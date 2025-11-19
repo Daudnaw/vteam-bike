@@ -1,0 +1,31 @@
+services:
+  backend:
+    build: ./services/backend
+    ports:
+      - 9000:80
+    links:
+      - db
+    depends_on:
+      - db
+    environment:
+      - MONGODB_DSN=mongo://db:27017/vteam-dev
+
+  frontend:
+    build: ./services/frontend
+    ports:
+      - 8080:80
+    links:
+      - backend
+    depends_on:
+      - backend
+
+  db:
+    image: mongodb/mongodb:latest
+    restart: always
+    volumes:
+      - ./data/db:
+    ports:
+      - 27017:27017
+    command: mongod --bind_ip_all
+    environment:
+      - MONGO_DATA_DIR=/data/db
