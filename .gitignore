@@ -1,0 +1,6 @@
+data/db/
+.idea/
+.vscode/
+tmp/
+*.log
+node_modules/
