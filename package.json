@@ -1,0 +1,16 @@
+{
+  "name": "vteam-bike",
+  "version": "1.0.0",
+  "description": "A repo for bike-project in vteam.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "services/backend",
+    "services/frontend"
+  ]
+}
