@@ -1,29 +1,40 @@
 services:
   backend:
     build: ./services/backend
+    command: sh -c "npm install && npm run dev"
+    working_dir: /app
     ports:
-      - 9000:80
-    links:
-      - db
+      - 3000:3000
     depends_on:
       - db
+    volumes:
+      - ./services/backend:/app
+      - /app/node_modules
     environment:
-      - MONGODB_DSN=mongo://db:27017/vteam-dev
+      - PORT=3000
+      - NODE_ENV=development
+      - MONGODB_DSN=mongodb://db:27017/vteam-dev
 
   frontend:
     build: ./services/frontend
+    command: sh -c "npm install && npm run dev"
+    working_dir: /app
     ports:
-      - 8080:80
-    links:
-      - backend
+      - 8080:3000
     depends_on:
       - backend
+    volumes:
+      - ./services/frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://backend:9000
 
   db:
-    image: mongodb/mongodb:latest
-    restart: always
+    image: mongo:latest
+    restart: unless-stopped
     volumes:
-      - ./data/db:
+      - ./data/db:/data/db
     ports:
       - 27017:27017
     command: mongod --bind_ip_all
