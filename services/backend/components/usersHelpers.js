@@ -2,12 +2,6 @@ import User from '../models/UserSchema.js'
 import Connect from './connectHelpers.js'
 
 class Users {
-  async addUser(data) {
-    await Connect.connect();
-    const user = new User(data);
-    return await user.save();
-  }
-
   async getAllUsers() {
     await Connect.connect();
     return await User.find();
@@ -23,9 +17,14 @@ class Users {
     return await User.findByIdAndDelete({ _id: id });
   }
 
-  async authenticate(email, password) {
+  async updateUser(id, data) {
     await Connect.connect();
-    return await User.authenticate(email, password);
+    return await User.findOneAndUpdate({ _id: id }, data,
+      {
+        new: true,
+        runValidators: true
+      }
+    )
   }
 }
 

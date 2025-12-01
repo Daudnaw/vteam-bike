@@ -35,27 +35,6 @@ router.get('/:id', async function(req, res, next) {
   }
 });
 
-router.post('/',
-  (req, res, next) => {
-    const { firstName, lastName, email, password } = req.body;
-
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ error: "firstName, lastName, email and password are required" });
-    }
-
-    next();
-  },
-  async (req, res) => {
-    try {
-      const newUser = await Users.addUser(req.body);
-      res.status(201).json(newUser);
-    } catch (err) {
-      console.error("Error in POST /users", err);
-      res.status(500).json({ error: "Could not add user" });
-    }
-  }
-);
-
 router.delete('/:id', async function (req, res) {
   const id = req.params.id;
   
@@ -79,5 +58,32 @@ router.delete('/:id', async function (req, res) {
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
+
+router.put('/:id', async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+
+  const forbidden = ['password', 'salt', '_id']
+
+  for (const f of forbidden) {
+    if (f in data) {
+      return res.status(400).json({
+        error: `Field '${f}' cannot be updated through this endpoint`
+      });
+    }
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: "Invalid user id" });
+  }
+
+  try {
+    const updated = await Users.updateUser(id, data);
+    res.status(200).json(updated);
+  } catch (err) {
+    console.error("Error in PUT /users/:id", err);
+    res.status(500).json({ error: err.message });
+  }
+})
 
 export default router;

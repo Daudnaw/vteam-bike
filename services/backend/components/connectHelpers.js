@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 class Connect {
   async connect() {
-    const uri = process.env.MONGODB_DSN || "mongodb://localhost:27017/temp-mongo";
+    const uri = process.env.MONGODB_DSN;
 
     if (mongoose.connection.readyState === 1) {
       return;
