@@ -4,10 +4,10 @@
  * Module dependencies.
  */
 
-import Debug from "debug";
+import createDebug from "debug";
 import http from "http";
 import app from "../app.js";
-const debug = Debug("backend:server");
+const debug = createDebug("backend:server");
 
 /**
  * Get port from environment and store in Express.
@@ -66,11 +66,9 @@ function onError(error) {
     case "EACCES":
       console.error(bind + " requires elevated privileges");
       process.exit(1);
-      break;
     case "EADDRINUSE":
       console.error(bind + " is already in use");
       process.exit(1);
-      break;
     default:
       throw error;
   }
