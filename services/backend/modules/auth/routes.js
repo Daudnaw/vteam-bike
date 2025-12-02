@@ -14,13 +14,14 @@ const router = Router();
  * @param {string} lastName.body.required - Last name
  * @param {string} email.body.required - Email address
  * @param {string} password.body.required - Plain text password
+ * @param {string} role.body.required - Role "customer" default, ("customer" | "admin")
  * @produces application/json
  * @consumes application/json
  * @returns {User.model} 201 - User registered
  * @returns {Error} 400 - Missing or invalid fields
  */
 router.post("/register", async (req, res, next) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, role } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({
@@ -29,7 +30,7 @@ router.post("/register", async (req, res, next) => {
   }
 
   try {
-    const user = new User({ firstName, lastName, email, password });
+    const user = new User({ firstName, lastName, email, password, role });
 
     const created = await user.save();
 

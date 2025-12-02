@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 import { scrypt as _scrypt, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
 import { AuthenticationError } from "../../lib/authentication-error.js";
+import { type } from "node:os";
 const scrypt = promisify(_scrypt);
 
 /**
@@ -12,6 +13,7 @@ const scrypt = promisify(_scrypt);
  * @property {string} email.required
  * @property {string} password.required
  * @property {string} salt
+ * @property {string} role.required - User role ("customer", "admin")
  * @property {Function} verifyPassword
  * @property {Function} authenticate
  * @property {Function} toJSON
@@ -41,6 +43,12 @@ const schema = new Schema(
     salt: {
       type: String,
     },
+    role: {
+      type: String,
+      enum: ["customer", "admin"],
+      default: "customer",
+      required: true,
+    }
   },
   {
     timestamps: true,
