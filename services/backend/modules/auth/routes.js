@@ -22,7 +22,7 @@ const router = Router();
 router.post("/register", async (req, res, next) => {
   const { firstName, lastName, email, password } = req.body;
 
-  if (!firstName | !lastName | !email | !password) {
+  if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({
       message: "firstName, lastName, email and password are required",
     });
