@@ -2,6 +2,7 @@ import { Router } from "express";
 import createDebug from "debug";
 import User from "../users/model.js";
 import { AuthenticationError } from "../../lib/authentication-error.js";
+import { start } from "node:repl";
 
 const debug = createDebug("backend:auth");
 const router = Router();
@@ -34,10 +35,12 @@ router.post("/register", async (req, res, next) => {
 
     const created = await user.save();
 
-    debug("Registered user %s", created.email);
+    const sanitized = created.toJSON();
+
+    debug("Registered user %s", sanitized.email);
 
     // TODO: decide if we want to issue a token on registration already
-    res.status(201).json();
+    res.status(201).json(sanitized);
   } catch (err) {
     debug("Error in /register: %O", err);
     return next(err);
@@ -83,6 +86,51 @@ router.post("/login", async (req, res, next) => {
     }
 
     debug("Error in /login: %O", err);
+    next(err);
+  }
+});
+
+/**
+ * @route PUT /auth/change-password
+ * @summary Change a users password
+ * @description Changes the users password
+ * @param {string} email.body.required - Email address
+ * @param {string} oldPassword.body.required - Plain text password
+ * @param {string} newPassword.body.required - Plain text password
+ * @produces application/json
+ * @consumes application/json
+ * @returns {AuthResponse.model} 200 - Password updatetd
+ * @returns {Error} 400 - Missing credentials
+ * @returns {Error} 401 - Invalid credentials
+ */
+router.put("/change-password", async (req, res, next) => {
+  const { email, oldPassword, newPassword } = req.body;
+
+  if (!email || !oldPassword || !newPassword) {
+    return res.status(400).json({
+      message: "email, oldPassword and newPassword are required",
+    });
+  }
+
+  try {
+    const user = await User.authenticate(email, oldPassword);
+
+    user.password = newPassword;
+    await user.save();
+
+    const sanitized = user.toJSON();
+    debug("User %s changed password", sanitized.email);
+
+    return res.status(200).json({
+      message: "Password updated successfully",
+      user: sanitized,
+    });
+  } catch (err) {
+    if (err instanceof AuthenticationError) {
+      return res.status(401).json({ message: err.message });
+    }
+
+    debug("Error in /change-password: %O", err);
     next(err);
   }
 });

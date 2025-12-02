@@ -140,4 +140,95 @@ describe("Auth routes", function () {
 
     expect(res.body).to.have.property("message", `No such email: ${email}`);
   });
+
+  it("PUT /auth/change-password updates the password and allows login with the new one", async () => {
+    await request(app)
+      .post(`${basePath}/register`)
+      .send(details)
+      .expect(201);
+
+    const newPassword = "new-secret-password";
+
+    const res = await request(app)
+      .put(`${basePath}/change-password`)
+      .send({
+        email: details.email,
+        oldPassword: details.password,
+        newPassword,
+      })
+      .expect(200);
+
+    expect(res.body).to.have.property(
+      "message",
+      "Password updated successfully",
+    );
+    expect(res.body).to.have.property("user");
+    expect(res.body.user).to.include({
+      email: details.email,
+      firstName: details.firstName,
+    });
+    expect(res.body.user).to.not.have.property("password");
+    expect(res.body.user).to.not.have.property("salt");
+
+    await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(401);
+
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: newPassword,
+      })
+      .expect(200);
+
+    expect(loginRes.body).to.have.property("user");
+    expect(loginRes.body.user).to.include({
+      email: details.email,
+      firstName: details.firstName,
+    });
+    expect(loginRes.body.user).to.not.have.property("password");
+    expect(loginRes.body.user).to.not.have.property("salt");
+  });
+
+  it("PUT /auth/change-password returns 400 when required fields are missing", async () => {
+    await request(app)
+      .post(`${basePath}/register`)
+      .send(details)
+      .expect(201);
+
+    const res = await request(app)
+      .put(`${basePath}/change-password`)
+      .send({
+        email: details.email,
+      })
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "email, oldPassword and newPassword are required",
+    );
+  });
+
+  it("PUT /auth/change-password returns 401 for wrong oldPassword", async () => {
+    await request(app)
+      .post(`${basePath}/register`)
+      .send(details)
+      .expect(201);
+
+    const res = await request(app)
+      .put(`${basePath}/change-password`)
+      .send({
+        email: details.email,
+        oldPassword: "totally-wrong",
+        newPassword: "new-secret",
+      })
+      .expect(401);
+
+    expect(res.body).to.have.property("message", "Invalid password");
+  });
 });
