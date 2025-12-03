@@ -98,7 +98,6 @@ router.post("/login", async (req, res, next) => {
 });
 
 /**
- * TODO - göra säkrare med JWT
  * @route PUT /auth/change-password
  * @summary Change a users password
  * @description Changes the users password
