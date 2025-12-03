@@ -3,6 +3,7 @@ import createDebug from "debug";
 import User from "../users/model.js";
 import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../../lib/authentication-error.js";
+import { requireAuth } from "./middleware.js";
 
 const debug = createDebug("backend:auth");
 const router = Router();
@@ -110,28 +111,34 @@ router.post("/login", async (req, res, next) => {
  * @returns {Error} 400 - Missing credentials
  * @returns {Error} 401 - Invalid credentials
  */
-router.put("/change-password", async (req, res, next) => {
+router.put("/change-password", requireAuth, async (req, res, next) => {
   const { email, oldPassword, newPassword } = req.body;
 
-  if (!email || !oldPassword || !newPassword) {
+  if (!oldPassword || !newPassword) {
     return res.status(400).json({
-      message: "email, oldPassword and newPassword are required",
+      message: "oldPassword and newPassword are required",
+    });
+  }
+
+  if (oldPassword === newPassword) {
+    return res.status(400).json({
+      message: "New password can not be the same as the old"
     });
   }
 
   try {
+    const email = req.user.email;
     const user = await User.authenticate(email, oldPassword);
 
     user.password = newPassword;
     await user.save();
 
     const sanitized = user.toJSON();
-    debug("User %s changed password", sanitized.email);
+    debug("user %s changed password", sanitized.email);
 
     return res.status(200).json({
       message: "Password updated successfully",
-      user: sanitized,
-    });
+    })
   } catch (err) {
     if (err instanceof AuthenticationError) {
       return res.status(401).json({ message: err.message });
