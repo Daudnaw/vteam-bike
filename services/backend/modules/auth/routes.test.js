@@ -30,7 +30,7 @@ describe("Auth routes", function () {
     await mongoose.connect(uri);
 
     await User.syncIndexes();
-
+    process.env.JWT_SECRET = "test-secret";
     // Minimal express app mounting only the v1 users router
     app = express();
     app.use(express.json());
@@ -147,12 +147,23 @@ describe("Auth routes", function () {
       .send(details)
       .expect(201);
 
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(200);
+
+    expect(loginRes.body).to.have.property("token");
+    const token = loginRes.body.token;
+
     const newPassword = "new-secret-password";
 
     const res = await request(app)
       .put(`${basePath}/change-password`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
-        email: details.email,
         oldPassword: details.password,
         newPassword,
       })
@@ -162,13 +173,6 @@ describe("Auth routes", function () {
       "message",
       "Password updated successfully",
     );
-    expect(res.body).to.have.property("user");
-    expect(res.body.user).to.include({
-      email: details.email,
-      firstName: details.firstName,
-    });
-    expect(res.body.user).to.not.have.property("password");
-    expect(res.body.user).to.not.have.property("salt");
 
     await request(app)
       .post(`${basePath}/login`)
@@ -178,7 +182,7 @@ describe("Auth routes", function () {
       })
       .expect(401);
 
-    const loginRes = await request(app)
+    const loginResAfter = await request(app)
       .post(`${basePath}/login`)
       .send({
         email: details.email,
@@ -186,13 +190,13 @@ describe("Auth routes", function () {
       })
       .expect(200);
 
-    expect(loginRes.body).to.have.property("user");
-    expect(loginRes.body.user).to.include({
+    expect(loginResAfter.body).to.have.property("user");
+    expect(loginResAfter.body.user).to.include({
       email: details.email,
       firstName: details.firstName,
     });
-    expect(loginRes.body.user).to.not.have.property("password");
-    expect(loginRes.body.user).to.not.have.property("salt");
+    expect(loginResAfter.body.user).to.not.have.property("password");
+    expect(loginResAfter.body.user).to.not.have.property("salt");
   });
 
   it("PUT /auth/change-password returns 400 when required fields are missing", async () => {
@@ -201,16 +205,25 @@ describe("Auth routes", function () {
       .send(details)
       .expect(201);
 
-    const res = await request(app)
-      .put(`${basePath}/change-password`)
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
       .send({
         email: details.email,
+        password: details.password,
       })
+      .expect(200);
+
+    const token = loginRes.body.token;
+
+    const res = await request(app)
+      .put(`${basePath}/change-password`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
       .expect(400);
 
     expect(res.body).to.have.property(
       "message",
-      "email, oldPassword and newPassword are required",
+      "oldPassword and newPassword are required",
     );
   });
 
@@ -220,8 +233,19 @@ describe("Auth routes", function () {
       .send(details)
       .expect(201);
 
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(200);
+
+    const token = loginRes.body.token;
+
     const res = await request(app)
       .put(`${basePath}/change-password`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
         email: details.email,
         oldPassword: "totally-wrong",
@@ -231,4 +255,74 @@ describe("Auth routes", function () {
 
     expect(res.body).to.have.property("message", "Invalid password");
   });
+
+  it("POST /auth/login return 400 when email or password is missing", async () => {
+    let res = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        password: "whatever",
+      })
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "email and password are required"
+    );
+
+    res = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: "test@test.test",
+      })
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "email and password are required"
+    );
+
+    res = await request(app)
+      .post(`${basePath}/login`)
+      .send({})
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "email and password are required"
+    );
+  });
+
+  it("PUT /auth/change-password return 400 when oldPassword === newPassword", async () => {
+    await request(app)
+      .post(`${basePath}/register`)
+      .send(details)
+      .expect(201);
+    
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(200);
+
+    const token = loginRes.body.token;
+
+    const res = await request(app)
+      .put(`${basePath}/change-password`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        oldPassword: "same",
+        newPassword: "same",
+      })
+      .expect(400);
+
+      expect(res.body).to.have.property(
+        "message",
+        "New password can not be the same as the old"
+      );
+  });
+
+
+
 });
