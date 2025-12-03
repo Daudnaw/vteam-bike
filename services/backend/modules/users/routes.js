@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { model } from "mongoose";
-import { error } from "node:console";
 const User = model("User");
 
 export const v1 = Router();
@@ -28,6 +27,7 @@ v1.get("/:id", async (req, res, next) => {
 });
 
 /**
+ * TODO - fundera på om denna route ska vara kvar eller ej
  * @route GET v1/users/
  * @summary Get all users
  * @description This endpoint gets all the users
