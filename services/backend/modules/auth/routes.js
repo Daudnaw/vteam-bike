@@ -1,6 +1,7 @@
 import { Router } from "express";
 import createDebug from "debug";
 import User from "../users/model.js";
+import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../../lib/authentication-error.js";
 
 const debug = createDebug("backend:auth");
@@ -73,10 +74,17 @@ router.post("/login", async (req, res, next) => {
 
     debug("User %s logged in", sanitized.email);
 
-    // TODO: Issue a JWT here properly
+    const payload = {
+      sub: sanitized._id,
+      email: sanitized.email,
+      role: sanitized.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
     res.json({
       user: sanitized,
-      token: "TODO_JWT", // placeholder
+      token: token,
     });
   } catch (err) {
     if (err instanceof AuthenticationError) {
