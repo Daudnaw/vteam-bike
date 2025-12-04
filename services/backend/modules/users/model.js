@@ -153,6 +153,16 @@ schema.methods.setPassword = async function (password) {
   this.salt = salt;
 };
 
+/**
+ * Compares a candidate password with the user's stored password hash.
+ *
+ * @param {string} candidatePassword - The plain text password to check.
+ * @returns {Promise<boolean>} - Resolves to `true` if the password matches, otherwise `false`.
+ */
+schema.methods.comparePassword = function (candidatePassword) {
+  return this.verifyPassword(candidatePassword);
+};
+
 const User = model("User", schema);
 
 export default User;

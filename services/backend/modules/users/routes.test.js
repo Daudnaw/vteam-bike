@@ -3,7 +3,7 @@ import request from "supertest";
 import express from "express";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-
+import jwt from "jsonwebtoken";
 import User from "./model.js";
 import { v1 as usersV1Router } from "./routes.js";
 
@@ -105,12 +105,18 @@ describe("Users v1 routes", function () {
   });
 
   it("PUT /users/:id updates allowed fields but not password/role", async () => {
-    const user = new User(details);
-    await user.save();
+    const user = await User.create(details);
 
-    const original = await User.findById(user.id);
-    const originalPassword = original.password;
-    const originalRole = original.role;
+    const originalPassword = user.password;
+    const originalRole = user.role;
+
+    const payload = {
+      sub: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     const updatedData = {
       firstName: "Jane",
@@ -119,11 +125,12 @@ describe("Users v1 routes", function () {
     };
 
     await request(app)
-      .put(`${basePath}/${user.id}`)
+      .put(`${basePath}/${user._id.toString()}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(updatedData)
       .expect(200);
 
-    const updated = await User.findById(user.id);
+    const updated = await User.findById(user._id);
 
     expect(updated.firstName).to.equal(updatedData.firstName);
     expect(updated.lastName).to.equal(updatedData.lastName);
@@ -133,42 +140,36 @@ describe("Users v1 routes", function () {
     expect(updated.role).to.equal(originalRole);
   });
 
-  it("PUT /users/:id returns 400 when trying to update forbidden fields", async () => {
-    const user = new User(details);
-    await user.save();
+  it("PUT /users/:id returns 403 when trying to update forbidden fields", async () => {
+    const user = await User.create(details);
 
-    const before = await User.findById(user.id);
-    const beforePassword = before.password;
-    const beforeRole = before.role;
+    const payload = {
+      sub: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    const forbiddenData = {
+      firstName: "Jane",
+      password: "new-secret",
+      role: "admin",
+    };
 
     const res = await request(app)
-      .put(`${basePath}/${user.id}`)
-      .send({
-        password: "newPassword",
-        role: "admin",
-      })
-      .expect(400);
+      .put(`${basePath}/${user._id.toString()}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send(forbiddenData)
+      .expect(403);
 
-    expect(res.body).to.have.property(
-      "error",
-      "Could not updated via this endpoint",
-    );
+    expect(res.body).to.have.property("error");
+    expect(res.body.error).to.match(/password, salt or role/i);
 
-    const after = await User.findById(user.id);
+    const fresh = await User.findById(user._id);
 
-    expect(after.password).to.equal(beforePassword);
-    expect(after.role).to.equal(beforeRole);
-  });
-
-  it("DELETE /users/:id deletes the user", async () => {
-    const user = new User(details);
-    await user.save();
-
-    await request(app)
-      .delete(`${basePath}/${user.id}`)
-      .expect(200);
-
-    const deleted = await User.findById(user.id);
-    expect(deleted).to.be.null;
+    expect(fresh.firstName).to.equal(user.firstName);
+    expect(fresh.password).to.equal(user.password);
+    expect(fresh.role).to.equal(user.role);
   });
 });

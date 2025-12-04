@@ -99,19 +99,18 @@ router.post("/login", async (req, res, next) => {
 
 /**
  * @route PUT /auth/change-password
- * @summary Change a users password
- * @description Changes the users password
- * @param {string} email.body.required - Email address
- * @param {string} oldPassword.body.required - Plain text password
- * @param {string} newPassword.body.required - Plain text password
+ * @summary Change the authenticated user's password
+ * @description Uses the user-id (sub) from the JWT to identify the user and update the password
+ * @param {string} oldPassword.body.required - Current password
+ * @param {string} newPassword.body.required - New password
  * @produces application/json
  * @consumes application/json
- * @returns {AuthResponse.model} 200 - Password updatetd
+ * @returns {AuthResponse.model} 200 - Password updated
  * @returns {Error} 400 - Missing credentials
  * @returns {Error} 401 - Invalid credentials
  */
 router.put("/change-password", requireAuth, async (req, res, next) => {
-  const { email, oldPassword, newPassword } = req.body;
+  const { oldPassword, newPassword } = req.body;
 
   if (!oldPassword || !newPassword) {
     return res.status(400).json({
@@ -119,30 +118,31 @@ router.put("/change-password", requireAuth, async (req, res, next) => {
     });
   }
 
-  if (oldPassword === newPassword) {
-    return res.status(400).json({
-      message: "New password can not be the same as the old"
-    });
-  }
-
   try {
-    const email = req.user.email;
-    const user = await User.authenticate(email, oldPassword);
+    const userId = req.user.sub;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isValid = await user.verifyPassword(oldPassword);
+
+    if (!isValid) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
 
     user.password = newPassword;
     await user.save();
 
     const sanitized = user.toJSON();
+    
     debug("user %s changed password", sanitized.email);
 
     return res.status(200).json({
       message: "Password updated successfully",
-    })
+    });
   } catch (err) {
-    if (err instanceof AuthenticationError) {
-      return res.status(401).json({ message: err.message });
-    }
-
     debug("Error in /change-password: %O", err);
     next(err);
   }
