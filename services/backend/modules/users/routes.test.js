@@ -64,4 +64,111 @@ describe("Users v1 routes", function () {
     });
     expect(res.body).to.have.property("_id", user.id);
   });
+  
+  it("GET /users/ returns empty array when there are no users", async () => {
+    const res = await request(app)
+      .get(`${basePath}/`)
+      .expect(200);
+
+    expect(res.body).to.be.an("array");
+    expect(res.body).to.have.length(0);
+  });
+
+  it("GET /users/ returns all users as JSON without sensitive fields", async () => {
+    const user1 = new User(details);
+    const user2 = new User({
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "jane@example.com",
+      password: "secret",
+    });
+
+    await user1.save();
+    await user2.save();
+
+    const res = await request(app)
+      .get(`${basePath}/`)
+      .expect(200);
+
+    expect(res.body).to.be.an("array");
+    expect(res.body).to.have.length(2);
+
+    for (const u of res.body) {
+      expect(u).to.have.property("_id");
+      expect(u).to.have.property("firstName");
+      expect(u).to.have.property("lastName");
+      expect(u).to.have.property("email");
+
+      expect(u).to.not.have.property("password");
+      expect(u).to.not.have.property("salt");
+    }
+  });
+
+  it("PUT /users/:id updates allowed fields but not password/role", async () => {
+    const user = new User(details);
+    await user.save();
+
+    const original = await User.findById(user.id);
+    const originalPassword = original.password;
+    const originalRole = original.role;
+
+    const updatedData = {
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "new-email@example.com",
+    };
+
+    await request(app)
+      .put(`${basePath}/${user.id}`)
+      .send(updatedData)
+      .expect(200);
+
+    const updated = await User.findById(user.id);
+
+    expect(updated.firstName).to.equal(updatedData.firstName);
+    expect(updated.lastName).to.equal(updatedData.lastName);
+    expect(updated.email).to.equal(updatedData.email);
+
+    expect(updated.password).to.equal(originalPassword);
+    expect(updated.role).to.equal(originalRole);
+  });
+
+  it("PUT /users/:id returns 400 when trying to update forbidden fields", async () => {
+    const user = new User(details);
+    await user.save();
+
+    const before = await User.findById(user.id);
+    const beforePassword = before.password;
+    const beforeRole = before.role;
+
+    const res = await request(app)
+      .put(`${basePath}/${user.id}`)
+      .send({
+        password: "newPassword",
+        role: "admin",
+      })
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "error",
+      "Could not updated via this endpoint",
+    );
+
+    const after = await User.findById(user.id);
+
+    expect(after.password).to.equal(beforePassword);
+    expect(after.role).to.equal(beforeRole);
+  });
+
+  it("DELETE /users/:id deletes the user", async () => {
+    const user = new User(details);
+    await user.save();
+
+    await request(app)
+      .delete(`${basePath}/${user.id}`)
+      .expect(200);
+
+    const deleted = await User.findById(user.id);
+    expect(deleted).to.be.null;
+  });
 });

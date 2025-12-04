@@ -12,6 +12,7 @@ const scrypt = promisify(_scrypt);
  * @property {string} email.required
  * @property {string} password.required
  * @property {string} salt
+ * @property {string} role.required - User role ("customer", "admin")
  * @property {Function} verifyPassword
  * @property {Function} authenticate
  * @property {Function} toJSON
@@ -41,6 +42,12 @@ const schema = new Schema(
     salt: {
       type: String,
     },
+    role: {
+      type: String,
+      enum: ["customer", "admin"],
+      default: "customer",
+      required: true,
+    }
   },
   {
     timestamps: true,
