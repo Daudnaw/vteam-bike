@@ -12,5 +12,8 @@
   "workspaces": [
     "services/backend",
     "services/frontend"
-  ]
+  ],
+  "dependencies": {
+    "lucide-react": "^0.555.0"
+  }
 }
