@@ -14,6 +14,7 @@ services:
       - PORT=3000
       - NODE_ENV=development
       - MONGODB_DSN=mongodb://db:27017/vteam-dev
+      - JWT_SECRET=hejsanhoppsan
 
   frontend:
     build: ./services/frontend

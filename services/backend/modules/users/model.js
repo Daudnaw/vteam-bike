@@ -12,6 +12,7 @@ const scrypt = promisify(_scrypt);
  * @property {string} email.required
  * @property {string} password.required
  * @property {string} salt
+ * @property {string} role.required - User role ("customer", "admin")
  * @property {Function} verifyPassword
  * @property {Function} authenticate
  * @property {Function} toJSON
@@ -41,6 +42,12 @@ const schema = new Schema(
     salt: {
       type: String,
     },
+    role: {
+      type: String,
+      enum: ["customer", "admin"],
+      default: "customer",
+      required: true,
+    }
   },
   {
     timestamps: true,
@@ -144,6 +151,16 @@ schema.methods.setPassword = async function (password) {
 
   this.password = key.toString("hex");
   this.salt = salt;
+};
+
+/**
+ * Compares a candidate password with the user's stored password hash.
+ *
+ * @param {string} candidatePassword - The plain text password to check.
+ * @returns {Promise<boolean>} - Resolves to `true` if the password matches, otherwise `false`.
+ */
+schema.methods.comparePassword = function (candidatePassword) {
+  return this.verifyPassword(candidatePassword);
 };
 
 const User = model("User", schema);

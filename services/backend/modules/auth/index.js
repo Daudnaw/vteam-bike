@@ -1,4 +1,6 @@
 import "../users/model.js";
-import * as baseRouter from "./routes.js";
+import router from "./routes.js";
 
 export const name = "auth";
+
+export const baseRouter = router;
