@@ -77,7 +77,7 @@ schema.options.toJSON = {
 
 /**
  * Adds a new position update.
- * Moves current → history
+ * Moves current to history
  * Sets a new current.
  *
  * @param {number} lat
