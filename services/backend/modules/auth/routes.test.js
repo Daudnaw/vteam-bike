@@ -30,7 +30,7 @@ describe("Auth routes", function () {
     await mongoose.connect(uri);
 
     await User.syncIndexes();
-
+    process.env.JWT_SECRET = "test-secret";
     // Minimal express app mounting only the v1 users router
     app = express();
     app.use(express.json());
@@ -139,5 +139,156 @@ describe("Auth routes", function () {
       .expect(401);
 
     expect(res.body).to.have.property("message", `No such email: ${email}`);
+  });
+
+  it("PUT /auth/change-password updates the password and allows login with the new one", async () => {
+    await request(app)
+      .post(`${basePath}/register`)
+      .send(details)
+      .expect(201);
+
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(200);
+
+    expect(loginRes.body).to.have.property("token");
+    const token = loginRes.body.token;
+
+    const newPassword = "new-secret-password";
+
+    const changeRes = await request(app)
+      .put(`${basePath}/change-password`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        oldPassword: details.password,
+        newPassword,
+      })
+      .expect(200);
+
+    expect(changeRes.body).to.have.property(
+      "message",
+      "Password updated successfully",
+    );
+
+    await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(401);
+
+    const loginResAfter = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: newPassword,
+      })
+      .expect(200);
+
+    expect(loginResAfter.body).to.have.property("user");
+    expect(loginResAfter.body.user).to.include({
+      email: details.email,
+      firstName: details.firstName,
+    });
+
+    expect(loginResAfter.body.user).to.not.have.property("password");
+    expect(loginResAfter.body.user).to.not.have.property("salt");
+  });
+
+  it("PUT /auth/change-password returns 400 when required fields are missing", async () => {
+    await request(app)
+      .post(`${basePath}/register`)
+      .send(details)
+      .expect(201);
+
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(200);
+
+    const token = loginRes.body.token;
+
+    const res = await request(app)
+      .put(`${basePath}/change-password`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "oldPassword and newPassword are required",
+    );
+  });
+
+  it("PUT /auth/change-password returns 401 for wrong oldPassword", async () => {
+    await request(app)
+      .post(`${basePath}/register`)
+      .send(details)
+      .expect(201);
+
+    const loginRes = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: details.email,
+        password: details.password,
+      })
+      .expect(200);
+
+    const token = loginRes.body.token;
+
+    const res = await request(app)
+      .put(`${basePath}/change-password`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        oldPassword: "totally-wrong",
+        newPassword: "new-secret",
+      })
+      .expect(401);
+
+    expect(res.body).to.have.property("message", "Invalid password");
+  });
+
+  it("POST /auth/login return 400 when email or password is missing", async () => {
+    let res = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        password: "whatever",
+      })
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "email and password are required"
+    );
+
+    res = await request(app)
+      .post(`${basePath}/login`)
+      .send({
+        email: "test@test.test",
+      })
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "email and password are required"
+    );
+
+    res = await request(app)
+      .post(`${basePath}/login`)
+      .send({})
+      .expect(400);
+
+    expect(res.body).to.have.property(
+      "message",
+      "email and password are required"
+    );
   });
 });

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import createDebug from "debug";
 import User from "../users/model.js";
+import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../../lib/authentication-error.js";
+import { requireAuth } from "./middleware.js";
 
 const debug = createDebug("backend:auth");
 const router = Router();
@@ -33,10 +35,12 @@ router.post("/register", async (req, res, next) => {
 
     const created = await user.save();
 
-    debug("Registered user %s", created.email);
+    const sanitized = created.toJSON();
+
+    debug("Registered user %s", sanitized.email);
 
     // TODO: decide if we want to issue a token on registration already
-    res.status(201).json();
+    res.status(201).json(sanitized);
   } catch (err) {
     debug("Error in /register: %O", err);
     return next(err);
@@ -71,10 +75,17 @@ router.post("/login", async (req, res, next) => {
 
     debug("User %s logged in", sanitized.email);
 
-    // TODO: Issue a JWT here properly
+    const payload = {
+      sub: sanitized._id,
+      email: sanitized.email,
+      role: sanitized.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
     res.json({
       user: sanitized,
-      token: "TODO_JWT", // placeholder
+      token: token,
     });
   } catch (err) {
     if (err instanceof AuthenticationError) {
@@ -82,6 +93,57 @@ router.post("/login", async (req, res, next) => {
     }
 
     debug("Error in /login: %O", err);
+    next(err);
+  }
+});
+
+/**
+ * @route PUT /auth/change-password
+ * @summary Change the authenticated user's password
+ * @description Uses the user-id (sub) from the JWT to identify the user and update the password
+ * @param {string} oldPassword.body.required - Current password
+ * @param {string} newPassword.body.required - New password
+ * @produces application/json
+ * @consumes application/json
+ * @returns {AuthResponse.model} 200 - Password updated
+ * @returns {Error} 400 - Missing credentials
+ * @returns {Error} 401 - Invalid credentials
+ */
+router.put("/change-password", requireAuth, async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({
+      message: "oldPassword and newPassword are required",
+    });
+  }
+
+  try {
+    const userId = req.user.sub;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isValid = await user.verifyPassword(oldPassword);
+
+    if (!isValid) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    const sanitized = user.toJSON();
+    
+    debug("user %s changed password", sanitized.email);
+
+    return res.status(200).json({
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    debug("Error in /change-password: %O", err);
     next(err);
   }
 });
