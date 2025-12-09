@@ -1,36 +1,17 @@
 import { Schema, model } from "mongoose";
 
 /**
- * @typedef Position
- * @property {number} lat.required
- * @property {number} lng.required
- *
  * @typedef Location
  * @property {string} _id
  * @property {string} scooterId.required reference to a scooter
  * @property {Position} current.required latest known position
  * @property {Array<Position>} history previous positions in an array
- * @property {Function} addPosition add a new position update
- * @property {Function} getLatestPosition rturns the current position
+ * @property {Function} addPosition Adds a new position
+ * @property {Function} getLatestPosition Returns the current position
  * @property {Function} getHistory returns all historical positions
- * @property {Function} toJSON
+ * @property {Function} toJSON Converts document to a plain JSON object
  */
 
-const positionSchema = new Schema(
-  {
-    lat: {
-      type: Number,
-      required: true,
-    },
-    lng: {
-      type: Number,
-      required: true,
-    },
-  },
-  {
-    _id: false,
-  },
-);
 
 // Main schema
 const schema = new Schema(
@@ -44,14 +25,16 @@ const schema = new Schema(
     },
 
     current: {
-      type: positionSchema,
-      required: true,
+      lat: { type: Number, required: true},
+      lng: { type: Number, required: true},
     },
 
-    history: {
-      type: [positionSchema],
-      default: [],
-    },
+    history: [
+        {
+            lat: { type: Number, required: true},
+            lng: { type: Number, required: true},
+        }
+    ],
   },
   {
     timestamps: true,
