@@ -5,7 +5,7 @@ import { signout } from '../../../../../src/app/actions/auth';
 
 export default function CustomerSidebar() {
     return (
-        <div className='w-1/10 p-4 bg-primary h-screen border-r-2'>
+        <div className='w-[300px] p-4 bg-primary h-screen border-r-2'>
             <div className='flex gap-2 items-center mt-2'>
                 <Bike className='text-detail-yellow h-14 w-14' />
                 <h2 className='text-h2'>Scooter</h2>
