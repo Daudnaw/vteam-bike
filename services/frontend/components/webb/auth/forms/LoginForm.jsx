@@ -3,17 +3,32 @@ import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { signin } from '../../../../src/app/actions/auth';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [viewPassword, setViewPassword] = useState(false);
+    const router = useRouter();
 
     async function handleAction(formData) {
         try {
             setLoading(true);
             setError(null);
             const res = await signin(formData);
+
+            if (res.ok) {
+                toast.success(res.message, { autoClose: 1500 });
+            }
+
+            setTimeout(() => {
+                if (res.role == 'customer') {
+                    router.push('/user-dashboard');
+                } else {
+                    router.push('/admin-dashboard');
+                }
+            }, 1500);
         } catch (err) {
             setError(err);
         }

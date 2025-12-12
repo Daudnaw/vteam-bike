@@ -23,11 +23,11 @@ export async function signin(formData) {
 
     cookieStore.set('token', data.token, { httpOnly: true, path: '/' });
 
-    if (data.user.role == 'customer') {
-        redirect('/user-dashboard');
-    }
-
-    redirect('/admin-dashboard');
+    return {
+        ok: true,
+        role: data.user.role,
+        message: 'Inloggningen lyckades!',
+    };
 }
 
 export async function signinapp(formData) {
@@ -51,7 +51,10 @@ export async function signinapp(formData) {
 
     cookieStore.set('token', data.token, { httpOnly: true, path: '/' });
 
-    redirect('/app/user-app');
+    return {
+        ok: true,
+        message: 'Inloggningen lyckades!',
+    };
 }
 
 export async function signoutapp() {
@@ -92,7 +95,10 @@ export async function register(formData) {
 
     cookieStore.set('token', data.token, { httpOnly: true, path: '/' });
 
-    redirect('/webb/auth/login');
+    return {
+        ok: true,
+        message: 'Registreringen lyckades!',
+    };
 }
 
 export async function registerapp(formData) {
@@ -117,5 +123,8 @@ export async function registerapp(formData) {
 
     cookieStore.set('token', data.token, { httpOnly: true, path: '/' });
 
-    redirect('/app/auth/login');
+    return {
+        ok: true,
+        message: 'Registreringen lyckades!',
+    };
 }
