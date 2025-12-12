@@ -12,7 +12,7 @@ export default function Page() {
                 className='opacity-10'
             />
             <div className='flex flex-col w-xl bg-primary-light p-5 rounded-md shadow-2xl z-10 border-primary-dark border-2'>
-                <h1 className='text-h1 font-bold text-center'>Välkommen</h1>
+                <h1 className='text-h1 text-center font-bold'>Välkommen</h1>
                 <p className='text-p mt-5 text-center'>
                     Välj det alternativ som passar dig bäst!
                 </p>
