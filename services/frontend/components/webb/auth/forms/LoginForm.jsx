@@ -68,7 +68,7 @@ export default function LoginForm() {
                         Glömt lösenord ?
                     </Link>
                     <Link
-                        href='/skapa-konto'
+                        href='/webb/auth/register'
                         className='underline hover:decoration-detail-yellow'
                     >
                         Inget konto? Bli medlem

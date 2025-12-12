@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { signinapp } from '../../../../src/app/actions/auth';
+import { registerapp } from '../../../../src/app/actions/auth';
 import Link from 'next/link';
 
-export default function LoginForm() {
+export default function RegisterForm() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [viewPassword, setViewPassword] = useState(false);
@@ -13,7 +13,7 @@ export default function LoginForm() {
         try {
             setLoading(true);
             setError(null);
-            const res = await signinapp(formData);
+            const res = await registerapp(formData);
         } catch (err) {
             setError(err);
         }
@@ -23,6 +23,22 @@ export default function LoginForm() {
     return (
         <div className='w-md'>
             <form action={handleAction} className=''>
+                <input
+                    className='w-full bg-gray-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2'
+                    required={true}
+                    placeholder='Förnamn...'
+                    name='firstName'
+                    type='text'
+                />
+
+                <input
+                    className='w-full bg-gray-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2'
+                    required={true}
+                    placeholder='Efternamn...'
+                    name='lastName'
+                    type='text'
+                />
+
                 <input
                     className='w-full bg-gray-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2'
                     required={true}
@@ -68,10 +84,10 @@ export default function LoginForm() {
                         Glömt lösenord ?
                     </Link>
                     <Link
-                        href='/app/auth/register'
+                        href='/app/auth/login'
                         className='underline hover:decoration-detail-yellow'
                     >
-                        Inget konto? Bli medlem
+                        Redan konto? Logga in
                     </Link>
                 </div>
 
@@ -79,7 +95,7 @@ export default function LoginForm() {
                     type='submit'
                     className='bg-primary-dark text-white rounded-md w-full text-h4 text-center mt-5 py-2 hover:text-detail-yellow cursor-pointer'
                 >
-                    {loading ? 'Loggar in...' : 'Logga in'}
+                    {loading ? 'Skapar konto...' : 'Skapa konto'}
                 </button>
             </form>
         </div>

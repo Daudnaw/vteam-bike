@@ -69,3 +69,53 @@ export async function signout() {
 
     redirect('/webb/auth/login');
 }
+
+export async function register(formData) {
+    let firstName = formData.get('firstName');
+    let lastName = formData.get('lastName');
+    let email = formData.get('email');
+    let password = formData.get('password');
+
+    const res = await fetch('http://backend:3000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.message);
+    }
+
+    const cookieStore = await cookies();
+
+    cookieStore.set('token', data.token, { httpOnly: true, path: '/' });
+
+    redirect('/webb/auth/login');
+}
+
+export async function registerapp(formData) {
+    let firstName = formData.get('firstName');
+    let lastName = formData.get('lastName');
+    let email = formData.get('email');
+    let password = formData.get('password');
+
+    const res = await fetch('http://backend:3000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.message);
+    }
+
+    const cookieStore = await cookies();
+
+    cookieStore.set('token', data.token, { httpOnly: true, path: '/' });
+
+    redirect('/app/auth/login');
+}
