@@ -14,8 +14,6 @@ export default function LoginForm() {
             setLoading(true);
             setError(null);
             const res = await signin(formData);
-
-            //TODO: redirect to dashboard
         } catch (err) {
             setError(err);
         }

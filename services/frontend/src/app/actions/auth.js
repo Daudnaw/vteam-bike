@@ -25,7 +25,11 @@ export async function signin(formData) {
 
     cookieStore.set('token', data.token, { httpOnly: true });
 
-    redirect('/dashboard');
+    if (data.user.role == 'customer') {
+        redirect('/user-dashboard');
+    }
+
+    redirect('/admin-dashboard');
 }
 
 export async function signout() {
