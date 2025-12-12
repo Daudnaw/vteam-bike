@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { signin } from '../../../../src/app/actions/auth';
+import { signinapp } from '../../../../src/app/actions/auth';
 import Link from 'next/link';
 
 export default function LoginForm() {
@@ -13,7 +13,7 @@ export default function LoginForm() {
         try {
             setLoading(true);
             setError(null);
-            const res = await signin(formData);
+            const res = await signinapp(formData);
         } catch (err) {
             setError(err);
         }
