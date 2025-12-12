@@ -3,8 +3,6 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 export async function signin(formData) {
-    console.log(formData);
-
     let email = formData.get('email');
 
     let password = formData.get('password');
@@ -23,7 +21,7 @@ export async function signin(formData) {
 
     const cookieStore = await cookies();
 
-    cookieStore.set('token', data.token, { httpOnly: true });
+    cookieStore.set('token', data.token, { httpOnly: true, path: '/' });
 
     if (data.user.role == 'customer') {
         redirect('/user-dashboard');
@@ -37,5 +35,5 @@ export async function signout() {
 
     cookieStore.delete('token');
 
-    redirect('/auth/login');
+    redirect('/webb/auth/login');
 }

@@ -8,5 +8,13 @@ export default async function Page() {
         redirect('/webb/auth/login');
     }
 
+    if (session.role == 'customer') {
+        redirect('/user-dashboard');
+    }
+
+    if (session.role == 'admin') {
+        redirect('/admin-dashboard');
+    }
+
     // TODO: Check user role and redirect to correct dashboard
 }
