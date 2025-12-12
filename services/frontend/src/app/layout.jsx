@@ -1,13 +1,16 @@
 import { Nunito_Sans, Playfair_Display } from 'next/font/google';
 import './globals.css';
+import ToastProvider from '../../components/helpers/ToastProvider';
 
 const nunito = Nunito_Sans({
     subsets: ['latin'],
+    weight: ['300', '400', '500', '600', '700'],
     variable: '--font-nunito',
 });
 
 const playfair = Playfair_Display({
     subsets: ['latin'],
+    weight: ['400', '500', '600', '700'],
     variable: '--font-playfair',
 });
 
@@ -23,6 +26,7 @@ export default function RootLayout({ children }) {
             <body
                 className={`${nunito.variable} ${playfair.variable} bg-background text-text`} //Global konfiguration
             >
+                <ToastProvider />
                 {children}
             </body>
         </html>
