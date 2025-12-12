@@ -15,6 +15,4 @@ export default async function Page() {
     if (session.role == 'admin') {
         redirect('/admin-dashboard');
     }
-
-    // TODO: Check user role and redirect to correct dashboard
 }
