@@ -12,7 +12,6 @@ export const v1 = Router();
  * @description this endpoint gets currentposition of a scooter
  * @param {string} scooterId.path.required- id of scooter
  * @returns {Position.model} 200 - Current position
- * @returns {Error} 404 - Not found
  */
 v1.get("/:scooterId", async (req, res, next) => {
   try {
