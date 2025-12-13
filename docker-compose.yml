@@ -30,6 +30,7 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://backend:9000
+      - JWT_SECRET=hejsanhoppsan
 
   db:
     image: mongo:latest
