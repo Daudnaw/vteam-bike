@@ -5,18 +5,18 @@ import { signout } from '../../../../../src/app/actions/auth';
 
 export default function AdminSidebar() {
     return (
-        <div className='w-[300px] p-4 bg-primary h-screen border-r-2'>
+        <div className='w-[300px] p-4 from-primary to-primary-dark bg-linear-to-br h-screen border-r-2'>
             <div className='flex gap-2 items-center mt-2'>
                 <Bike className='text-detail-yellow h-14 w-14' />
                 <h2 className='text-h2'>Scooter</h2>
             </div>
-            <h4 className='text-base mt-10'>Meny</h4>
+            <h4 className='text-base mt-10 text-detail-yellow'>Meny</h4>
             <Link
                 href='/admin-dashboard'
                 className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
             >
                 <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
+                <span className='group-hover:text-primary-dark text-white transition-colors'>
                     Länk 1
                 </span>
             </Link>
@@ -25,7 +25,7 @@ export default function AdminSidebar() {
                 className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
             >
                 <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
+                <span className='group-hover:text-primary-dark text-white transition-colors'>
                     Länk 2
                 </span>
             </Link>{' '}
@@ -34,7 +34,7 @@ export default function AdminSidebar() {
                 className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
             >
                 <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
+                <span className='group-hover:text-primary-dark text-white transition-colors'>
                     Länk 3
                 </span>
             </Link>{' '}
@@ -43,7 +43,7 @@ export default function AdminSidebar() {
                 className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
             >
                 <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
+                <span className='group-hover:text-primary-dark text-white transition-colors'>
                     Länk 4
                 </span>
             </Link>
