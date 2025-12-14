@@ -1,5 +1,18 @@
 import React from 'react';
+import StatCard from '../../../../../components/webb/dashboards/shared/StatCard';
 
 export default function UserDashboard() {
-    return <div>UserDashboard</div>;
+    return (
+        <div className='p-5'>
+            <h2 className='text-h2 mb-5'>Översikt</h2>
+            <div className='grid grid-cols-3 gap-5'>
+                <StatCard nr={0} text='Resor' />
+                <StatCard nr={0} text='Fakturor' />
+                <StatCard nr={0} text='Hyrda cyklar' />
+            </div>
+
+            <h2 className='text-h3 mt-10'>Resor</h2>
+            <h3 className='text-center text-h1 mt-10'>EN TABLE ÖVER RESOR</h3>
+        </div>
+    );
 }

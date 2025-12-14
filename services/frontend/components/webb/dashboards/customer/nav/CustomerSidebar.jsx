@@ -1,60 +1,61 @@
-import React from 'react';
-import { Home, Bike, LogOut } from 'lucide-react';
-import Link from 'next/link';
-import { signout } from '../../../../../src/app/actions/auth';
+'use client';
+import React, { useState } from 'react';
+import {
+    Home,
+    Bike,
+    ArrowLeftCircle,
+    Motorbike,
+    Map,
+    CreditCard,
+} from 'lucide-react';
+import NavLink from '../../shared/NavLink';
+import SignOutButton from '../../shared/SignOutButton';
 
 export default function CustomerSidebar() {
+    const [collapsed, setCollapsed] = useState(false);
+
     return (
-        <div className='w-[300px] p-4 bg-primary h-screen border-r-2'>
-            <div className='flex gap-2 items-center mt-2'>
+        <div
+            className={`${
+                collapsed ? 'w-[80px]' : 'w-[300px]'
+            } p-5 bg-slate-800 h-screen relative transition-all ease-in-out duration-300 border-r border-background`}
+        >
+            <div className='flex gap-2 items-center'>
                 <Bike className='text-detail-yellow h-14 w-14' />
-                <h2 className='text-h2'>Scooter</h2>
+                {!collapsed && <h2 className='text-h2 text-white'>Scooter</h2>}
             </div>
-            <h4 className='text-base mt-10'>Meny</h4>
-            <Link
-                href='/user-dashboard'
-                className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
-            >
-                <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
-                    Länk 1
-                </span>
-            </Link>
-            <Link
-                href='/user-dashboard'
-                className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
-            >
-                <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
-                    Länk 2
-                </span>
-            </Link>{' '}
-            <Link
-                href='/user-dashboard'
-                className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
-            >
-                <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
-                    Länk 3
-                </span>
-            </Link>{' '}
-            <Link
-                href='/user-dashboard'
-                className='flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2'
-            >
-                <Home className='text-detail-yellow mr-2 h-8 w-8 transition-colors group-hover:text-primary-dark' />
-                <span className='group-hover:text-primary-dark transition-colors'>
-                    Länk 4
-                </span>
-            </Link>
-            <form action={signout}>
-                <button
-                    type='submit'
-                    className='bg-detail-red w-full py-2 rounded-md text-p cursor-pointer mt-4 hover:opacity-95 flex justify-center items-center'
-                >
-                    <LogOut className='pr-2' /> Logga ut
-                </button>
-            </form>
+            <h4 className='text-base mt-10 text-detail-yellow'>Meny</h4>
+            <NavLink
+                link='/user-dashboard'
+                collapsed={collapsed}
+                text='Översikt'
+                Icon={Home}
+            />
+            <NavLink
+                link='/user-dashboard/trips'
+                collapsed={collapsed}
+                text='Resor'
+                Icon={Motorbike}
+            />
+            <NavLink
+                link='/user-dashboard/payment'
+                collapsed={collapsed}
+                text='Betalning'
+                Icon={CreditCard}
+            />
+            <NavLink
+                link='/user-dashboard/map'
+                collapsed={collapsed}
+                text='Karta'
+                Icon={Map}
+            />
+            <SignOutButton collapsed={collapsed} />
+            <ArrowLeftCircle
+                className={`${
+                    collapsed && 'rotate-180'
+                }  absolute right-0 -mr-4 top-2/4 bg-slate-800 h-8 w-8 rounded-full text-detail-yellow cursor-pointer`}
+                onClick={() => setCollapsed(!collapsed)}
+            />
         </div>
     );
 }

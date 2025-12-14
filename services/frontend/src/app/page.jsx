@@ -11,7 +11,7 @@ export default function Page() {
                 fill={true}
                 className='opacity-10'
             />
-            <div className='flex flex-col w-xl bg-primary-light p-5 rounded-md shadow-2xl z-10 border-primary-dark border-2'>
+            <div className='flex flex-col w-xl bg-slate-800 p-5 rounded-md shadow-2xl z-10 text-white'>
                 <h1 className='text-h1 text-center font-bold'>Välkommen</h1>
                 <p className='text-p mt-5 text-center'>
                     Välj det alternativ som passar dig bäst!
@@ -19,13 +19,13 @@ export default function Page() {
                 <div className='flex mt-5 items-center gap-5 w-full'>
                     <Link
                         href='/app'
-                        className='  bg-primary-dark py-4 px-8 text-h4 font-bold text-white rounded-md flex-1 text-center hover:text-detail-yellow'
+                        className='bg-detail-yellow text-black py-4 px-8 text-h4 font-bold  rounded-md flex-1 text-center hover:opacity-90'
                     >
                         Användarapp
                     </Link>
                     <Link
                         href='/webb'
-                        className=' bg-primary-dark py-4 px-8 text-h4 font-bold text-white rounded-md flex-1 text-center hover:text-detail-yellow'
+                        className='bg-detail-yellow text-black py-4 px-8 text-h4 font-bold rounded-md flex-1 text-center hover:opacity-90'
                     >
                         Webbapp
                     </Link>
