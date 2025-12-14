@@ -23,7 +23,7 @@ export default function LoginForm() {
             }
 
             setTimeout(() => {
-                router.push('/user-app');
+                router.push('/app/user-app');
             }, 1500);
         } catch (err) {
             setError(err);
