@@ -35,7 +35,7 @@ export default function LoginForm() {
         <div className='w-md'>
             <form action={handleAction} className=''>
                 <input
-                    className='w-full bg-gray-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2'
+                    className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
                     required={true}
                     placeholder='Email...'
                     name='email'
@@ -44,7 +44,7 @@ export default function LoginForm() {
 
                 <div className='flex justify-between items-center relative w-full'>
                     <input
-                        className='w-full bg-gray-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2'
+                        className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
                         required={true}
                         placeholder='Lösenord...'
                         name='password'
@@ -56,14 +56,14 @@ export default function LoginForm() {
                             onClick={() => {
                                 setViewPassword(!viewPassword);
                             }}
-                            className='absolute right-0 -mb-3 mr-2 hover:text-detail cursor-pointer hover:text-detail-yellow'
+                            className='absolute right-0 -mb-3 mr-2 hover:text-detail text-black cursor-pointer hover:text-detail-yellow'
                         />
                     ) : (
                         <Eye
                             onClick={() => {
                                 setViewPassword(!viewPassword);
                             }}
-                            className='absolute right-0 -mb-3 mr-2 hover:text-detail cursor-pointer hover:text-detail-yellow'
+                            className='absolute right-0 -mb-3 mr-2 hover:text-detail text-black cursor-pointer hover:text-detail-yellow'
                         />
                     )}
                 </div>
@@ -88,7 +88,7 @@ export default function LoginForm() {
 
                 <button
                     type='submit'
-                    className='bg-primary-dark text-white rounded-md w-full text-h4 text-center mt-5 py-2 hover:text-detail-yellow cursor-pointer'
+                    className='bg-detail-yellow text-black rounded-md w-full text-h4 text-center mt-5 py-2 hover:opacity-90 cursor-pointer'
                 >
                     {loading ? 'Loggar in...' : 'Logga in'}
                 </button>
