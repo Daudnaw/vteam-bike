@@ -1,6 +1,13 @@
 'use client';
 import React, { useState } from 'react';
-import { Home, Bike, ArrowLeftCircle } from 'lucide-react';
+import {
+    Home,
+    Bike,
+    ArrowLeftCircle,
+    Motorbike,
+    Map,
+    CreditCard,
+} from 'lucide-react';
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
 
@@ -21,26 +28,26 @@ export default function CustomerSidebar() {
             <NavLink
                 link='/user-dashboard'
                 collapsed={collapsed}
-                text='Länk 1'
+                text='Översikt'
                 Icon={Home}
             />
             <NavLink
-                link='/user-dashboard'
+                link='/user-dashboard/trips'
                 collapsed={collapsed}
-                text='Länk 2'
-                Icon={Home}
+                text='Resor'
+                Icon={Motorbike}
             />
             <NavLink
-                link='/user-dashboard'
+                link='/user-dashboard/payment'
                 collapsed={collapsed}
-                text='Länk 3'
-                Icon={Home}
+                text='Betalning'
+                Icon={CreditCard}
             />
             <NavLink
-                link='/user-dashboard'
+                link='/user-dashboard/map'
                 collapsed={collapsed}
-                text='Länk 4'
-                Icon={Home}
+                text='Karta'
+                Icon={Map}
             />
             <SignOutButton collapsed={collapsed} />
             <ArrowLeftCircle

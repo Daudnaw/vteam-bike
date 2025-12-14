@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function ToolTip({ text }) {
     return (
-        <div className='w-fit bg-primary-light rounded-md shadow-2xl absolute right-0 -mr-[70px] z-50 p-2 text-base border-2 border-detail-yellow'>
+        <div className='absolute left-full top-1/2 -translate-y-1/2 ml-2 w-max bg-primary-light rounded-md shadow-2xl z-50 p-2 text-base'>
             {text}
         </div>
     );

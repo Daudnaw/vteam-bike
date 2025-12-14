@@ -22,6 +22,7 @@ export default function NavLink({ collapsed, Icon, link, text }) {
                         setShowTooltip(false);
                     }
                 }}
+                className='relative'
             >
                 <Icon
                     className={`${
