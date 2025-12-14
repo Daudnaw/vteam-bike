@@ -7,7 +7,7 @@ export default function SignOutButton({ collapsed }) {
         <form action={signout}>
             <button
                 type='submit'
-                className='bg-detail-red w-full py-2 rounded-md text-p cursor-pointer mt-4 hover:opacity-95 flex justify-center items-center'
+                className=' text-detail-red flex items-center text-h4 cursor-pointer mt-5 justify-center w-full'
             >
                 <LogOut className={`${!collapsed ? 'pr-2' : ''}`} />
                 {!collapsed && <span>Logga ut</span>}

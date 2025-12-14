@@ -9,7 +9,7 @@ export default function NavLink({ collapsed, Icon, link, text }) {
     return (
         <Link
             href={link}
-            className={`flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 border-b-2 relative`}
+            className={`flex items-center text-h4 mt-4 py-2 group transition-colors ease-in-out duration-500 relative`}
         >
             <div
                 onMouseEnter={() => {
