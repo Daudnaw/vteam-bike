@@ -1,5 +1,12 @@
 import React from 'react';
 
-export default function Page() {
-    return <div>Map</div>;
+import Map from '../../../../../../components/map/Map';
+
+export default function MapPage() {
+  return (
+    <section>
+      <h1 >Alla Zoner</h1>
+      <Map />
+    </section>
+  );
 }
