@@ -7,6 +7,7 @@ import {
     Motorbike,
     Map,
     CreditCard,
+    User,
 } from 'lucide-react';
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
@@ -48,6 +49,12 @@ export default function CustomerSidebar() {
                 collapsed={collapsed}
                 text='Karta'
                 Icon={Map}
+            />
+            <NavLink
+                link='/user-dashboard/profile'
+                collapsed={collapsed}
+                text='Profil'
+                Icon={User}
             />
             <SignOutButton collapsed={collapsed} />
             <ArrowLeftCircle
