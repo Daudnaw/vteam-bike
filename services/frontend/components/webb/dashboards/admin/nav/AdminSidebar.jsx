@@ -6,7 +6,10 @@ import {
     ArrowLeftCircle,
     Motorbike,
     Map,
-    CreditCard,
+    User,
+    Landmark,
+    Locate,
+    Wrench
 } from 'lucide-react';
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
@@ -32,22 +35,40 @@ export default function AdminSidebar() {
                 Icon={Home}
             />
             <NavLink
-                link='/admin-dashboard/trips'
+                link='/admin-dashboard/customers'
                 collapsed={collapsed}
-                text='Resor'
-                Icon={Motorbike}
+                text='customers'
+                Icon={User}
             />
             <NavLink
-                link='/admin-dashboard/payment'
+                link='/admin-dashboard/cities'
                 collapsed={collapsed}
-                text='Betalning'
-                Icon={CreditCard}
+                text='cities'
+                Icon={Landmark}
             />
             <NavLink
                 link='/admin-dashboard/map'
                 collapsed={collapsed}
                 text='Karta'
                 Icon={Map}
+            />
+            <NavLink
+                link='/admin-dashboard/bikes'
+                collapsed={collapsed}
+                text='bikes'
+                Icon={Motorbike}
+            />
+            <NavLink
+                link='/admin-dashboard/zones'
+                collapsed={collapsed}
+                text='zones'
+                Icon={Locate}
+            />
+            <NavLink
+                link='/admin-dashboard/service'
+                collapsed={collapsed}
+                text='service'
+                Icon={Wrench}
             />
             <SignOutButton collapsed={collapsed} />
             <ArrowLeftCircle
