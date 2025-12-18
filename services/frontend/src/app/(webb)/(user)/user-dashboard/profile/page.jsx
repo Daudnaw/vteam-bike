@@ -3,8 +3,6 @@ import CustomerProfile from '../../../../../../components/webb/dashboards/custom
 import { getSession } from '../../../../../../utils/user';
 
 export default async function Page() {
-    const session = await getSession();
-
     return (
         <div className='p-5'>
             <h2 className='text-h2 mb-5 font-bold'>Profil</h2>
@@ -12,7 +10,7 @@ export default async function Page() {
             <CustomerProfile
                 firstName='Test'
                 lastName='Testsson'
-                email={session.email}
+                email='test@test.se'
                 verified={false}
             />
         </div>
