@@ -1,5 +1,12 @@
-import React from 'react';
+'use client';
 
-export default function Page() {
-    return <div>customer</div>;
+import React from 'react';
+import UsersList from '../../../../../../components/webb/dashboards/admin/user/AllUser';
+
+export default function MyPage() {
+  return (
+    <section>
+      <UsersList />
+    </section>
+  );
 }

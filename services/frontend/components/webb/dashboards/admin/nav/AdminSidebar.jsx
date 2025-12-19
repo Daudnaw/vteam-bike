@@ -37,7 +37,7 @@ export default function AdminSidebar() {
             <NavLink
                 link='/admin-dashboard/customers'
                 collapsed={collapsed}
-                text='customers'
+                text='users'
                 Icon={User}
             />
             <NavLink
