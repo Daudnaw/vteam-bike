@@ -9,7 +9,7 @@ import { Schema, model } from "mongoose";
  * @property {number[]} [center] - Center coordinate [lat, lng], required if type = "circle"
  * @property {number} [radius] - Radius in meters, required if type = "circle"
  * @property {boolean} active.required - Whether the zone is active or not
- * @property {"parking"|"speed_limit"|"no_go"|"custom"} zoneType.required - Zone usage type
+ * @property {"parking"|"speed_limit"|"no_go"|"city"|"charge_station"|"custom"} zoneType.required - Zone usage type
  * @property {number} [maxSpeed] - Max allowed speed inside the zone
  */
 const zoneSchema = new Schema(
@@ -49,7 +49,7 @@ const zoneSchema = new Schema(
     zoneType: {
       type: String,
       required: true,
-      enum: ["parking", "speed_limit", "no_go", "custom"],
+      enum: ["parking", "speed_limit", "no_go", "city", "charge_station", "custom"],
     },
     maxSpeed: {
       type: Number,
