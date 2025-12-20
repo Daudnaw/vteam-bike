@@ -45,7 +45,7 @@ v1.get("/", requireAuth, requireAdmin, async (req, res, next) => {
 v1.get("/zonetype/:zoneType", requireAuth, requireAdmin, async (req, res, next) => {
   const { zoneType } = req.params;
 
-  const allowed = ["parking", "speed_limit", "no_go", "custom"];
+  const allowed = ["parking", "speed_limit", "no_go", "city", "charge_station", "custom"];
 
   if (!allowed.includes(zoneType)) {
     return res.status(400).json({ error: "Invalid zone type" });
