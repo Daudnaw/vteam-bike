@@ -12,7 +12,6 @@ export async function getSession() {
 
     try {
         const decodedToken = jwt.verify(token.value, process.env.JWT_SECRET);
-
         return decodedToken;
     } catch {
         return null;
