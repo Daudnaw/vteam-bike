@@ -1,4 +1,5 @@
 'use server';
+import { cookies } from 'next/headers';
 
 const zones = {
     zones: [
@@ -97,4 +98,30 @@ const zones = {
 
 export async function getZones() {
     return zones;
+}
+
+export async function getAllCities() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  if (!token) {
+    throw new Error('Not authenticated');
+  }
+
+  const res = await fetch(
+    `http://backend:3000/api/v1/zones`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: 'no-store',
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch zones (${res.status})`);
+  }
+
+  return res.json();
 }
