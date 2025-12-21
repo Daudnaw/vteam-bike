@@ -1,7 +1,7 @@
 import { Router } from "express";
 import createDebug from "debug";
 import User from "../users/model.js";
-import { requireAdmin } from "../auth/middleware.js";
+import { requireAdmin, requireAuth } from "../auth/middleware.js";
 
 const debug = createDebug("backend:auth");
 const router = Router();
@@ -18,7 +18,7 @@ const router = Router();
  * @returns {Error} 403 - Forbidden fields included
  * @returns {Error} 404 - User not found
  */
-router.put("/:id", requireAdmin, async (req, res, next) => {
+router.put("/:id", requireAuth, requireAdmin, async (req, res, next) => {
   const { id } = req.params;
   const data = req.body ?? {};
 
