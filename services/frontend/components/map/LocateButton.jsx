@@ -1,0 +1,30 @@
+'use client';
+import React, { useState, useEffect } from 'react';
+import { useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { Pin } from 'lucide-react';
+
+export default function LocateButton() {
+    const map = useMap();
+
+    function handleLocate() {
+        map.locate({ enableHighAccuracy: true });
+
+        map.once('locationfound', (e) => {
+            map.flyTo(e.latlng, 15);
+        });
+
+        map.once('locationerror', (e) => {
+            console.error(e.message);
+        });
+    }
+
+    return (
+        <button
+            onClick={handleLocate}
+            className='absolute top-2 right-2 bg-slate-800 p-2 rounded-md z-1000'
+        >
+            <Pin className='text-detail-yellow' />
+        </button>
+    );
+}
