@@ -4,18 +4,26 @@ import RegisterForm from './forms/RegisterForm';
 
 export default function RegisterPage() {
     return (
-        <div className='h-screen flex'>
-            <div className='flex-1 items-center justify-center flex flex-col'>
-                <div className='bg-slate-800 p-5 rounded-md shadow-2xl text-white'>
-                    <h2 className='text-4xl font-bold mb-5 text-center'>
-                        Skapa konto!
-                    </h2>
-                    <p className='text-lg mb-5 text-center'>
-                        Fyll i fälten nedan!
-                    </p>
-                    <RegisterForm />
-                </div>
+        <div className='h-screen p-5'>
+            <h2 className='text-center font-bold'>Scooter app</h2>
+            <div className='relative h-[200px] rounded-lg mt-5 shadow-xl'>
+                <Image
+                    className='rounded-lg shadow-xl'
+                    src='/scooters.png'
+                    alt='Scooters'
+                    fill={true}
+                />
             </div>
+
+            <h3 className='mt-5 text-center text-h3 font-bold'>
+                Registrera konto
+            </h3>
+
+            <p className='text-sm text-center text-gray-500 mt-2'>
+                Vänligen fyll i fälten nedan för att skapa ett konto.
+            </p>
+
+            <RegisterForm />
         </div>
     );
 }
