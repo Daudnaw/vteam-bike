@@ -19,7 +19,7 @@ export default function UserLocation() {
 
         map.on('locationfound', (e) => {
             setPos(e.latlng);
-            map.flyTo(e.latlng, 15);
+            map.flyTo(e.latlng, 17);
         });
 
         map.on('locationerror', (e) => {

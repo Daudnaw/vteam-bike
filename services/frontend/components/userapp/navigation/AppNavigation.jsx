@@ -24,11 +24,11 @@ export default function AppNavigation() {
                 href='/'
             >
                 <Camera className='text-detail-yellow' />
-                <span>Scanna</span>
+                <span>QR</span>
             </Link>
             <Link
                 className=' flex gap-2 flex-1 justify-center items-center pl-2'
-                href='/'
+                href='/app/user-app/profile'
             >
                 <User className='text-detail-yellow' />
                 <span>Profil</span>
