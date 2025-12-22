@@ -11,7 +11,10 @@ export default function LocateButton() {
         map.locate({ enableHighAccuracy: true });
 
         map.once('locationfound', (e) => {
-            map.flyTo(e.latlng, 17);
+            map.flyTo(e.latlng, 17, {
+                animate: true,
+                duration: 1.5,
+            });
         });
 
         map.once('locationerror', (e) => {
