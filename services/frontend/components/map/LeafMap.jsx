@@ -2,7 +2,7 @@
 
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Circle, Polygon, Popup, Marker } from 'react-leaflet';
-import { getZones } from '../../src/app/actions/zones';
+import { getAllZones } from '../../src/app/actions/zones';
 import { getBikes } from '../../src/app/actions/bikes';
 import { useState, useEffect } from 'react';
 import L from 'leaflet';
@@ -20,7 +20,7 @@ export default function LeafMap() {
 
   useEffect(() => {
     async function fetchData() {
-      const zonesData = await getZones();
+      const zonesData = await getAllZones();
       const bikesData = await getBikes();
 
       setZones(zonesData.zones);
