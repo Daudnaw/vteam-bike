@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { getAllCities } from '../../../../../src/app/actions/zones'; // should fetch zones of type "custom"
+import Link from 'next/link';
+import { MoreVertical, Trash2, Plus } from 'lucide-react';
+import { getAllCities, deleteZone } from '../../../../../src/app/actions/zones';
 
 export default function CitiesList() {
   const [cities, setCities] = useState([]);
@@ -16,6 +18,19 @@ export default function CitiesList() {
       .finally(() => setLoading(false));
   }, []);
 
+  async function handleDelete(zoneId) {
+      if (!confirm('Are you sure you want to delete this city?')) return;
+  
+      try {
+        await deleteZone(zoneId);
+         toast.success('Deleted successfully', { autoClose: 1500 });
+      
+        setCities((prev) => prev.filter((u) => u._id !== zoneId));
+      } catch (err) {
+        toast.error(err.message || 'Failed to delete city');
+      }
+    }
+
   if (loading) return <p>Loading cities...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -28,9 +43,9 @@ export default function CitiesList() {
             <tr>
               <th className="border border-detail-yellow text-2xl py-2 text-center">City Name</th>
               <th className="border border-detail-yellow text-2xl py-2 text-center">Type</th>
-              <th className="border border-detail-yellow text-2xl py-2 text-center">Center / Area</th>
-              <th className="border border-detail-yellow text-2xl py-2 text-center">Radius</th>
+              <th className="border border-detail-yellow text-2xl py-2 text-center">Zonetype</th>
               <th className="border border-detail-yellow text-2xl py-2 text-center">Active</th>
+              <th className="border border-detail-yellow text-2xl py-2 text-center">Action</th>
             </tr>
           </thead>
 
@@ -39,19 +54,37 @@ export default function CitiesList() {
               <tr key={city._id}>
                 <td className="border border-detail-yellow px-2 py-2 text-center">{city.name}</td>
                 <td className="border border-detail-yellow px-2 py-2 text-center">{city.type}</td>
-                <td className="border border-detail-yellow px-2 py-2 text-center">
-                  {city.type === 'circle' ? `[${city.center.join(', ')}]` : JSON.stringify(city.area)}
-                </td>
-                <td className="border border-detail-yellow px-2 py-2 text-center">
-                  {city.type === 'circle' ? city.radius : '-'}
-                </td>
+                <td className="border border-detail-yellow px-2 py-2 text-center">{city.zoneType}</td>
                 <td className="border border-detail-yellow px-2 py-2 text-center">
                   {city.active ? 'Yes' : 'No'}
                 </td>
+                  <td className="border border-detail-yellow px-2 py-2 text-center flex gap-2 justify-center items-center">
+                    <Link
+                      href={`/admin-dashboard/cities/update?cityId=${city._id}`}
+                      className="flex gap-1 items-center text-blue-400 hover:text-detail-yellow"
+                    >
+                      <MoreVertical size={18} /> More
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(city._id)}
+                      className="flex gap-1 items-center text-red-400 hover:text-detail-yellow"
+                    >
+                      <Trash2 size={18} /> Delete
+                    </button>
+                  </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="flex justify-between items-center mb-4">
+        <Link
+          href="/admin-dashboard/cities/create"
+          className="flex items-center gap-2 bg-detail-yellow text-black px-4 py-2 rounded hover:bg-yellow-600 transition"
+        >
+          <Plus size={18} />
+          Create New city
+        </Link>
       </div>
     </div>
   );
