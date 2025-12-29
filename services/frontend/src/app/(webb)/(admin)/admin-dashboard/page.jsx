@@ -1,5 +1,6 @@
 import React from 'react';
 import StatCard from '../../../../../components/webb/dashboards/shared/StatCard';
+import NetVolumeCard from '../../../../../components/payments/Statistics';
 
 export default function AdminDashboard() {
     return (
@@ -9,6 +10,7 @@ export default function AdminDashboard() {
                 <StatCard nr={0} text='Bikes' />
                 <StatCard nr={0} text='Customers' />
                 <StatCard nr={0} text='Cities' />
+                <NetVolumeCard />
             </div>
 
             <h2 className='text-h3 mt-10'>vetinte</h2>

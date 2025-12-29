@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }) {
         <section className='flex'>
             <AdminSidebar />
             <main className='flex-1'>
-                <AdminHeader email={email} />
+                <AdminHeader /** email={email} */ />
                 {children}
             </main>
         </section>
