@@ -6,15 +6,17 @@ import { redirect } from 'next/navigation';
 export default async function AdminLayout({ children }) {
     const session = await getSession();
 
+    console.log('SEssion:', session);
+
     if (!session) {
         redirect('/webb/auth/login');
-    }  
+    }
 
     return (
         <section className='flex'>
             <AdminSidebar />
             <main className='flex-1'>
-                <AdminHeader email={email} />
+                <AdminHeader email={session.email} />
                 {children}
             </main>
         </section>
