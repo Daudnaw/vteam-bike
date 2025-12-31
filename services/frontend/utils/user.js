@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
+import { jwtDecode } from 'jwt-decode';
 
 export async function getSession() {
     const cookieStore = await cookies();
@@ -11,7 +11,8 @@ export async function getSession() {
     }
 
     try {
-        const decodedToken = jwt.verify(token.value, process.env.JWT_SECRET);
+        const decodedToken = jwtDecode(token.value);
+
         return decodedToken;
     } catch {
         return null;

@@ -95,7 +95,7 @@ export default function TripTable() {
                                 </td>
                                 <td className='border border-detail-yellow px-2 py-2 text-center'>
                                     <Link
-                                        href='/user-dashboard'
+                                        href={`/user-dashboard/trips/${trip.id}`}
                                         className='underline underline-offset-4 hover:decoration-detail-yellow'
                                     >
                                         Se mer
