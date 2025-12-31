@@ -52,7 +52,7 @@ v1.get("/zonetype/:zoneType", requireAuth, requireAdmin, async (req, res, next) 
   }
 
   try {
-    const zones = await Zone.findByZoneType(zoneType);
+    const zones = await Zone.findByZoneType(zoneType).lean();
     res.status(200).json(zones);
   } catch (err) {
     next(err);

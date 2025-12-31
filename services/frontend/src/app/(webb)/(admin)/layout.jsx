@@ -4,23 +4,19 @@ import { getSession } from '../../../../utils/user';
 import { redirect } from 'next/navigation';
 
 export default async function AdminLayout({ children }) {
-    let session = await getSession();
+    const session = await getSession();
 
-    /**
+    console.log('SEssion:', session);
+
     if (!session) {
         redirect('/webb/auth/login');
-    } */
-   session = {
-    email: 'nz@gmail.com',
-    password: '123456',
-    role: 'admin'
-};
+    }
 
     return (
         <section className='flex'>
             <AdminSidebar />
             <main className='flex-1'>
-                <AdminHeader email={email} />
+                <AdminHeader email={session.email} />
                 {children}
             </main>
         </section>
