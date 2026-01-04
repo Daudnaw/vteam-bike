@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
 
 export default function Page() {
-    return <div>zones</div>;
+    return <div>kanske en kartvy av endast alla zoner</div>;
 }

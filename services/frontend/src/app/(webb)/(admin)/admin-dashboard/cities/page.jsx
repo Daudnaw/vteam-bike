@@ -1,13 +1,12 @@
-import React from 'react';
-import Link from 'next/link';
+'use client';
 
-export default function Page() {
-    return <div>cities
-        <Link
-                        href='/webb/admin-dashboard/cities'
-                        className='underline hover:decoration-detail-yellow'
-                    >
-                        add city
-                    </Link>
-    </div>;
+import React from 'react';
+import CitiesList from '../../../../../../components/webb/dashboards/admin/city/AllCity';
+
+export default function MyPage() {
+  return (
+    <section>
+      <CitiesList />
+    </section>
+  );
 }
