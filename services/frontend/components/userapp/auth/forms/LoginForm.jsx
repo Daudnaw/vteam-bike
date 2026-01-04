@@ -23,7 +23,7 @@ export default function LoginForm() {
             }
 
             setTimeout(() => {
-                router.push('/app/user-app');
+                router.push('/app/user-app/map');
             }, 1500);
         } catch (err) {
             setError(err);
@@ -32,7 +32,7 @@ export default function LoginForm() {
     }
 
     return (
-        <div className='w-md'>
+        <div className='mt-5'>
             <form action={handleAction} className=''>
                 <input
                     className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
