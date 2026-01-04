@@ -11,18 +11,15 @@ router.post("/checkout", async (req, res, next) => {
   try {
     const { amount } = req.body;
 
-    const allowedAmounts = [100, 300, 500];
-    const selectedAmount = allowedAmounts.includes(amount) ? amount : 100;
-
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
           price_data: {
             currency: "sek",
             product_data: {
-              name: `Credit pot ${selectedAmount} kr`,
+              name: `Credit pot ${amount} kr`,
             },
-            unit_amount: selectedAmount * 100,
+            unit_amount: amount * 100,
           },
           quantity: 1,
         },

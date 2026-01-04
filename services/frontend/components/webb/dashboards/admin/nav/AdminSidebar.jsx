@@ -21,7 +21,7 @@ export default function AdminSidebar() {
     return (
         <div
             className={`${
-                collapsed ? 'w-[80px]' : 'w-[300px]'
+                collapsed ? 'w-20' : 'w-[300px]'
             } p-5 bg-slate-800 h-screen relative transition-all ease-in-out duration-300 border-r border-background`}
         >
             <div className='flex gap-2 items-center'>
