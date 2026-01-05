@@ -1,53 +1,7 @@
 import React from "react";
 import { Bike, MapPin, Activity, Wrench } from "lucide-react";
 import Link from "next/link";
-
-const bikes = [
-  {
-    bikeId: "STOCKHOLM-001",
-    status: "available",
-    speed: 0,
-    batteryLevel: 87,
-    position: "Laddstation Centralen",
-    rideLogs: [],
-    needsCharge: false,
-    currentCustomer: null,
-    city: "Stockholm",
-  },
-  {
-    bikeId: "STOCKHOLM-002",
-    status: "in_use",
-    speed: 12,
-    batteryLevel: 65,
-    position: "Fri parkering Vasaparken",
-    rideLogs: [],
-    needsCharge: false,
-    currentCustomer: "KUND-001",
-    city: "Stockholm",
-  },
-  {
-    bikeId: "STOCKHOLM-003",
-    status: "in_service",
-    speed: 0,
-    batteryLevel: 20,
-    position: "Servicehub Södermalm",
-    rideLogs: [],
-    needsCharge: true,
-    currentCustomer: null,
-    city: "Stockholm",
-  },
-  {
-    bikeId: "STOCKHOLM-004",
-    status: "available",
-    speed: 0,
-    batteryLevel: 90,
-    position: "Accepterad parkering Odenplan",
-    rideLogs: [],
-    needsCharge: false,
-    currentCustomer: null,
-    city: "Stockholm",
-  },
-];
+import { getBikes } from '../../../../../src/app/actions/bikes';
 
 const statusConfig = {
   available: { label: "Tillgänglig", color: "text-green-400" },
@@ -55,7 +9,9 @@ const statusConfig = {
   in_service: { label: "Service", color: "text-red-400" },
 };
 
-export default function BikeTable() {
+export default async function BikeTable() {
+  const bikes = await getBikes();
+
   return (
     <div className="overflow-hidden rounded-md border border-detail-yellow shadow-2xl">
       <table className="w-full border-collapse divide-detail-yellow from-slate-600 to-slate-800 bg-linear-to-br text-white">
