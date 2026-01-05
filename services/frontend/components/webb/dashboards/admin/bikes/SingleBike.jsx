@@ -1,7 +1,16 @@
 'use client';
 
 import { toast } from 'react-toastify';
-import { Trash2, Lock, PauseCircle, Wrench } from 'lucide-react';
+import {
+  Trash2,
+  Lock,
+  PauseCircle,
+  Wrench,
+  Bike,
+  MapPin,
+  Activity
+} from 'lucide-react';
+
 import {
   deleteBike,
   stopBike,
@@ -74,10 +83,30 @@ export default function SingleBike({ bikeId }) {
       <table className="w-full border-collapse divide-detail-yellow from-slate-600 to-slate-800 bg-linear-to-br text-white">
         <thead className="bg-slate-900">
           <tr>
-            <th className="border border-detail-yellow text-2xl py-2 text-center">Cykel</th>
-            <th className="border border-detail-yellow text-2xl py-2 text-center">Status</th>
-            <th className="border border-detail-yellow text-2xl py-2 text-center">Plats</th>
-            <th className="border border-detail-yellow text-2xl py-2 text-center">Åtgärder</th>
+            <th className="border border-detail-yellow text-2xl py-2 text-center">
+              <div className="flex gap-2 items-center justify-center">
+                <Bike className="text-detail-yellow" />
+                Cykel
+              </div>
+            </th>
+            <th className="border border-detail-yellow text-2xl py-2 text-center">
+              <div className="flex gap-2 items-center justify-center">
+                <Activity className="text-detail-yellow" />
+                Status
+              </div>
+            </th>
+            <th className="border border-detail-yellow text-2xl py-2 text-center">
+              <div className="flex gap-2 items-center justify-center">
+                <MapPin className="text-detail-yellow" />
+                Plats
+              </div>
+            </th>
+            <th className="border border-detail-yellow text-2xl py-2 text-center">
+              <div className="flex gap-2 items-center justify-center">
+                <Wrench className="text-detail-yellow" />
+                Åtgärder
+              </div>
+            </th>
           </tr>
         </thead>
 
