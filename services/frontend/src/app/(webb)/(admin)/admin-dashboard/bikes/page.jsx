@@ -8,7 +8,6 @@ export default function Page() {
             <h2 className='text-h2 mb-5 font-bold'>Översikt Bikes</h2>
             <div className='grid grid-cols-3 gap-5'>
                 <StatCard nr={0} text='Available' />
-                <StatCard nr={0} text='' />
                 <StatCard nr={0} text='At service' />
             </div>
 
