@@ -9,7 +9,7 @@ import {
     User,
     Landmark,
     Locate,
-    Wrench
+    Wrench,
 } from 'lucide-react';
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
@@ -70,7 +70,7 @@ export default function AdminSidebar() {
                 text='service'
                 Icon={Wrench}
             />
-            <SignOutButton collapsed={collapsed} />
+            <SignOutButton collapsed={collapsed} webb={true} />
             <ArrowLeftCircle
                 className={`${
                     collapsed && 'rotate-180'

@@ -7,7 +7,7 @@ export default function AppNavigation() {
         <div className='fixed bottom-0 flex bg-slate-800 text-white py-5 w-full px-4 z-1000'>
             <Link
                 className='border-r border-detail-yellow flex gap-2 flex-1 justify-center items-center pr-2'
-                href='/'
+                href='/app/user-app/qr'
             >
                 <Camera className='text-detail-yellow' />
                 <span>QR</span>
