@@ -12,6 +12,10 @@ export default async function AdminLayout({ children }) {
         redirect('/webb/auth/login');
     }
 
+    if (session.role !== "admin") {
+        redirect('/user-dashboard');
+    }
+
     return (
         <section className='flex'>
             <AdminSidebar />
