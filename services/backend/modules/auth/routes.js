@@ -10,15 +10,24 @@ import crypto from "node:crypto";
 const debug = createDebug("backend:auth");
 const router = Router();
 let googleClientPromise = null;
+let __googleClientOverride = null;
 
 const CLIENT_REDIRECTS = {
   webb: {
-    customer: "http://localhost:8080/webb/user-dashboard",
-    admin: "http://localhost:8080/webb/admin-dashboard",
+    customer: "http://localhost:8080/user-dashboard",
+    admin: "http://localhost:8080/admin-dashboard",
   },
   app: {
     customer: "http://localhost:8080/app/user-app",
   },
+};
+
+export const __testables = {
+  CLIENT_REDIRECTS,
+  pickClient,
+  makeState,
+  parseState,
+  signJwtFromUser,
 };
 
 function pickClient(req) {
@@ -37,7 +46,14 @@ function parseState(stateStr) {
   }
 }
 
+export function __setGoogleClientForTests(client) {
+  __googleClientOverride = client;
+  googleClientPromise = null;
+}
+
 function getGoogleClient() {
+  if (__googleClientOverride) return Promise.resolve(__googleClientOverride);
+
   if (!googleClientPromise) {
     googleClientPromise = (async () => {
       const issuer = await Issuer.discover("https://accounts.google.com");
@@ -70,6 +86,7 @@ router.get("/google", async (req, res, next) => {
 
     const code_verifier = generators.codeVerifier();
     const code_challenge = generators.codeChallenge(code_verifier);
+    const csrf = generators.state();
     const state = makeState(csrf, targetClient);
 
     res.cookie("oauth_state", state, {
