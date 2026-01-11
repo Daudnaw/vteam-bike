@@ -90,6 +90,12 @@ export default function LoginForm() {
                     </Link>
                 </div>
                 <button
+                    type='submit'
+                    className='bg-detail-yellow text-black rounded-md w-full text-h4 text-center mt-5 py-2 hover:opacity-90 cursor-pointer'
+                >
+                    {loading ? 'Loggar in...' : 'Logga in'}
+                </button>
+                <button
                     type="button"
                     onClick={() => {
                         window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
@@ -99,10 +105,13 @@ export default function LoginForm() {
                     Fortsätt med Google
                 </button>
                 <button
-                    type='submit'
-                    className='bg-detail-yellow text-black rounded-md w-full text-h4 text-center mt-5 py-2 hover:opacity-90 cursor-pointer'
-                >
-                    {loading ? 'Loggar in...' : 'Logga in'}
+                    type="button"
+                    onClick={() => {
+                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github`;
+                    }}
+                    className="bg-white text-black rounded-md w-full text-h4 text-center mt-3 py-2 hover:opacity-90 cursor-pointer border"
+                    >
+                    Fortsätt med GitHub
                 </button>
             </form>
         </div>

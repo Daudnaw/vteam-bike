@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../../lib/authentication-error.js";
 import { requireAuth } from "./middleware.js";
 import { Issuer, generators } from "openid-client";
+import crypto from "node:crypto";
 
 const debug = createDebug("backend:auth");
 const router = Router();
@@ -121,6 +122,116 @@ router.get("/google/callback", async (req, res, next) => {
     const token = signJwtFromUser(sanitized);
 
     res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 1000,
+      path: "/",
+    });
+
+    return res.redirect("http://localhost:8080/user-dashboard");
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/github", (req, res) => {
+  const state = crypto.randomBytes(16).toString("hex");
+
+  res.cookie("oauth_state", state, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 10 * 60 * 1000,
+    path: "/",
+  });
+
+  const params = new URLSearchParams({
+    client_id: process.env.GITHUB_CLIENT_ID,
+    redirect_uri: process.env.GITHUB_REDIRECT_URI,
+    scope: "read:user user:email",
+    state,
+  });
+
+  res.redirect(`https://github.com/login/oauth/authorize?${params.toString()}`);
+});
+
+router.get("/github/callback", async (req, res, next) => {
+  try {
+    const { code, state } = req.query;
+    const savedState = req.cookies.oauth_state;
+
+    if (!code || !state) return res.status(400).json({ message: "Missing code/state" });
+    if (!savedState || state !== savedState) return res.status(401).json({ message: "Invalid state" });
+
+    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: process.env.GITHUB_REDIRECT_URI,
+      }),
+    });
+
+    const tokenData = await tokenRes.json();
+    const accessToken = tokenData.access_token;
+    if (!accessToken) return res.status(401).json({ message: "No access token from GitHub" });
+
+    const userRes = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "vteam",
+        Accept: "application/vnd.github+json",
+      },
+    });
+    const ghUser = await userRes.json();
+
+    const emailsRes = await fetch("https://api.github.com/user/emails", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "vteam",
+        Accept: "application/vnd.github+json",
+      },
+    });
+    const emails = await emailsRes.json();
+    const primaryEmail =
+      Array.isArray(emails)
+        ? (emails.find(e => e.primary && e.verified)?.email ?? emails.find(e => e.verified)?.email)
+        : null;
+
+    if (!primaryEmail) {
+      return res.status(400).json({ message: "No verified email from GitHub. Make email public or allow email scope." });
+    }
+
+    let user = await User.findOne({ oauthProvider: "github", oauthSubject: String(ghUser.id) });
+
+    if (!user) {
+      const byEmail = await User.findOne({ email: primaryEmail });
+      if (byEmail) {
+        byEmail.oauthProvider = "github";
+        byEmail.oauthSubject = String(ghUser.id);
+        user = await byEmail.save();
+      }
+    }
+
+    if (!user) {
+      user = await User.create({
+        firstName: ghUser.name?.split(" ")?.[0] ?? "GitHub",
+        lastName: ghUser.name?.split(" ").slice(1).join(" ") ?? "User",
+        email: primaryEmail,
+        oauthProvider: "github",
+        oauthSubject: String(ghUser.id),
+      });
+    }
+
+    res.clearCookie("oauth_state");
+
+    const sanitized = user.toJSON();
+    const jwtToken = signJwtFromUser(sanitized);
+
+    res.cookie("token", jwtToken, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

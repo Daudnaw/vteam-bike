@@ -16,6 +16,9 @@ services:
       - MONGODB_DSN=mongodb://db:27017/vteam-dev
       - GOOGLE_CLIENT_ID=72229994044-c79ferugmuftta95ms4kk1fdffk58a9u.apps.googleusercontent.com
       - GOOGLE_CLIENT_SECRET=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
+      - GITHUB_CLIENT_ID=Ov23lilGKVWwk2B0alrl
+      - GITHUB_CLIENT_SECRET=961c4c0950b8776da358ddd50b9049df5bbd4f73
+      - GITHUB_REDIRECT_URI=http://localhost:3000/api/auth/github/callback
       - GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
       - FRONTEND_OAUTH_REDIRECT=http://localhost:8080/oauth/callback
       - JWT_SECRET=hejsanhoppsan
