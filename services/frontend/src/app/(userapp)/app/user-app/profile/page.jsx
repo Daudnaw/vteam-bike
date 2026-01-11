@@ -1,5 +1,5 @@
 import React from 'react';
-import { getSession } from '../../../../../../utils/user';
+import { getSession } from '../../../../../../utils/user.server';
 import ProfilePage from '../../../../../../components/userapp/profile/ProfilePage';
 
 const sampleUser = {

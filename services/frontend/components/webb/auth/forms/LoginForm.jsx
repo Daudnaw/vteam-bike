@@ -80,16 +80,24 @@ export default function LoginForm() {
                         href='/glomt-losenord'
                         className='underline hover:decoration-detail-yellow'
                     >
-                        Glömt lösenord ?
+                        Glömt lösenord?
                     </Link>
                     <Link
                         href='/webb/auth/register'
                         className='underline hover:decoration-detail-yellow'
                     >
-                        Inget konto? Bli medlem
+                        Ny här? Skapa konto här!
                     </Link>
                 </div>
-
+                <button
+                    type="button"
+                    onClick={() => {
+                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
+                    }}
+                    className="bg-white text-black rounded-md w-full text-h4 text-center mt-3 py-2 hover:opacity-90 cursor-pointer border"
+                    >
+                    Fortsätt med Google
+                </button>
                 <button
                     type='submit'
                     className='bg-detail-yellow text-black rounded-md w-full text-h4 text-center mt-5 py-2 hover:opacity-90 cursor-pointer'

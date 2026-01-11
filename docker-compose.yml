@@ -14,6 +14,10 @@ services:
       - PORT=3000
       - NODE_ENV=development
       - MONGODB_DSN=mongodb://db:27017/vteam-dev
+      - GOOGLE_CLIENT_ID=72229994044-c79ferugmuftta95ms4kk1fdffk58a9u.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+      - GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
+      - FRONTEND_OAUTH_REDIRECT=http://localhost:8080/oauth/callback
       - JWT_SECRET=hejsanhoppsan
 
   frontend:
@@ -29,7 +33,8 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://backend:9000
+      - API_URL_INTERNAL=http://backend:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
 
   db:
     image: mongo:latest
