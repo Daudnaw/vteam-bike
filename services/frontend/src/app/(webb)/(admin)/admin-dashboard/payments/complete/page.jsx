@@ -15,18 +15,47 @@ function formatCurrency(amountInÖre, currency) {
 }
 
 export default function Page() {
-  const params = useSearchParams();
-  const sessionId = params.get("session_id");
+    const params = useSearchParams();
+    const sessionId = params.get("session_id");
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [session, setSession] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [session, setSession] = useState(null);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!sessionId) {
       setError("No session-id found in URL:en.");
       setLoading(false);
       return;
+    }
+
+    async function confirmCreditsOnce() {
+        const key = `credits_confirmed_${sessionId}`;
+        if (typeof window !== "undefined" && localStorage.getItem(key) === "1") {
+        return;
+        }
+
+        try {
+            const res = await fetch(`${BASE_URL}/api/payments/confirm`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ sessionId }),
+            });
+
+            if (!res.ok) {
+                const text = await res.text().catch(() => "");
+                throw new Error(text || "Could not confirm payment");
+            }
+
+            await res.json().catch(() => ({}));
+
+            if (typeof window !== "undefined") {
+                localStorage.setItem(key, "1");
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async function fetchSession() {
@@ -34,7 +63,9 @@ export default function Page() {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(`${BASE_URL}/api/payments/checkout/${sessionId}`);
+        const res = await fetch(`${BASE_URL}/api/payments/checkout/${sessionId}`, {
+            credentials: "include",
+        });
 
         if (!res.ok) {
           throw new Error("Could not get payments info");
@@ -50,7 +81,10 @@ export default function Page() {
       }
     }
 
-    fetchSession();
+    (async () => {
+      await confirmCreditsOnce();
+      await fetchSession();
+    })();
   }, [sessionId]);
 
   return (

@@ -1,13 +1,15 @@
 import { Router } from "express";
 import Stripe from "stripe";
+import { requireAuth, requireAdmin } from "../auth/middleware.js";
+import User from "../users/model.js";
+import PaymentEvent from "./model.js";
 
 const router = Router();
 
 const stripe_secret_key = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripe_secret_key);
 
-
-router.post("/checkout", async (req, res, next) => {
+router.post("/checkout", requireAuth, async (req, res, next) => {
   const MEMBERSHIPS = {
     small:  { amount: 100, name: "Small membership" },
     medium: { amount: 300, name: "Medium membership" },
@@ -60,16 +62,71 @@ router.post("/checkout", async (req, res, next) => {
       ];
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode,
-      line_items,
-      success_url: `http://localhost:8080/admin-dashboard/payments/complete?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:8080/admin-dashboard/payments`,
-    });
+    const userId = req.user?.sub ?? req.user?.id;
+
+  const session = await stripe.checkout.sessions.create({
+    mode,
+    line_items,
+    success_url: `http://localhost:8080/admin-dashboard/payments/complete?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `http://localhost:8080/admin-dashboard/payments`,
+    client_reference_id: userId,
+    metadata: { userId, type: mode === "payment" ? "credits" : "membership", tier: tier ?? "" },
+  });
 
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error(err);
+    return next(err);
+  }
+});
+
+router.post("/confirm", requireAuth, async (req, res, next) => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ error: "Missing sessionId" });
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== "paid") {
+      return res.status(400).json({ error: "Payment not completed" });
+    }
+
+    if (session.mode !== "payment") {
+      return res.status(400).json({ error: "Not a credit purchase" });
+    }
+
+    const userId = req.user?.sub ?? req.user?.id;
+    const sessionUserId = session.metadata?.userId || session.client_reference_id;
+
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    if (!sessionUserId || sessionUserId !== userId) {
+      return res.status(403).json({ error: "Session does not belong to user" });
+    }
+
+    const amountSek = (session.amount_total ?? 0) / 100;
+
+    try {
+      await PaymentEvent.create({
+        stripeSessionId: session.id,
+        userId,
+        type: "credits",
+        amountSek,
+        currency: session.currency ?? "sek",
+      });
+    } catch (e) {
+      if (e?.code === 11000) {
+        return res.json({ ok: true, alreadyProcessed: true });
+      }
+      throw e;
+    }
+
+    await User.findByIdAndUpdate(userId, { $inc: { credit: amountSek } });
+
+    return res.json({ ok: true, creditAdded: amountSek });
+  } catch (err) {
     return next(err);
   }
 });

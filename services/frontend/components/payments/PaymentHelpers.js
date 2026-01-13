@@ -9,6 +9,7 @@ export default async function checkOut(payload) {
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify(payload),
         });
 

@@ -35,6 +35,12 @@ const schema = new Schema(
       required: true,
       trim: true,
     },
+    credit: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
     password: {
       type: String,
       required: true,
