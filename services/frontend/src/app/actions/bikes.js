@@ -1,24 +1,92 @@
 'use server'
 
-const bikes = {
-  bikes: [
-    {
-      _id: "bike001",
-      name: "Bike 1",
-      lat: 59.331,
-      lng: 18.065,
-      status: "available"
-    },
-    {
-      _id: "bike002",
-      name: "Bike 2",
-      lat: 59.334,
-      lng: 18.071,
-      status: "in_use"
-    }
-  ]
-}
+const bikes = [
+  {
+    bikeId: "STOCKHOLM-001",
+    status: "available",
+    speed: 0,
+    batteryLevel: 87,
+    position: "Laddstation",
+    rideLogs: [],
+    needsCharge: false,
+    currentCustomer: null,
+    city: "Stockholm",
+  },
+  {
+    bikeId: "STOCKHOLM-002",
+    status: "in_use",
+    speed: 12,
+    batteryLevel: 65,
+    position: "Fri parkering",
+    rideLogs: [],
+    needsCharge: false,
+    currentCustomer: "KUND-001",
+    city: "Stockholm",
+  },
+  {
+    bikeId: "STOCKHOLM-003",
+    status: "in_service",
+    speed: 0,
+    batteryLevel: 20,
+    position: "Service",
+    rideLogs: [],
+    needsCharge: true,
+    currentCustomer: null,
+    city: "Stockholm",
+  },
+  {
+    bikeId: "STOCKHOLM-004",
+    status: "available",
+    speed: 0,
+    batteryLevel: 90,
+    position: "Accepterad",
+    rideLogs: [],
+    needsCharge: false,
+    currentCustomer: null,
+    city: "Stockholm",
+  },
+];
 
 export async function getBikes() {
     return bikes;
+}
+
+export async function deleteBike(bikeId) {
+  console.log(`Bike ${bikeId} is deleted`);
+  return { success: true };
+}
+
+export async function stopBike(bikeId) {
+  console.log(`Bike ${bikeId} is stopped`);
+  return { success: true };
+}
+
+export async function lockBike(bikeId) {
+  console.log(`Bike ${bikeId} is locked`);
+  return { success: true };
+}
+
+export async function maintainBike(bikeId) {
+  console.log(`Bike ${bikeId} is set to maintenance`);
+  return { success: true };
+}
+
+export async function readyBike(bikeId) {
+  console.log(`Bike ${bikeId} is ready to use again`);
+  return { success: true };
+}
+
+export async function addBike(form) {
+  const formObject = Object.fromEntries(form.entries());
+  console.log("addBike", JSON.stringify(formObject, null, 2));
+  return { success: true };
+}
+
+export async function updateBike(id, form) {
+  console.log(`update ${form} `);
+  return { success: true };
+}
+
+export async function getSingelBike(bikeId) {
+  return bikes.find((bike) => bike.bikeId === bikeId) || null;
 }

@@ -51,8 +51,8 @@ export async function updateUser(userId, data) {
   if (!token) {
     throw new Error('Not authenticated');
   }
-
-  const res = await fetch(`http://backend:3000/api/v1/users/${userId}`, {
+  //dubbelkolla om pull är gjort och om url är korrekt
+  const res = await fetch(`http://backend:3000/api/admin/users/${userId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

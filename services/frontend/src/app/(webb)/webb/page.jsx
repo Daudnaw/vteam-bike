@@ -2,15 +2,7 @@ import { getSession } from '../../../../utils/user';
 import { redirect } from 'next/navigation';
 
 export default async function Page() {
-    let session = await getSession();
-
-    session = {
-    email: 'nz@gmail.com',
-    password: '123456',
-    role: 'admin'
-};
-
-console.log('ROLE:', session.role); // syns i terminalen
+    const session = await getSession();
 
     if (!session) {
         redirect('/webb/auth/login');

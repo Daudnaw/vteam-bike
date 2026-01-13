@@ -60,7 +60,7 @@ v1.get("/", async (req, res, next) => {
  * @returns {Error} 403 - Forbidden update
  * @returns {Error} 404 - Not found
  */
-v1.put("/:id", requireAuth, async (req, res, next) => {
+v1.put("/me", requireAuth, async (req, res, next) => {
   const data = req.body;
   const forbidden = ["password", "salt", "role"];
 
@@ -88,6 +88,27 @@ v1.put("/:id", requireAuth, async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+v1.put("/:id", requireAuth, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admins only' });
+  }
+
+  const forbidden = ['password', 'salt'];
+  for (const f of forbidden) {
+    if (f in req.body) {
+      return res.status(403).json({ error: 'Forbidden field' });
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  );
+
+  res.json(updatedUser);
 });
 
 /**

@@ -4,7 +4,9 @@ import { getSession } from '../../../../utils/user';
 import { redirect } from 'next/navigation';
 
 export default async function AdminLayout({ children }) {
-    let session = await getSession();
+    const session = await getSession();
+
+    console.log('SEssion:', session);
 
     if (!session) {
         redirect('/webb/auth/login');
