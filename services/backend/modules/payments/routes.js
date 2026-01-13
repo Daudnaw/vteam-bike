@@ -80,35 +80,29 @@ router.post("/checkout", requireAuth, async (req, res, next) => {
   }
 });
 
-router.post("/confirm", requireAuth, async (req, res, next) => {
+router.post("/confirm", requireAuth, async (req, res) => {
   try {
     const { sessionId } = req.body;
+    if (!sessionId) return res.status(400).json({ error: "Missing sessionId" });
 
-    if (!sessionId) {
-      return res.status(400).json({ error: "Missing sessionId" });
-    }
-
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["subscription"],
+    });
 
     if (session.payment_status !== "paid") {
       return res.status(400).json({ error: "Payment not completed" });
     }
 
-    if (session.mode !== "payment") {
-      return res.status(400).json({ error: "Not a credit purchase" });
-    }
+    const already = await PaymentEvent.findOne({ stripeSessionId: session.id });
+    if (already) return res.json({ ok: true, alreadyProcessed: true });
 
-    const userId = req.user?.sub ?? req.user?.id;
-    const sessionUserId = session.metadata?.userId || session.client_reference_id;
+    const userId = req.user.sub;
 
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
-    if (!sessionUserId || sessionUserId !== userId) {
-      return res.status(403).json({ error: "Session does not belong to user" });
-    }
+    if (session.mode === "payment") {
+      const amountSek = (session.amount_total ?? 0) / 100;
 
-    const amountSek = (session.amount_total ?? 0) / 100;
+      await User.findByIdAndUpdate(userId, { $inc: { credit: amountSek } });
 
-    try {
       await PaymentEvent.create({
         stripeSessionId: session.id,
         userId,
@@ -116,18 +110,60 @@ router.post("/confirm", requireAuth, async (req, res, next) => {
         amountSek,
         currency: session.currency ?? "sek",
       });
-    } catch (e) {
-      if (e?.code === 11000) {
-        return res.json({ ok: true, alreadyProcessed: true });
-      }
-      throw e;
+
+      return res.json({ ok: true, creditAdded: amountSek });
     }
 
-    await User.findByIdAndUpdate(userId, { $inc: { credit: amountSek } });
+    if (session.mode === "subscription") {
+      const tier = session.metadata?.tier || "";
+      const subscriptionId =
+        typeof session.subscription === "string"
+          ? session.subscription
+          : session.subscription?.id;
 
-    return res.json({ ok: true, creditAdded: amountSek });
+      if (!tier || !subscriptionId) {
+        return res.status(400).json({ error: "Missing tier/subscriptionId" });
+      }
+
+      const sub = await stripe.subscriptions.retrieve(subscriptionId);
+
+      const periodEnd = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000)
+        : null;
+
+      await User.findByIdAndUpdate(userId, {
+        $set: {
+          "membership.tier": tier,
+          "membership.status": sub.status ?? "active",
+          "membership.stripeSubscriptionId": subscriptionId,
+          "membership.currentPeriodEnd": periodEnd,
+        },
+      });
+
+      const amountSek = (session.amount_total ?? 0) / 100;
+
+      await PaymentEvent.create({
+        stripeSessionId: session.id,
+        userId,
+        type: "membership",
+        tier,
+        amountSek,
+        currency: session.currency ?? "sek",
+      });
+
+      return res.json({
+        ok: true,
+        membershipActivated: true,
+        tier,
+        status: sub.status,
+        currentPeriodEnd: periodEnd,
+      });
+    }
+
+    return res.status(400).json({ error: "Unknown session mode" });
   } catch (err) {
-    return next(err);
+    console.error("confirm failed:", err);
+    return res.status(500).json({ error: "Confirm failed" });
   }
 });
 
