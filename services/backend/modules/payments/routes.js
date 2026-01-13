@@ -8,25 +8,63 @@ const stripe = new Stripe(stripe_secret_key);
 
 
 router.post("/checkout", async (req, res, next) => {
-  try {
-    const { amount } = req.body;
+  const MEMBERSHIPS = {
+    small:  { amount: 100, name: "Small membership" },
+    medium: { amount: 300, name: "Medium membership" },
+    allin:  { amount: 700, name: "All in membership" },
+  };
 
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
+  try {
+    const { mode, amount, tier } = req.body;
+
+    if (mode !== "payment" && mode !== "subscription") {
+      return res.status(400).json({ error: "Invalid mode" });
+    }
+
+    let line_items;
+
+    if (mode === "payment") {
+      const amt = Number(amount);
+      if (!Number.isFinite(amt) || amt < 10 || amt > 5000) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      line_items = [
         {
           price_data: {
             currency: "sek",
-            product_data: {
-              name: `Credit pot ${amount} kr`,
-            },
-            unit_amount: amount * 100,
+            product_data: { name: `Credit pot ${amt} kr` },
+            unit_amount: Math.round(amt * 100),
           },
           quantity: 1,
         },
-      ],
-      mode: "payment",
+      ];
+    }
+
+    if (mode === "subscription") {
+      const membership = MEMBERSHIPS[tier];
+      if (!membership) {
+        return res.status(400).json({ error: "Invalid tier" });
+      }
+
+      line_items = [
+        {
+          price_data: {
+            currency: "sek",
+            product_data: { name: membership.name },
+            unit_amount: membership.amount * 100,
+            recurring: { interval: "month" },
+          },
+          quantity: 1,
+        },
+      ];
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode,
+      line_items,
       success_url: `http://localhost:8080/admin-dashboard/payments/complete?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: "http://localhost:8080/admin-dashboard/payments",
+      cancel_url: `http://localhost:8080/admin-dashboard/payments`,
     });
 
     return res.status(200).json({ url: session.url });

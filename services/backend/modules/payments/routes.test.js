@@ -25,10 +25,10 @@ describe("Payments routes", function () {
   after(async () => {
   });
 
-  it("POST /payments/checkout with allowed amount should return 200 and a url", async () => {
+  it('POST /payments/checkout payment with allowed amount should return 200 and a url', async () => {
     const res = await request(app)
       .post(`${basePath}/checkout`)
-      .send({ amount: 300 })
+      .send({ mode: "payment", amount: 300 })
       .expect(200);
 
     expect(res.body).to.have.property("url");
@@ -36,20 +36,58 @@ describe("Payments routes", function () {
     expect(res.body.url).to.include("https://");
   });
 
-  it("POST /payments/checkout with disallowed amount should fall back to 100 and still return 200 and a url", async () => {
+  it("POST /payments/checkout payment with disallowed amount should return 400", async () => {
     const res = await request(app)
       .post(`${basePath}/checkout`)
-      .send({ amount: 999 })
+      .send({ mode: "payment", amount: 9999 })
+      .expect(400);
+
+    expect(res.body).to.deep.equal({ error: "Invalid amount" });
+  });
+
+  it("POST /payments/checkout with invalid mode should return 400", async () => {
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .send({ mode: "nope", amount: 100 })
+      .expect(400);
+
+    expect(res.body).to.deep.equal({ error: "Invalid mode" });
+  });
+
+  it("POST /payments/checkout subscription small should return 200 and a url", async () => {
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .send({ mode: "subscription", tier: "small" })
+      .expect(200);
+
+    expect(res.body).to.have.property("url");
+    expect(res.body.url).to.be.a("string");
+    expect(res.body.url).to.include("https://");
+  });
+
+  it("POST /payments/checkout subscription allin should return 200 and a url", async () => {
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .send({ mode: "subscription", tier: "allin" })
       .expect(200);
 
     expect(res.body).to.have.property("url");
     expect(res.body.url).to.be.a("string");
   });
 
+  it("POST /payments/checkout subscription with invalid tier should return 400", async () => {
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .send({ mode: "subscription", tier: "gold" })
+      .expect(400);
+
+    expect(res.body).to.deep.equal({ error: "Invalid tier" });
+  });
+
   it("GET /payments/checkout/:id should return a normalized session payload", async () => {
     const checkoutRes = await request(app)
       .post(`${basePath}/checkout`)
-      .send({ amount: 100 })
+      .send({ mode: "payment", amount: 100 })
       .expect(200);
 
     const { url } = checkoutRes.body;
