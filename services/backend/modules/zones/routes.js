@@ -1,17 +1,17 @@
-import { Router } from "express";
-import { model } from "mongoose";
-import createDebug from "debug";
-import { requireAuth, requireAdmin } from "../auth/middleware.js";
-const Zone = model("Zone");
+import { Router } from 'express';
+import { model } from 'mongoose';
+import createDebug from 'debug';
+import { requireAuth, requireAdmin } from '../auth/middleware.js';
+const Zone = model('Zone');
 
-const debug = createDebug("backend:auth");
+const debug = createDebug('backend:auth');
 export const v1 = Router();
 
 /**
  * GET /zones
- * 
+ *
  * Retrieves all zones from the database.
- * 
+ *
  * Access: Admin only (protected by requireAuth and requireAdmin).
  *
  * @route GET /zones
@@ -19,13 +19,13 @@ export const v1 = Router();
  * @returns {Array<Zone>} 200 - List of all zones
  * @returns {Error} 403 - Forbidden if the user is not an admin
  */
-v1.get("/", requireAuth, requireAdmin, async (req, res, next) => {
-  try {
-    const zones = await Zone.find();
-    res.status(200).json(zones);
-  } catch (err) {
-    next(err);
-  }
+v1.get('/', requireAuth, requireAdmin, async (req, res, next) => {
+    try {
+        const zones = await Zone.find();
+        res.status(200).json(zones);
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -42,22 +42,34 @@ v1.get("/", requireAuth, requireAdmin, async (req, res, next) => {
  * @returns {Error} 400 - Invalid zone type
  * @returns {Error} 403 - Forbidden (not an admin)
  */
-v1.get("/zonetype/:zoneType", requireAuth, requireAdmin, async (req, res, next) => {
-  const { zoneType } = req.params;
+v1.get(
+    '/zonetype/:zoneType',
+    requireAuth,
+    requireAdmin,
+    async (req, res, next) => {
+        const { zoneType } = req.params;
 
-  const allowed = ["parking", "speed_limit", "no_go", "city", "charge_station", "custom"];
+        const allowed = [
+            'parking',
+            'speed_limit',
+            'no_go',
+            'city',
+            'charge_station',
+            'custom',
+        ];
 
-  if (!allowed.includes(zoneType)) {
-    return res.status(400).json({ error: "Invalid zone type" });
-  }
+        if (!allowed.includes(zoneType)) {
+            return res.status(400).json({ error: 'Invalid zone type' });
+        }
 
-  try {
-    const zones = await Zone.findByZoneType(zoneType).lean();
-    res.status(200).json(zones);
-  } catch (err) {
-    next(err);
-  }
-});
+        try {
+            const zones = await Zone.findByZoneType(zoneType).lean();
+            res.status(200).json(zones);
+        } catch (err) {
+            next(err);
+        }
+    }
+);
 
 /**
  * GET /zones/:id
@@ -73,20 +85,20 @@ v1.get("/zonetype/:zoneType", requireAuth, requireAdmin, async (req, res, next) 
  * @returns {Error} 404 - Zone not found
  * @returns {Error} 403 - Forbidden (not an admin)
  */
-v1.get("/:id", requireAuth, requireAdmin, async (req, res, next) => {
-  const { id } = req.params;
+v1.get('/:id', requireAuth, requireAdmin, async (req, res, next) => {
+    const { id } = req.params;
 
-  try {
-    const zone = await Zone.findById(id);
+    try {
+        const zone = await Zone.findById(id);
 
-    if (!zone) {
-      return res.status(404).json({ error: "Zone not found" });
+        if (!zone) {
+            return res.status(404).json({ error: 'Zone not found' });
+        }
+
+        return res.status(200).json(zone.toJSON());
+    } catch (err) {
+        return next(err);
     }
-
-    return res.status(200).json(zone.toJSON());
-  } catch (err) {
-    return next(err);
-  }
 });
 
 /**
@@ -102,28 +114,28 @@ v1.get("/:id", requireAuth, requireAdmin, async (req, res, next) => {
  * @returns {Error} 400 - Missing required fields (name, type, zoneType)
  * @returns {Error} 403 - Forbidden (not admin)
  */
-v1.post("/", requireAuth, requireAdmin, async (req, res, next) => {
-  const { name, type, zoneType } = req.body;
-  
-  if (!name || !type || !zoneType) {
-    return res.status(400).json({
-      message: "name, type and zoneType are required",
-    });
-  }
+v1.post('/', requireAuth, requireAdmin, async (req, res, next) => {
+    const { name, type, zoneType } = req.body;
 
-  try {
-    const zone = new Zone(req.body);
+    if (!name || !type || !zoneType) {
+        return res.status(400).json({
+            message: 'name, type and zoneType are required',
+        });
+    }
 
-    const created = await zone.save();
-    const sanitized = created.toJSON();
+    try {
+        const zone = new Zone(req.body);
 
-    debug("Zone created %s", sanitized.name);
+        const created = await zone.save();
+        const sanitized = created.toJSON();
 
-    res.status(201).json(sanitized);
-  } catch(err) {
-    debug("Error in post /zone: %0", err);
-    return next(err);
-  }
+        debug('Zone created %s', sanitized.name);
+
+        res.status(201).json(sanitized);
+    } catch (err) {
+        debug('Error in post /zone: %0', err);
+        return next(err);
+    }
 });
 
 /**
@@ -140,24 +152,24 @@ v1.post("/", requireAuth, requireAdmin, async (req, res, next) => {
  * @returns {Error} 403 - Not authorized
  * @returns {Error} 404 - Zone not found
  */
-v1.put("/:id", requireAuth, requireAdmin, async (req, res, next) => {
-  const { id } = req.params;
-  const updates = req.body;
+v1.put('/:id', requireAuth, requireAdmin, async (req, res, next) => {
+    const { id } = req.params;
+    const updates = req.body;
 
-  try {
-    const zone = await Zone.findById(id);
-    if (!zone) {
-      return res.status(404).json({ error: "Zone not found" });
+    try {
+        const zone = await Zone.findById(id);
+        if (!zone) {
+            return res.status(404).json({ error: 'Zone not found' });
+        }
+
+        zone.set(updates);
+
+        const updated = await zone.save();
+
+        return res.status(200).json(updated.toJSON());
+    } catch (err) {
+        return next(err);
     }
-    
-    zone.set(updates);
-
-    const updated = await zone.save();
-
-    return res.status(200).json(updated.toJSON());
-  } catch (err) {
-    return next(err);
-  }
 });
 
 /**
@@ -174,18 +186,18 @@ v1.put("/:id", requireAuth, requireAdmin, async (req, res, next) => {
  * @returns {Error} 404 - Zone not found
  * @returns {Error} 403 - Forbidden (admin required)
  */
-v1.delete("/:id", requireAuth, requireAdmin, async (req, res, next) => {
-  const { id } = req.params;
+v1.delete('/:id', requireAuth, requireAdmin, async (req, res, next) => {
+    const { id } = req.params;
 
-  try {
-    const deletedZone = await Zone.findByIdAndDelete(id);
+    try {
+        const deletedZone = await Zone.findByIdAndDelete(id);
 
-    if (!deletedZone) {
-      return res.status(404).json({ error: "Zone not found" });
+        if (!deletedZone) {
+            return res.status(404).json({ error: 'Zone not found' });
+        }
+
+        return res.status(200).json(deletedZone.toJSON());
+    } catch (err) {
+        return next(err);
     }
-
-    return res.status(200).json(deletedZone.toJSON());
-  } catch (err) {
-    return next(err);
-  }
 });

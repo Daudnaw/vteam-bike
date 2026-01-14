@@ -6,23 +6,23 @@ import UpdateForm from '../../../../../../../components/webb/dashboards/admin/zo
 import UpdateCity from '../../../../../../../components/webb/dashboards/admin/zone/form/UpdateCity';
 
 export default function UpdateZonePage() {
-  const searchParams = useSearchParams();
-  const zoneId = searchParams.get('zoneId');
-  const cityId = searchParams.get('cityId');
+    const searchParams = useSearchParams();
+    const zoneId = searchParams.get('zoneId');
+    const cityId = searchParams.get('cityId');
 
-  if (cityId) {
-    return (
-      <div>
-        <UpdateCity cityId={cityId} />
-      </div>
-    );
-  }
+    if (cityId) {
+        return (
+            <div className='h-screen p-5 flex justify-center items-center'>
+                <UpdateCity cityId={cityId} />
+            </div>
+        );
+    }
 
-  if (zoneId) {
-    return (
-      <div>
-        <UpdateForm zoneId={zoneId} />
-      </div>
-    );
-  }
+    if (zoneId) {
+        return (
+            <div className='h-screen p-5 flex justify-center items-center'>
+                <UpdateForm zoneId={zoneId} />
+            </div>
+        );
+    }
 }

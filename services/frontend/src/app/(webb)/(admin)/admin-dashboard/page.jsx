@@ -6,7 +6,7 @@ import LinkCard from '../../../../../components/webb/dashboards/admin/LinkCard';
 export default function AdminDashboard() {
     return (
         <div className='p-5'>
-            <h2 className='text-h2 mb-5'>Översikt</h2>
+            <h2 className='text-h2 mb-5 font-bold'>Översikt</h2>
             <div className='grid grid-cols-3 gap-5'>
                 <StatCard nr={0} text='Cyklar' />
                 <StatCard nr={0} text='Användare' />
