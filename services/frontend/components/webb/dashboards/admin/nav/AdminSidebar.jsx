@@ -10,7 +10,7 @@ import {
     Landmark,
     Locate,
     Wrench,
-    DollarSign
+    DollarSign,
 } from 'lucide-react';
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
@@ -77,7 +77,7 @@ export default function AdminSidebar() {
                 text='Purchase'
                 Icon={DollarSign}
             />
-            <SignOutButton collapsed={collapsed} />
+            <SignOutButton collapsed={collapsed} webb={true} />
             <ArrowLeftCircle
                 className={`${
                     collapsed && 'rotate-180'
