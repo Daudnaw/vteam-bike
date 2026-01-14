@@ -6,7 +6,7 @@ export default async function UserAppLayout({ children }) {
     let session = await getSession();
 
     if (!session) {
-        redirect('/app/auth/login');
+        redirect('/app/user-app/map');
     }
 
     return (

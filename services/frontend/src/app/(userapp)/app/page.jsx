@@ -8,5 +8,5 @@ export default async function Page() {
         redirect('/app/auth/login');
     }
 
-    redirect('/app/user-app');
+    redirect('/app/user-app/map');
 }
