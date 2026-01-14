@@ -45,12 +45,6 @@ export default function CustomerSidebar() {
                 Icon={CreditCard}
             />
             <NavLink
-                link='/user-dashboard/map'
-                collapsed={collapsed}
-                text='Karta'
-                Icon={Map}
-            />
-            <NavLink
                 link='/user-dashboard/profile'
                 collapsed={collapsed}
                 text='Profil'
