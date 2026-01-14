@@ -5,6 +5,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import UserLocation from './UserLocation';
 import LocateButton from './LocateButton';
 import CityButton from './CityButton';
+import { useState } from 'react';
 
 const zones = [
     {
@@ -27,7 +28,9 @@ const zones = [
     },
 ];
 
-export default function AppMap() {
+export default function AppMap({ zones }) {
+    console.log('ZONES:', zones);
+
     return (
         <MapContainer
             center={[0, 0]}
