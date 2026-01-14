@@ -5,11 +5,15 @@ import Link from 'next/link';
 import { Edit3, Plus } from 'lucide-react';
 import { getSingelZone } from '../../../../../../src/app/actions/zones';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
+import { deleteZone } from '../../../../../../src/app/actions/zones';
+import { useRouter } from 'next/navigation';
 
 export default function UpdateCity({ cityId }) {
     const [city, setCity] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const router = useRouter();
 
     async function handleDelete(zoneId) {
         if (!confirm('Are you sure you want to delete this city?')) return;
@@ -18,7 +22,9 @@ export default function UpdateCity({ cityId }) {
             await deleteZone(zoneId);
             toast.success('Deleted successfully', { autoClose: 1500 });
 
-            setCities((prev) => prev.filter((u) => u._id !== zoneId));
+            setTimeout(() => {
+                router.push('/admin-dashboard/cities');
+            }, 1500);
         } catch (err) {
             toast.error(err.message || 'Failed to delete city');
         }
@@ -46,13 +52,21 @@ export default function UpdateCity({ cityId }) {
                 <h2 className='text-h3 font-bold flex items-center gap-2'>
                     {city.name}
                 </h2>
-                <Link
-                    href={`/admin-dashboard/zones/update?cityId=${cityId}`}
-                    className='p-4 rounded border bg-slate-800 text-detail-yellow'
-                    title='Edit city'
-                >
-                    <Edit3 size={22} />
-                </Link>
+                <div className='flex gap-5'>
+                    <button
+                        onClick={() => handleDelete(cityId)}
+                        className='p-4 rounded border bg-detail-red text-white items-center flex gap-2 cursor-pointer'
+                    >
+                        <Edit3 size={22} /> <span>Ta bort</span>
+                    </button>
+                    <Link
+                        href={`/admin-dashboard/zones/update?cityId=${cityId}`}
+                        className='p-4 rounded border bg-slate-800 text-detail-yellow items-center flex gap-2'
+                        title='Edit city'
+                    >
+                        <Edit3 size={22} /> <span>Ändra</span>
+                    </Link>
+                </div>
             </div>
         </div>
     );
