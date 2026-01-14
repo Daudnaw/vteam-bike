@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }) {
         <section className='flex'>
             <AdminSidebar />
             <main className='flex-1'>
-                <AdminHeader email={session.email} />
+                <AdminHeader firstName={session.firstName} lastName={session.lastName} />
                 {children}
             </main>
         </section>

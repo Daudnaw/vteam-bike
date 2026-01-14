@@ -1,6 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Trash2,
   Lock,
@@ -8,7 +11,8 @@ import {
   Wrench,
   Bike,
   MapPin,
-  Activity
+  Activity,
+  Edit3
 } from 'lucide-react';
 
 import {
@@ -16,23 +20,28 @@ import {
   stopBike,
   lockBike,
   maintainBike,
-  readyBike
+  readyBike,
+  getSingelBike
 } from '../../../../../src/app/actions/bikes';
 
 
 export default function SingleBike({ bikeId }) {
-  // Dummy
-  const bike = {
-    bikeId: "STOCKHOLM-004",
-    status: "available", // Tsta att byta "maintenance", "locked", or "riding"
-    speed: 0,
-    batteryLevel: 90,
-    position: "Accepterad",
-    rideLogs: [],
-    needsCharge: false,
-    currentCustomer: null,
-    city: "Stockholm",
-  };
+  const [bike, setBike] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!bikeId) return;
+
+    getSingelBike(bikeId)
+          .then(setBike)
+          .catch((err) => setError(err.message))
+          .finally(() => setLoading(false));
+      }, [bikeId]);
+
+  if (loading) return <p>Loading bike...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!bike) return <p>bike not found</p>;
 
   const actionRules = {
   available: {
@@ -79,6 +88,7 @@ export default function SingleBike({ bikeId }) {
   };
 
   return (
+    <div>
     <div className="overflow-hidden rounded-md border border-detail-yellow shadow-2xl">
       <table className="w-full border-collapse divide-detail-yellow from-slate-600 to-slate-800 bg-linear-to-br text-white">
         <thead className="bg-slate-900">
@@ -249,6 +259,15 @@ export default function SingleBike({ bikeId }) {
           </tr>
         </tbody>
       </table>
+    </div>
+      <Link
+        href={`/admin-dashboard/bikes/update?bikeId=${bikeId}`}
+        className="inline-flex items-center gap-2 bg-detail-yellow text-black px-3 py-1 rounded hover:bg-yellow-600 transition text-sm"
+        title="Edit bike"
+      >
+        <Edit3 size={16} />
+        Edit me
+      </Link>
     </div>
   );
 }

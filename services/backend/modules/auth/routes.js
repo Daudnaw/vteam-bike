@@ -78,6 +78,8 @@ router.post("/login", async (req, res, next) => {
     const payload = {
       sub: sanitized._id,
       email: sanitized.email,
+      firstName: sanitized.firstName,
+      lastName: sanitized.lastName,
       role: sanitized.role,
     };
 

@@ -15,6 +15,8 @@ services:
       - NODE_ENV=development
       - MONGODB_DSN=mongodb://db:27017/vteam-dev
       - JWT_SECRET=hejsanhoppsan
+      - STRIPE_PUBLISHABLE_KEY=pk_test_51ScB6U1SvvBu8btHmI7IH5j4j5Yeo3b8d7pNq2niIHVxBFk3X2yRTRYr2CZPOHWpWykLJgIbVNUWE4BO6ImzH413001zQAFdJg
+      - STRIPE_SECRET_KEY=sk_test_51ScB6U1SvvBu8btHrQZkwdC2SSIYkWTnotcN8y2xfZYo9SG291VuAd7v2Z5h0TOEMuqCjMjCdIOtdaKt1bK4lbrc00l8OzKGi6
 
   frontend:
     build: ./services/frontend
@@ -30,6 +32,7 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://backend:9000
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51ScB6U1SvvBu8btHmI7IH5j4j5Yeo3b8d7pNq2niIHVxBFk3X2yRTRYr2CZPOHWpWykLJgIbVNUWE4BO6ImzH413001zQAFdJg
 
   db:
     image: mongo:latest

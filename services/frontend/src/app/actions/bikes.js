@@ -75,3 +75,18 @@ export async function readyBike(bikeId) {
   console.log(`Bike ${bikeId} is ready to use again`);
   return { success: true };
 }
+
+export async function addBike(form) {
+  const formObject = Object.fromEntries(form.entries());
+  console.log("addBike", JSON.stringify(formObject, null, 2));
+  return { success: true };
+}
+
+export async function updateBike(id, form) {
+  console.log(`update ${form} `);
+  return { success: true };
+}
+
+export async function getSingelBike(bikeId) {
+  return bikes.find((bike) => bike.bikeId === bikeId) || null;
+}
