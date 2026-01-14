@@ -38,13 +38,13 @@ export default function AdminSidebar() {
             <NavLink
                 link='/admin-dashboard/customers'
                 collapsed={collapsed}
-                text='users'
+                text='Användare'
                 Icon={User}
             />
             <NavLink
                 link='/admin-dashboard/cities'
                 collapsed={collapsed}
-                text='cities'
+                text='Städer'
                 Icon={Landmark}
             />
             <NavLink
@@ -56,25 +56,25 @@ export default function AdminSidebar() {
             <NavLink
                 link='/admin-dashboard/bikes'
                 collapsed={collapsed}
-                text='bikes'
+                text='Cyklar'
                 Icon={Motorbike}
             />
             <NavLink
                 link='/admin-dashboard/zones'
                 collapsed={collapsed}
-                text='zones'
+                text='Zoner'
                 Icon={Locate}
             />
             <NavLink
                 link='/admin-dashboard/service'
                 collapsed={collapsed}
-                text='service'
+                text='Service'
                 Icon={Wrench}
             />
             <NavLink
                 link='/admin-dashboard/payments'
                 collapsed={collapsed}
-                text='Purchase'
+                text='Köp'
                 Icon={DollarSign}
             />
             <SignOutButton collapsed={collapsed} webb={true} />
