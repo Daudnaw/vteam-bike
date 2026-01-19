@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Stripe from "stripe";
-import { requireAuth, requireAdmin } from "../auth/middleware.js";
+import { requireAuth, requireAdmin, issueAuthCookie } from "../auth/middleware.js";
 import User from "../users/model.js";
 import PaymentEvent from "./model.js";
 
@@ -150,6 +150,9 @@ router.post("/confirm", requireAuth, async (req, res) => {
         amountSek,
         currency: session.currency ?? "sek",
       });
+
+      const updated = await User.findById(userId);
+      issueAuthCookie(res, updated);
 
       return res.json({
         ok: true,

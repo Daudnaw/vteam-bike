@@ -72,7 +72,7 @@ router.post("/login", async (req, res, next) => {
     const user = await User.authenticate(email, password);
 
     const sanitized = user.toJSON();
-
+    console.log(sanitized);
     debug("User %s logged in", sanitized.email);
 
     const payload = {
@@ -81,6 +81,10 @@ router.post("/login", async (req, res, next) => {
       firstName: sanitized.firstName,
       lastName: sanitized.lastName,
       role: sanitized.role,
+      membership: {
+        tier: sanitized.membership.tier,
+        status: sanitized.membership.status,
+      },
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });

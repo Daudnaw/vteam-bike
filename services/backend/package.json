@@ -8,7 +8,7 @@
     "dev": "DEBUG=* nodemon ./bin/www",
     "test": "NODE_ENV=test DEBUG=backend:* npm exec -- mocha \"./**/*.test.js\" --timeout 10000",
     "coverage": "NODE_ENV=test DEBUG=backend:* c8 --reporter=text --reporter=lcov --report-dir=coverage mocha \"./**/*.test.js\" --timeout 10000",
-    "coveragePay": "NODE_ENV=test DEBUG=backend:* c8 --reporter=text --reporter=lcov --report-dir=coverage mocha ./modules/payments/**/*.test.js --timeout 20000"
+    "coverageAuth": "NODE_ENV=test DEBUG=backend:* c8 --reporter=text --reporter=lcov --report-dir=coverage mocha ./modules/auth/**/*.test.js --timeout 20000"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
