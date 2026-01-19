@@ -72,7 +72,7 @@ router.post("/login", async (req, res, next) => {
     const user = await User.authenticate(email, password);
 
     const sanitized = user.toJSON();
-    console.log(sanitized);
+
     debug("User %s logged in", sanitized.email);
 
     const payload = {
