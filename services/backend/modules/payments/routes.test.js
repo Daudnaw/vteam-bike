@@ -1,34 +1,54 @@
 import { expect } from "chai";
 import request from "supertest";
 import express from "express";
+import jwt from "jsonwebtoken";
 
 let app;
 let router;
 
 const basePath = "/payments";
 
+function makeToken(overrides = {}) {
+  return jwt.sign(
+    {
+      sub: "507f1f77bcf86cd799439011",
+      email: "test@test.se",
+      role: "admin",
+      membership: { tier: "none", status: "inactive" },
+      ...overrides,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+}
+
 describe("Payments routes", function () {
   this.timeout(20000);
 
   before(async () => {
-    process.env.STRIPE_SECRET_KEY =
-      process.env.STRIPE_SECRET_KEY || "sk_test_51ScB6U1SvvBu8btHrQZkwdC2SSIYkWTnotcN8y2xfZYo9SG291VuAd7v2Z5h0TOEMuqCjMjCdIOtdaKt1bK4lbrc00l8OzKGi6";
+    process.env.JWT_SECRET = "test-secret";
+  process.env.STRIPE_SECRET_KEY =
+    process.env.STRIPE_SECRET_KEY ||
+    "sk_test_51ScB6U1SvvBu8btHrQZkwdC2SSIYkWTnotcN8y2xfZYo9SG291VuAd7v2Z5h0TOEMuqCjMjCdIOtdaKt1bK4lbrc00l8OzKGi6";
 
-    const mod = await import("./routes.js");
-    router = mod.default;
+  const mod = await import("./routes.js");
+  router = mod.default;
 
-    app = express();
-    app.use(express.json());
-    app.use(basePath, router);
+  app = express();
+  app.use(express.json());
+  app.use(basePath, router);
   });
 
   after(async () => {
   });
 
-  it("POST /payments/checkout with allowed amount should return 200 and a url", async () => {
+  it('POST /payments/checkout payment with allowed amount should return 200 and a url', async () => {
+    const token = makeToken();
+
     const res = await request(app)
       .post(`${basePath}/checkout`)
-      .send({ amount: 300 })
+      .set("Authorization", `Bearer ${token}`)
+      .send({ mode: "payment", amount: 300 })
       .expect(200);
 
     expect(res.body).to.have.property("url");
@@ -36,20 +56,71 @@ describe("Payments routes", function () {
     expect(res.body.url).to.include("https://");
   });
 
-  it("POST /payments/checkout with disallowed amount should fall back to 100 and still return 200 and a url", async () => {
+  it("POST /payments/checkout payment with disallowed amount should return 400", async () => {
+    const token = makeToken();
+
     const res = await request(app)
       .post(`${basePath}/checkout`)
-      .send({ amount: 999 })
+      .set("Authorization", `Bearer ${token}`)
+      .send({ mode: "payment", amount: 9999 })
+      .expect(400);
+
+    expect(res.body).to.deep.equal({ error: "Invalid amount" });
+  });
+
+  it("POST /payments/checkout with invalid mode should return 400", async () => {
+    const token = makeToken();
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ mode: "nope", amount: 100 })
+      .expect(400);
+
+    expect(res.body).to.deep.equal({ error: "Invalid mode" });
+  });
+
+  it("POST /payments/checkout subscription small should return 200 and a url", async () => {
+    const token = makeToken();
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ mode: "subscription", tier: "small" })
+      .expect(200);
+
+    expect(res.body).to.have.property("url");
+    expect(res.body.url).to.be.a("string");
+    expect(res.body.url).to.include("https://");
+  });
+
+  it("POST /payments/checkout subscription allin should return 200 and a url", async () => {
+    const token = makeToken();
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ mode: "subscription", tier: "allin" })
       .expect(200);
 
     expect(res.body).to.have.property("url");
     expect(res.body.url).to.be.a("string");
   });
 
+  it("POST /payments/checkout subscription with invalid tier should return 400", async () => {
+    const token = makeToken();
+    const res = await request(app)
+      .post(`${basePath}/checkout`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ mode: "subscription", tier: "gold" })
+      .expect(400);
+
+    expect(res.body).to.deep.equal({ error: "Invalid tier" });
+  });
+
   it("GET /payments/checkout/:id should return a normalized session payload", async () => {
+    const token = makeToken();
     const checkoutRes = await request(app)
       .post(`${basePath}/checkout`)
-      .send({ amount: 100 })
+      .set("Authorization", `Bearer ${token}`)
+      .send({ mode: "payment", amount: 100 })
       .expect(200);
 
     const { url } = checkoutRes.body;
@@ -74,8 +145,10 @@ describe("Payments routes", function () {
   });
 
   it("GET /payments/stats/net-volume should return aggregated stats", async () => {
+    const token = makeToken();
     const res = await request(app)
       .get(`${basePath}/stats/net-volume`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(200);
 
     expect(res.body).to.have.property("currency").that.is.a("string");

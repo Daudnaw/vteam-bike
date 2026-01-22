@@ -2,14 +2,15 @@
 
 const BASE_URL = "http://localhost:3000";
 
-export default async function checkOut(amountInSek) {
+export default async function checkOut(payload) {
     try {
         const res = await fetch(`${BASE_URL}/api/payments/checkout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ amount: amountInSek }),
+            credentials: "include",
+            body: JSON.stringify(payload),
         });
 
     if (!res.ok) {
