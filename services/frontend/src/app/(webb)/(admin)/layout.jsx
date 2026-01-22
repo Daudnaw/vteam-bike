@@ -1,6 +1,6 @@
 import AdminHeader from '../../../../components/webb/dashboards/admin/nav/AdminHeader';
 import AdminSidebar from '../../../../components/webb/dashboards/admin/nav/AdminSidebar';
-import { getSession } from '../../../../utils/user';
+import { getSession } from '../../../../utils/user.server';
 import { redirect } from 'next/navigation';
 
 export default async function AdminLayout({ children }) {
@@ -10,6 +10,10 @@ export default async function AdminLayout({ children }) {
 
     if (!session) {
         redirect('/webb/auth/login');
+    }
+
+    if (session.role !== "admin") {
+        redirect('/user-dashboard');
     }
 
     return (

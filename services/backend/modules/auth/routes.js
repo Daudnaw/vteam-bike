@@ -4,9 +4,326 @@ import User from "../users/model.js";
 import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../../lib/authentication-error.js";
 import { requireAuth } from "./middleware.js";
+import { Issuer, generators } from "openid-client";
+import crypto from "node:crypto";
 
 const debug = createDebug("backend:auth");
 const router = Router();
+let googleClientPromise = null;
+let __googleClientOverride = null;
+
+const CLIENT_REDIRECTS = {
+  webb: {
+    customer: "http://localhost:8080/user-dashboard",
+    admin: "http://localhost:8080/admin-dashboard",
+  },
+  app: {
+    customer: "http://localhost:8080/app/user-app",
+  },
+};
+
+export const __testables = {
+  CLIENT_REDIRECTS,
+  pickClient,
+  makeState,
+  parseState,
+  signJwtFromUser,
+};
+
+function pickClient(req) {
+  return req.query.to === "app" ? "app" : "webb";
+}
+
+function makeState(csrf, client) {
+  return JSON.stringify({ csrf, client });
+}
+
+function parseState(stateStr) {
+  try {
+    return JSON.parse(stateStr);
+  } catch {
+    return null;
+  }
+}
+
+export function __setGoogleClientForTests(client) {
+  __googleClientOverride = client;
+  googleClientPromise = null;
+}
+
+function getGoogleClient() {
+  if (__googleClientOverride) return Promise.resolve(__googleClientOverride);
+
+  if (!googleClientPromise) {
+    googleClientPromise = (async () => {
+      const issuer = await Issuer.discover("https://accounts.google.com");
+      return new issuer.Client({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uris: [process.env.GOOGLE_REDIRECT_URI],
+        response_types: ["code"],
+      });
+    })();
+  }
+  return googleClientPromise;
+}
+
+function signJwtFromUser(sanitized) {
+  const payload = {
+    sub: sanitized._id,
+    email: sanitized.email,
+    role: sanitized.role,
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+}
+
+router.get("/google", async (req, res, next) => {
+  try {
+    const client = await getGoogleClient();
+
+    const targetClient = pickClient(req);
+
+    const code_verifier = generators.codeVerifier();
+    const code_challenge = generators.codeChallenge(code_verifier);
+    const csrf = generators.state();
+    const state = makeState(csrf, targetClient);
+
+    res.cookie("oauth_state", state, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 10 * 60 * 1000,
+    });
+
+    res.cookie("oauth_code_verifier", code_verifier, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 10 * 60 * 1000,
+    });
+
+    const url = client.authorizationUrl({
+      scope: "openid email profile",
+      state,
+      code_challenge,
+      code_challenge_method: "S256",
+    });
+
+    return res.redirect(url);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/google/callback", async (req, res, next) => {
+  try {
+    const client = await getGoogleClient();
+
+    const { code, state } = req.query;
+
+    const savedStateRaw = req.cookies.oauth_state;
+    const code_verifier = req.cookies.oauth_code_verifier;
+
+    if (!code || !state) return res.status(400).json({ message: "Missing code/state" });
+    if (!savedStateRaw) return res.status(401).json({ message: "Missing saved state" });
+    if (!code_verifier) return res.status(400).json({ message: "Missing code_verifier" });
+
+    if (state !== savedStateRaw) return res.status(401).json({ message: "Invalid state" });
+
+    const parsed = parseState(savedStateRaw);
+    const targetClient = parsed?.client === "app" ? "app" : "webb";
+
+    const tokenSet = await client.callback(
+      process.env.GOOGLE_REDIRECT_URI,
+      { code, state },
+      { code_verifier, state }
+    );
+
+    const claims = tokenSet.claims();
+    if (!claims?.sub || !claims?.email) {
+      return res.status(400).json({ message: "Missing sub/email from Google" });
+    }
+
+    let user = await User.findOne({ oauthProvider: "google", oauthSubject: claims.sub });
+
+    if (!user) {
+      const byEmail = await User.findOne({ email: claims.email });
+      if (byEmail) {
+        byEmail.oauthProvider = "google";
+        byEmail.oauthSubject = claims.sub;
+        user = await byEmail.save();
+      }
+    }
+
+    if (!user) {
+      user = await User.create({
+        firstName: claims.given_name ?? "Google",
+        lastName: claims.family_name ?? "User",
+        email: claims.email,
+        oauthProvider: "google",
+        oauthSubject: claims.sub,
+      });
+    }
+
+    res.clearCookie("oauth_state");
+    res.clearCookie("oauth_code_verifier");
+
+    const sanitized = user.toJSON();
+    const token = signJwtFromUser(sanitized);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 1000,
+      path: "/",
+    });
+
+    const role = sanitized.role === "admin" ? "admin" : "customer";
+    const redirectUrl = CLIENT_REDIRECTS[targetClient][role];
+
+    return res.redirect(redirectUrl);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/github", (req, res) => {
+  const targetClient = pickClient(req);
+  const csrf = crypto.randomBytes(16).toString("hex");
+  const state = makeState(csrf, targetClient);
+
+  res.cookie("oauth_state", state, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 10 * 60 * 1000,
+    path: "/",
+  });
+
+  const params = new URLSearchParams({
+    client_id: process.env.GITHUB_CLIENT_ID,
+    redirect_uri: process.env.GITHUB_REDIRECT_URI,
+    scope: "read:user user:email",
+    state,
+  });
+
+  return res.redirect(`https://github.com/login/oauth/authorize?${params.toString()}`);
+});
+
+router.get("/github/callback", async (req, res, next) => {
+  try {
+    const { code, state } = req.query;
+    const savedStateRaw = req.cookies.oauth_state;
+
+    if (!code || !state) return res.status(400).json({ message: "Missing code/state" });
+    if (!savedStateRaw) return res.status(401).json({ message: "Missing saved state" });
+
+    if (state !== savedStateRaw) return res.status(401).json({ message: "Invalid state" });
+
+    const parsed = parseState(savedStateRaw);
+    const targetClient = parsed?.client === "app" ? "app" : "webb";
+
+    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: process.env.GITHUB_REDIRECT_URI,
+      }),
+    });
+
+    const tokenData = await tokenRes.json();
+    const accessToken = tokenData.access_token;
+    if (!accessToken) return res.status(401).json({ message: "No access token from GitHub" });
+
+    const userRes = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "vteam",
+        Accept: "application/vnd.github+json",
+      },
+    });
+    const ghUser = await userRes.json();
+
+    const emailsRes = await fetch("https://api.github.com/user/emails", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "User-Agent": "vteam",
+        Accept: "application/vnd.github+json",
+      },
+    });
+    const emails = await emailsRes.json();
+
+    const primaryEmail =
+      Array.isArray(emails)
+        ? (emails.find((e) => e.primary && e.verified)?.email ??
+           emails.find((e) => e.verified)?.email)
+        : null;
+
+    if (!primaryEmail) {
+      return res.status(400).json({ message: "No verified email from GitHub" });
+    }
+
+    const subject = String(ghUser.id);
+    let user = await User.findOne({ oauthProvider: "github", oauthSubject: subject });
+
+    if (!user) {
+      const byEmail = await User.findOne({ email: primaryEmail });
+      if (byEmail) {
+        byEmail.oauthProvider = "github";
+        byEmail.oauthSubject = subject;
+        user = await byEmail.save();
+      }
+    }
+
+    if (!user) {
+      const fullName = ghUser.name || "";
+      const parts = fullName.trim().split(/\s+/).filter(Boolean);
+
+      user = await User.create({
+        firstName: parts[0] ?? "GitHub",
+        lastName: parts.slice(1).join(" ") || "User",
+        email: primaryEmail,
+        oauthProvider: "github",
+        oauthSubject: subject,
+      });
+    }
+
+    res.clearCookie("oauth_state");
+
+    const sanitized = user.toJSON();
+    const token = signJwtFromUser(sanitized);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 1000,
+      path: "/",
+    });
+
+    const role = sanitized.role === "admin" ? "admin" : "customer";
+    const redirectUrl = CLIENT_REDIRECTS[targetClient][role];
+
+    return res.redirect(redirectUrl);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/me", requireAuth, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.sub);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ user: user.toJSON() });
+  } catch (err) {
+    next(err);
+  }
+});
 
 /**
  * @route POST /auth/register
@@ -153,5 +470,7 @@ router.put("/change-password", requireAuth, async (req, res, next) => {
     next(err);
   }
 });
+
+
 
 export default router;

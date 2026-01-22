@@ -1,4 +1,4 @@
-import { getSession } from '../../../../utils/user';
+import { getSession } from '../../../../utils/user.server';
 import { redirect } from 'next/navigation';
 
 export default async function Page() {

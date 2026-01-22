@@ -5,6 +5,7 @@ import { signin } from '../../../../src/app/actions/auth';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import { Github, Mail } from 'lucide-react';
 
 export default function LoginForm() {
     const [error, setError] = useState(null);
@@ -80,22 +81,44 @@ export default function LoginForm() {
                         href='/glomt-losenord'
                         className='underline hover:decoration-detail-yellow'
                     >
-                        Glömt lösenord ?
+                        Glömt lösenord?
                     </Link>
                     <Link
                         href='/webb/auth/register'
                         className='underline hover:decoration-detail-yellow'
                     >
-                        Inget konto? Bli medlem
+                        Ny här? Skapa konto här!
                     </Link>
                 </div>
-
                 <button
                     type='submit'
                     className='bg-detail-yellow text-black rounded-md w-full text-h4 text-center mt-5 py-2 hover:opacity-90 cursor-pointer'
                 >
                     {loading ? 'Loggar in...' : 'Logga in'}
                 </button>
+                <div className="flex mt-4 space-x-3">
+                    <button
+                        type="button"
+                        onClick={() => {
+                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google?to=webb`;
+                        }}
+                        className="flex items-center justify-center gap-3 w-full rounded-md border bg-white px-4 py-3 text-black text-h5 hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                    >
+                        <Mail className="h-5 w-5" />
+                        <span>Fortsätt med Google</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github?to=webb`;
+                        }}
+                        className="flex items-center justify-center gap-3 w-full rounded-md border bg-slate-900 px-4 py-3 text-white text-h5 hover:bg-slate-800 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-700"
+                    >
+                        <Github className="h-5 w-5" />
+                        <span>Fortsätt med GitHub</span>
+                    </button>
+                </div>
             </form>
         </div>
     );

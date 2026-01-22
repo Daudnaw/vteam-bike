@@ -3,8 +3,9 @@ import request from "supertest";
 import express from "express";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
+import cookieParser from "cookie-parser";
 
-import router from "./routes.js";
+import router, { __testables, __setGoogleClientForTests } from "./routes.js";
 import User from "../users/model.js";
 
 let mongoServer;
@@ -290,5 +291,228 @@ describe("Auth routes", function () {
       "message",
       "email and password are required"
     );
+  });
+});
+
+describe("OAuth routes", function () {
+  this.timeout(20000);
+
+  before(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    await mongoose.connect(mongoServer.getUri());
+    await User.syncIndexes();
+
+    process.env.JWT_SECRET = "test-secret";
+    process.env.NODE_ENV = "test";
+
+    app = express();
+    app.use(express.json());
+    app.use(cookieParser());
+    app.use(basePath, router);
+  });
+
+  after(async () => {
+    await mongoose.disconnect();
+    if (mongoServer) await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+    const collections = mongoose.connection.collections;
+    for (const key of Object.keys(collections)) {
+      await collections[key].deleteMany({});
+    }
+  });
+
+  describe("Helper functions", () => {
+    it("pickClient returns 'app' when req.query.to === 'app', otherwise 'webb'", () => {
+      const reqApp = { query: { to: "app" } };
+      const reqWebb = { query: { } };
+      expect(__testables.pickClient(reqApp)).to.equal("app");
+      expect(__testables.pickClient(reqWebb)).to.equal("webb");
+      expect(__testables.pickClient({ query: { to: "webb" } })).to.equal("webb");
+    });
+
+    it("makeState + parseState roundtrip and parseState returns null on invalid JSON", () => {
+      const s = __testables.makeState("csrf123", "app");
+      const parsed = __testables.parseState(s);
+      expect(parsed).to.deep.equal({ csrf: "csrf123", client: "app" });
+
+      expect(__testables.parseState("not-json")).to.equal(null);
+    });
+
+    it("signJwtFromUser creates a JWT with sub/email/role", () => {
+      const token = __testables.signJwtFromUser({
+        _id: "abc123",
+        email: "a@b.com",
+        role: "customer",
+      });
+
+      expect(token).to.be.a("string");
+      expect(token.split(".")).to.have.length(3);
+    });
+  });
+
+  describe("Google OAuth routes", () => {
+    it("GET /auth/google sets oauth cookies and redirects", async () => {
+      __setGoogleClientForTests({
+        authorizationUrl: ({ state, code_challenge }) => {
+          return `https://example.com/auth?state=${encodeURIComponent(state)}&cc=${encodeURIComponent(code_challenge)}`;
+        },
+      });
+
+      const res = await request(app)
+        .get(`${basePath}/google?to=app`)
+        .expect(302);
+
+      expect(res.headers.location).to.match(/^https:\/\/example\.com\/auth\?/);
+
+      const setCookie = res.headers["set-cookie"] || [];
+      expect(setCookie.join(";")).to.include("oauth_state=");
+      expect(setCookie.join(";")).to.include("oauth_code_verifier=");
+    });
+
+    it("GET /auth/google/callback returns 400 if code/state missing", async () => {
+      __setGoogleClientForTests({ callback: async () => ({ claims: () => ({}) }) });
+
+      await request(app)
+        .get(`${basePath}/google/callback`)
+        .expect(400);
+    });
+
+    it("GET /auth/google/callback returns 401 if saved state missing", async () => {
+      __setGoogleClientForTests({ callback: async () => ({ claims: () => ({}) }) });
+
+      await request(app)
+        .get(`${basePath}/google/callback?code=123&state=abc`)
+        .expect(401)
+        .then((res) => {
+          expect(res.body.message).to.equal("Missing saved state");
+        });
+    });
+
+    it("GET /auth/google/callback returns 401 if state mismatch", async () => {
+      __setGoogleClientForTests({ callback: async () => ({ claims: () => ({}) }) });
+
+      await request(app)
+        .get(`${basePath}/google/callback?code=123&state=abc`)
+        .set("Cookie", [`oauth_state=DIFFERENT`, `oauth_code_verifier=verifier123`])
+        .expect(401)
+        .then((res) => {
+          expect(res.body.message).to.equal("Invalid state");
+        });
+    });
+
+    it("GET /auth/google/callback success creates user, sets token cookie, redirects to app customer url", async () => {
+      const state = __testables.makeState("csrf1", "app");
+
+      __setGoogleClientForTests({
+        callback: async () => ({
+          claims: () => ({
+            sub: "google-sub-1",
+            email: "google@example.com",
+            given_name: "Gina",
+            family_name: "Google",
+          }),
+        }),
+      });
+
+      const res = await request(app)
+        .get(`${basePath}/google/callback?code=CODE123&state=${encodeURIComponent(state)}`)
+        .set("Cookie", [
+          `oauth_state=${encodeURIComponent(state)}`,
+          `oauth_code_verifier=verifier123`,
+        ])
+        .expect(302);
+
+      expect(res.headers.location).to.equal(__testables.CLIENT_REDIRECTS.app.customer);
+
+      const setCookie = res.headers["set-cookie"] || [];
+      expect(setCookie.join(";")).to.include("token=");
+      expect(setCookie.join(";")).to.include("HttpOnly");
+
+      const created = await User.findOne({ email: "google@example.com" });
+      expect(created).to.exist;
+      expect(created.oauthProvider).to.equal("google");
+      expect(created.oauthSubject).to.equal("google-sub-1");
+      expect(created.firstName).to.equal("Gina");
+      expect(created.lastName).to.equal("Google");
+    });
+  });
+
+  describe("GitHub OAuth routes", () => {
+    const originalFetch = global.fetch;
+
+    before(() => {
+      process.env.GITHUB_CLIENT_ID = "gh-client";
+      process.env.GITHUB_CLIENT_SECRET = "gh-secret";
+      process.env.GITHUB_REDIRECT_URI = "http://localhost:3000/auth/github/callback";
+    });
+
+    after(() => {
+      global.fetch = originalFetch;
+    });
+
+    it("GET /auth/github sets oauth_state cookie and redirects to github authorize", async () => {
+      const res = await request(app)
+        .get(`${basePath}/github?to=webb`)
+        .expect(302);
+
+      expect(res.headers.location).to.match(/^https:\/\/github\.com\/login\/oauth\/authorize\?/);
+
+      const setCookie = res.headers["set-cookie"] || [];
+      expect(setCookie.join(";")).to.include("oauth_state=");
+    });
+
+    it("GET /auth/github/callback returns 400 if code/state missing", async () => {
+      await request(app)
+        .get(`${basePath}/github/callback`)
+        .expect(400);
+    });
+
+    it("GET /auth/github/callback success creates user, sets token cookie, redirects to webb/customer url", async () => {
+      const state = __testables.makeState("csrf2", "webb");
+
+      global.fetch = async (url, options) => {
+        if (url === "https://github.com/login/oauth/access_token") {
+          return {
+            json: async () => ({ access_token: "gh-access-token" }),
+          };
+        }
+
+        if (url === "https://api.github.com/user") {
+          return {
+            json: async () => ({ id: 999, name: "Octo Cat" }),
+          };
+        }
+
+        if (url === "https://api.github.com/user/emails") {
+          return {
+            json: async () => ([
+              { email: "octo@example.com", primary: true, verified: true },
+            ]),
+          };
+        }
+
+        throw new Error(`Unexpected fetch URL: ${url}`);
+      };
+
+      const res = await request(app)
+        .get(`${basePath}/github/callback?code=CODE999&state=${encodeURIComponent(state)}`)
+        .set("Cookie", [`oauth_state=${encodeURIComponent(state)}`])
+        .expect(302);
+
+      expect(res.headers.location).to.equal(__testables.CLIENT_REDIRECTS.webb.customer);
+
+      const setCookie = res.headers["set-cookie"] || [];
+      expect(setCookie.join(";")).to.include("token=");
+      expect(setCookie.join(";")).to.include("HttpOnly");
+
+      const created = await User.findOne({ email: "octo@example.com" });
+      expect(created).to.exist;
+      expect(created.oauthProvider).to.equal("github");
+      expect(created.oauthSubject).to.equal("999");
+      expect(created.firstName).to.equal("Octo");
+      expect(created.lastName).to.equal("Cat");
+    });
   });
 });
