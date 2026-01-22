@@ -40,7 +40,6 @@ services:
       - NODE_ENV=development
       - API_URL_INTERNAL=http://backend:3000
       - NEXT_PUBLIC_API_URL=http://localhost:3000
-      - NEXT_PUBLIC_API_URL=http://backend:9000
       - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51ScB6U1SvvBu8btHmI7IH5j4j5Yeo3b8d7pNq2niIHVxBFk3X2yRTRYr2CZPOHWpWykLJgIbVNUWE4BO6ImzH413001zQAFdJg
 
   db:
