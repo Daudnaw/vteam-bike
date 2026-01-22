@@ -62,7 +62,7 @@ export async function signoutapp() {
 
     cookieStore.delete('token');
 
-    redirect('/userapp/auth/login');
+    redirect('/app/auth/login');
 }
 
 export async function signout() {
@@ -72,7 +72,6 @@ export async function signout() {
 
     redirect('/webb/auth/login');
 }
-
 export async function register(formData) {
     let firstName = formData.get('firstName');
     let lastName = formData.get('lastName');

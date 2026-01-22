@@ -56,7 +56,7 @@ export default function CustomerSidebar() {
                 text='Profil'
                 Icon={User}
             />
-            <SignOutButton collapsed={collapsed} />
+            <SignOutButton collapsed={collapsed} webb={true} />
             <ArrowLeftCircle
                 className={`${
                     collapsed && 'rotate-180'

@@ -1,5 +1,5 @@
 import React from "react";
-import { Bike, MapPin, Activity, Wrench } from "lucide-react";
+import { Bike, MapPin, Activity, Wrench, Plus } from "lucide-react";
 import Link from "next/link";
 import { getBikes } from '../../../../../src/app/actions/bikes';
 
@@ -13,6 +13,7 @@ export default async function BikeTable() {
   const bikes = await getBikes();
 
   return (
+    <div>
     <div className="overflow-hidden rounded-md border border-detail-yellow shadow-2xl">
       <table className="w-full border-collapse divide-detail-yellow from-slate-600 to-slate-800 bg-linear-to-br text-white">
         <thead className="bg-slate-900">
@@ -80,6 +81,16 @@ export default async function BikeTable() {
           })}
         </tbody>
       </table>
+    </div>
+    <div className="flex justify-between items-center mb-4">
+        <Link
+          href="/admin-dashboard/bikes/create"
+          className="flex items-center gap-2 bg-detail-yellow text-black px-4 py-2 rounded hover:bg-yellow-600 transition"
+        >
+          <Plus size={18} />
+          Add Bike
+        </Link>
+      </div>
     </div>
   );
 }

@@ -1,14 +1,13 @@
 import React from 'react';
 import { getSession } from '../../../../../../utils/user.server';
 import ProfilePage from '../../../../../../components/userapp/profile/ProfilePage';
+import { getSingleUser } from '../../../../actions/user';
 
-const sampleUser = {
-    id: 1,
-    firstName: 'Test',
-    lastName: 'Testsson',
-    email: 'test@test.se',
-};
+export async function getProfile(id) {
+    const profile = await getSingleUser(id);
 
+    return profile;
+}
 export default async function page() {
     let session = await getSession();
 
@@ -16,9 +15,15 @@ export default async function page() {
         redirect('/app/auth/login');
     }
 
+    const profile = await getProfile(session.sub);
+
+    if (!profile) {
+        return 'No profile found';
+    }
+
     return (
         <div>
-            <ProfilePage profile={sampleUser} />
+            <ProfilePage profile={profile} />
         </div>
     );
 }

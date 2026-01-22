@@ -36,6 +36,31 @@ const schema = new Schema(
       required: true,
       trim: true,
     },
+    credit: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
+  membership: {
+    tier: {
+      type: String,
+      enum: ["", "small", "medium", "allin"],
+      default: "" 
+    },
+    status: {
+      type: String,
+      default: "none"
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: ""
+    },
+    currentPeriodEnd: {
+      type: Date,
+      default: null
+    },
+  },
     password: {
       type: String,
       required: function() {

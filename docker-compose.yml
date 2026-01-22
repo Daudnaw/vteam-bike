@@ -22,6 +22,8 @@ services:
       - GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
       - FRONTEND_OAUTH_REDIRECT=http://localhost:8080/oauth/callback
       - JWT_SECRET=hejsanhoppsan
+      - STRIPE_PUBLISHABLE_KEY=pk_test_51ScB6U1SvvBu8btHmI7IH5j4j5Yeo3b8d7pNq2niIHVxBFk3X2yRTRYr2CZPOHWpWykLJgIbVNUWE4BO6ImzH413001zQAFdJg
+      - STRIPE_SECRET_KEY=sk_test_51ScB6U1SvvBu8btHrQZkwdC2SSIYkWTnotcN8y2xfZYo9SG291VuAd7v2Z5h0TOEMuqCjMjCdIOtdaKt1bK4lbrc00l8OzKGi6
 
   frontend:
     build: ./services/frontend
@@ -38,6 +40,8 @@ services:
       - NODE_ENV=development
       - API_URL_INTERNAL=http://backend:3000
       - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=http://backend:9000
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51ScB6U1SvvBu8btHmI7IH5j4j5Yeo3b8d7pNq2niIHVxBFk3X2yRTRYr2CZPOHWpWykLJgIbVNUWE4BO6ImzH413001zQAFdJg
 
   db:
     image: mongo:latest

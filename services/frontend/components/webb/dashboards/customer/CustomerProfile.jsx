@@ -32,7 +32,7 @@ export default function CustomerProfile({
                     </span>
                 </p>
 
-                <p className='mb-5'>
+                {/* <p className='mb-5'>
                     Verifierad:
                     <span
                         className={`${
@@ -41,7 +41,7 @@ export default function CustomerProfile({
                     >
                         {verified ? 'Ja' : 'Nej'}
                     </span>
-                </p>
+                </p> */}
             </div>
 
             <h3 className='my-5 text-h3'>Betalning</h3>

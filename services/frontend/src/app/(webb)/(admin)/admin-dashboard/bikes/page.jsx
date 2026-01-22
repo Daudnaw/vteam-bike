@@ -9,6 +9,7 @@ export default function Page() {
             <div className='grid grid-cols-3 gap-5'>
                 <StatCard nr={0} text='Available' />
                 <StatCard nr={0} text='At service' />
+                <StatCard nr={0} text='Charging' />
             </div>
 
             <h2 className='text-h3 mt-10 font-bold mb-5'>Alla Bikes</h2>

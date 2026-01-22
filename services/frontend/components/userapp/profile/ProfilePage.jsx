@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Bike, Mail } from 'lucide-react';
 import IconCard from './IconCard';
+import SignOutButton from '../../webb/dashboards/shared/SignOutButton';
 
 export default async function ProfilePage({ profile }) {
     return (
@@ -35,12 +36,10 @@ export default async function ProfilePage({ profile }) {
                 <Mail /> <span>{profile.email}</span>
             </div>
 
-            <div className='flex items-center gap-2 text-xl my-4'>
-                <Mail /> <span>{profile.email}</span>
-            </div>
+            <div className='h-1 w-full bg-slate-800 my-4' />
 
-            <div className='flex items-center gap-2 text-xl'>
-                <Mail /> <span>{profile.email}</span>
+            <div className='flex items-center gap-2 text-xl my-4'>
+                <SignOutButton collapsed={false} webb={false} />
             </div>
         </div>
     );

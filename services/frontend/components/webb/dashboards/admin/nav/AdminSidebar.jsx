@@ -9,7 +9,8 @@ import {
     User,
     Landmark,
     Locate,
-    Wrench
+    Wrench,
+    DollarSign
 } from 'lucide-react';
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
@@ -20,7 +21,7 @@ export default function AdminSidebar() {
     return (
         <div
             className={`${
-                collapsed ? 'w-[80px]' : 'w-[300px]'
+                collapsed ? 'w-20' : 'w-[300px]'
             } p-5 bg-slate-800 h-screen relative transition-all ease-in-out duration-300 border-r border-background`}
         >
             <div className='flex gap-2 items-center'>
@@ -69,6 +70,12 @@ export default function AdminSidebar() {
                 collapsed={collapsed}
                 text='service'
                 Icon={Wrench}
+            />
+            <NavLink
+                link='/admin-dashboard/payments'
+                collapsed={collapsed}
+                text='Purchase'
+                Icon={DollarSign}
             />
             <SignOutButton collapsed={collapsed} />
             <ArrowLeftCircle
