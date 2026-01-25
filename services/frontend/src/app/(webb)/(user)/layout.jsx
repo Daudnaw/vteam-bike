@@ -1,6 +1,6 @@
 import CustomerSidebar from '../../../../components/webb/dashboards/customer/nav/CustomerSidebar';
 import CustomerHeader from '../../../../components/webb/dashboards/customer/nav/CustomerHeader';
-import { getSession } from '../../../../utils/user';
+import { getSession } from '../../../../utils/user.server';
 import { redirect } from 'next/navigation';
 
 export default async function UserLayout({ children }) {
@@ -14,7 +14,12 @@ export default async function UserLayout({ children }) {
         <section className='flex'>
             <CustomerSidebar />
             <main className='flex-1'>
+<<<<<<< HEAD
+                
+                <CustomerHeader email={session.email} />
+=======
                 <CustomerHeader firstName={session.firstName} lastName={session.lastName}/>
+>>>>>>> main
                 {children}
             </main>
         </section>

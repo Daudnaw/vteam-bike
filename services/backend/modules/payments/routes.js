@@ -1,38 +1,172 @@
 import { Router } from "express";
 import Stripe from "stripe";
+import { requireAuth, requireAdmin, issueAuthCookie } from "../auth/middleware.js";
+import User from "../users/model.js";
+import PaymentEvent from "./model.js";
 
 const router = Router();
 
 const stripe_secret_key = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripe_secret_key);
 
+router.post("/checkout", requireAuth, async (req, res, next) => {
+  const MEMBERSHIPS = {
+    small:  { amount: 100, name: "Small membership" },
+    medium: { amount: 300, name: "Medium membership" },
+    allin:  { amount: 700, name: "All in membership" },
+  };
 
-router.post("/checkout", async (req, res, next) => {
   try {
-    const { amount } = req.body;
+    const { mode, amount, tier } = req.body;
 
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
+    if (mode !== "payment" && mode !== "subscription") {
+      return res.status(400).json({ error: "Invalid mode" });
+    }
+
+    let line_items;
+
+    if (mode === "payment") {
+      const amt = Number(amount);
+      if (!Number.isFinite(amt) || amt < 10 || amt > 5000) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      line_items = [
         {
           price_data: {
             currency: "sek",
-            product_data: {
-              name: `Credit pot ${amount} kr`,
-            },
-            unit_amount: amount * 100,
+            product_data: { name: `Credit pot ${amt} kr` },
+            unit_amount: Math.round(amt * 100),
           },
           quantity: 1,
         },
-      ],
-      mode: "payment",
-      success_url: `http://localhost:8080/admin-dashboard/payments/complete?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: "http://localhost:8080/admin-dashboard/payments",
-    });
+      ];
+    }
+
+    if (mode === "subscription") {
+      const membership = MEMBERSHIPS[tier];
+      if (!membership) {
+        return res.status(400).json({ error: "Invalid tier" });
+      }
+
+      line_items = [
+        {
+          price_data: {
+            currency: "sek",
+            product_data: { name: membership.name },
+            unit_amount: membership.amount * 100,
+            recurring: { interval: "month" },
+          },
+          quantity: 1,
+        },
+      ];
+    }
+
+    const userId = req.user?.sub ?? req.user?.id;
+
+  const session = await stripe.checkout.sessions.create({
+    mode,
+    line_items,
+    success_url: `http://localhost:8080/admin-dashboard/payments/complete?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `http://localhost:8080/admin-dashboard/payments`,
+    client_reference_id: userId,
+    metadata: { userId, type: mode === "payment" ? "credits" : "membership", tier: tier ?? "" },
+  });
 
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error(err);
     return next(err);
+  }
+});
+
+router.post("/confirm", requireAuth, async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) return res.status(400).json({ error: "Missing sessionId" });
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["subscription"],
+    });
+
+    if (session.payment_status !== "paid") {
+      return res.status(400).json({ error: "Payment not completed" });
+    }
+
+    const already = await PaymentEvent.findOne({ stripeSessionId: session.id });
+    if (already) return res.json({ ok: true, alreadyProcessed: true });
+
+    const userId = req.user.sub;
+
+    if (session.mode === "payment") {
+      const amountSek = (session.amount_total ?? 0) / 100;
+
+      await User.findByIdAndUpdate(userId, { $inc: { credit: amountSek } });
+
+      await PaymentEvent.create({
+        stripeSessionId: session.id,
+        userId,
+        type: "credits",
+        amountSek,
+        currency: session.currency ?? "sek",
+      });
+
+      return res.json({ ok: true, creditAdded: amountSek });
+    }
+
+    if (session.mode === "subscription") {
+      const tier = session.metadata?.tier || "";
+      const subscriptionId =
+        typeof session.subscription === "string"
+          ? session.subscription
+          : session.subscription?.id;
+
+      if (!tier || !subscriptionId) {
+        return res.status(400).json({ error: "Missing tier/subscriptionId" });
+      }
+
+      const sub = await stripe.subscriptions.retrieve(subscriptionId);
+
+      const periodEnd = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000)
+        : null;
+
+      await User.findByIdAndUpdate(userId, {
+        $set: {
+          "membership.tier": tier,
+          "membership.status": sub.status ?? "active",
+          "membership.stripeSubscriptionId": subscriptionId,
+          "membership.currentPeriodEnd": periodEnd,
+        },
+      });
+
+      const amountSek = (session.amount_total ?? 0) / 100;
+
+      await PaymentEvent.create({
+        stripeSessionId: session.id,
+        userId,
+        type: "membership",
+        tier,
+        amountSek,
+        currency: session.currency ?? "sek",
+      });
+
+      const updated = await User.findById(userId);
+      issueAuthCookie(res, updated);
+
+      return res.json({
+        ok: true,
+        membershipActivated: true,
+        tier,
+        status: sub.status,
+        currentPeriodEnd: periodEnd,
+      });
+    }
+
+    return res.status(400).json({ error: "Unknown session mode" });
+  } catch (err) {
+    console.error("confirm failed:", err);
+    return res.status(500).json({ error: "Confirm failed" });
   }
 });
 

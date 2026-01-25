@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 import { scrypt as _scrypt, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
 import { AuthenticationError } from "../../lib/authentication-error.js";
+import { type } from "node:os";
 const scrypt = promisify(_scrypt);
 
 /**
@@ -35,9 +36,36 @@ const schema = new Schema(
       required: true,
       trim: true,
     },
+    credit: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
+  membership: {
+    tier: {
+      type: String,
+      enum: ["", "small", "medium", "allin"],
+      default: "" 
+    },
+    status: {
+      type: String,
+      default: "none"
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: ""
+    },
+    currentPeriodEnd: {
+      type: Date,
+      default: null
+    },
+  },
     password: {
       type: String,
-      required: true,
+      required: function() {
+        return !this.oauthProvider;
+      },
     },
     salt: {
       type: String,
@@ -47,12 +75,27 @@ const schema = new Schema(
       enum: ["customer", "admin"],
       default: "customer",
       required: true,
-    }
+    },
+    oauthProvider: {
+      type: String,
+      enum: ["google", "github"],
+      index: true,
+    },
+    oauthSubject: {
+      type: String,
+      index: true,
+    },
   },
   {
     timestamps: true,
   },
 );
+
+schema.index(
+  { oauthProvider: 1, oauthSubject: 1 },
+  { unique: true, sparse: true }
+);
+
 
 /**
  * Transform the object to be returned as JSON
@@ -80,8 +123,9 @@ schema.options.toJSON = {
  * @throws {Error}
  */
 schema.pre("save", async function () {
-  // Early return when password hasn't changed
   if (!this.isModified("password")) return;
+
+  if (!this.password) return;
 
   await this.setPassword(this.password);
 });
@@ -133,8 +177,8 @@ schema.statics.authenticate = async function (email, password) {
  * @returns {Promise}
  */
 schema.methods.verifyPassword = async function (password) {
+  if (!this.password || !this.salt) return false;
   const key = await scrypt(password, this.salt, 64);
-
   return key.toString("hex") === this.password;
 };
 

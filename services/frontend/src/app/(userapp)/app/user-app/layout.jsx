@@ -1,4 +1,4 @@
-import { getSession } from '../../../../../utils/user';
+import { getSession } from '../../../../../utils/user.server';
 import { redirect } from 'next/navigation';
 import AppNavigation from '../../../../../components/userapp/navigation/AppNavigation';
 
