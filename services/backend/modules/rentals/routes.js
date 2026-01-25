@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { model } from "mongoose";
+import { sendCommand } from "../scooter/ws";
+import { requireAuth } from "../auth/middleware.js";
 
 const Rental = model("Rental");
 //const Location = model("Location");
@@ -12,7 +14,7 @@ export const v1 = Router();
  * @description Returns json with all rentals
  * @returns {Array<Rental.model>} 200 List of rentals
  */
-v1.get("/", async (req, res, next) => {
+v1.get("/", requireAuth, async (req, res, next) => {
   try {
     const rentals = await Rental.find()
       .populate("user", "firstName email") //vad mer vill vi ha
@@ -31,7 +33,7 @@ v1.get("/", async (req, res, next) => {
  * @returns {Rental.model} 200 Rental document
  * @returns {Error} 404 Not found
  */
-v1.get("/:id", async (req, res, next) => {
+v1.get("/:id", requireAuth, async (req, res, next) => {
   try {
     const rental = await Rental.findById(req.params.id)
       .populate("user", "firstName email")
@@ -54,12 +56,18 @@ v1.get("/:id", async (req, res, next) => {
  * @returns {Rental.model} 200 Created rental
  * @returns {Error} 400 - Invalid input
  */
-v1.post("/", async (req, res, next) => {
+v1.post("/", requireAuth, async (req, res, next) => {
   try {
     const { user, scooter } = req.body;
 
     if (!user || !scooter) {
       return res.status(400).json({ error: "User and Scooter are required" });
+    }
+
+    const existed = sendCommand(scooter, { action: "START"});
+
+    if (!existed) {
+      return res.status(409).json({ error: "Scoter is offline", rental});
     }
 
     const rental = new Rental({ user, scooter });
@@ -79,14 +87,23 @@ v1.post("/", async (req, res, next) => {
  * @returns {Rental.model} 200 - Updated rental with endTime, cost, tripHistory
  * @returns {Error} 404 - Not found
  */
-v1.patch("/:id/end", async (req, res, next) => {
+v1.patch("/:id/end", requireAuth, async (req, res, next) => {
   try {
     const rental = await Rental.findById(req.params.id);
-
     if (!rental) return res.status(404).json({ error: "Rental not found" });
 
-    const updatedRental = await rental.endRental();
+    const price = handelPrice(rental);
 
+    // TODO: lösa med betalning både coins och med kort
+
+    const existed = sendCommand(scooter, { action: "STOP"});
+
+    if (!existed) {
+      return res.status(409).json({ error: "Scoter is offline", rental});
+    }
+
+    const updatedRental = await rental.endRental();
+    
     res.status(200).json(updatedRental);
   } catch (err) {
     next(err);
@@ -101,7 +118,7 @@ v1.patch("/:id/end", async (req, res, next) => {
  * @returns {object} 200 - { message: "Rental deleted" }
  * @returns {Error} 404 - Not found
  */
-v1.delete("/:id", async (req, res, next) => {
+v1.delete("/:id", requireAuth, async (req, res, next) => {
   try {
     const rental = await Rental.findByIdAndDelete(req.params.id);
     if (!rental) return res.status(404).json({ error: "Rental not found" });
@@ -120,7 +137,7 @@ v1.delete("/:id", async (req, res, next) => {
  * @returns {object} 200 - { durationMinutes: number|null }
  * @returns {Error} 404 - Not found
  */
-v1.get("/:id/duration", async (req, res, next) => {
+v1.get("/:id/duration", requireAuth, async (req, res, next) => {
   try {
     const rental = await Rental.findById(req.params.id);
     if (!rental) return res.status(404).json({ error: "Rental not found" });
@@ -139,7 +156,7 @@ v1.get("/:id/duration", async (req, res, next) => {
  * @returns {Array<Rental.model>} 200 - List of rentals for the user
  * @returns {Error} 404 If no rentals found
  */
-v1.get("/user/:userId", async (req, res, next) => {
+v1.get("/user/:userId", requireAuth, async (req, res, next) => {
   try {
     const { userId } = req.params;
 
@@ -165,7 +182,7 @@ v1.get("/user/:userId", async (req, res, next) => {
  * @returns {Rental.model} 200 Most recent rental
  * @returns {Error} 404 - If user has no rentals
  */
-v1.get("/user/:userId/latest", async (req, res, next) => {
+v1.get("/user/:userId/latest", requireAuth, async (req, res, next) => {
   try {
     const { userId } = req.params;
     const rental = await Rental.findOne({ user: userId })
