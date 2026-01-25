@@ -8,6 +8,7 @@ import createDebug from "debug";
 import http from "http";
 import app from "../app.js";
 import mongoose from "mongoose";
+import { registerWebSockets } from "../ws.js";
 const debug = createDebug("backend:server");
 
 /**
@@ -22,6 +23,7 @@ app.set("port", port);
  */
 
 const server = http.createServer(app);
+registerWebSockets({ server });
 
 /**
  * Connect to MongoDB
