@@ -8,24 +8,24 @@ import { getAllZones } from '../../src/app/actions/zones';
 import { getBikes } from '../../src/app/actions/bikes';
 
 export default function ZonesAndBikesMap() {
-  const [zones, setZones] = useState([]);
-  const [bikes, setBikes] = useState([]);
+    const [zones, setZones] = useState([]);
+    const [bikes, setBikes] = useState([]);
 
-  useEffect(() => {
-    async function fetchData() {
-      const zonesData = await getAllZones();
-      const bikesData = await getBikes();
+    useEffect(() => {
+        async function fetchData() {
+            const zonesData = await getAllZones();
+            const bikesData = await getBikes();
 
-      setZones(zonesData);
-      setBikes(bikesData);
-    }
-    fetchData();
-  }, []);
+            setZones(zonesData);
+            setBikes(bikesData);
+        }
+        fetchData();
+    }, []);
 
-  return (
-    <BaseMap>
-      <ZonesLayer zones={zones} />
-      <BikesLayer bikes={bikes} />
-    </BaseMap>
-  );
+    return (
+        <BaseMap>
+            <ZonesLayer zones={zones} />
+            {/*<BikesLayer bikes={bikes} /> */}
+        </BaseMap>
+    );
 }

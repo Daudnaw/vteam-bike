@@ -17,10 +17,13 @@ export default async function AdminLayout({ children }) {
     }
 
     return (
-        <section className='flex'>
+        <section className='flex h-screen overflow-hidden'>
             <AdminSidebar />
-            <main className='flex-1'>
-                <AdminHeader firstName={session.firstName} lastName={session.lastName} />
+            <main className='flex-1 overflow-y-scroll'>
+                <AdminHeader
+                    firstName={session.firstName}
+                    lastName={session.lastName}
+                />
                 {children}
             </main>
         </section>
