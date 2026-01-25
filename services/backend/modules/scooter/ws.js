@@ -2,8 +2,8 @@ import { WebSocketServer } from "ws";
 import Scooter from "./model.js";
 
 const DEFAULT_TELEMETRY = {
-  activeIntervalMs: 1000,
-  idleIntervalMs: 5000,
+  activeIntervalMs: 5000,
+  idleIntervalMs: 60000,
 };
 
 /**
