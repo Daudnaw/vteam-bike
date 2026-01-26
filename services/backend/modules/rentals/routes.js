@@ -2,6 +2,7 @@ import { Router } from "express";
 import { model } from "mongoose";
 import { sendCommand } from "../scooter/ws";
 import { requireAuth } from "../auth/middleware.js";
+import User from "../users/model.js";
 
 const Rental = model("Rental");
 //const Location = model("Location");
@@ -89,21 +90,58 @@ v1.post("/", requireAuth, async (req, res, next) => {
  */
 v1.patch("/:id/end", requireAuth, async (req, res, next) => {
   try {
+    const userId = req.user.sub;
+
     const rental = await Rental.findById(req.params.id);
     if (!rental) return res.status(404).json({ error: "Rental not found" });
 
-    const price = handelPrice(rental);
+    if (String(rental.user) !== String(userId)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
 
-    // TODO: lösa med betalning både coins och med kort
-
-    const existed = sendCommand(scooter, { action: "STOP"});
+    const existed = sendCommand(rental.scooter, { action: "STOP"});
 
     if (!existed) {
       return res.status(409).json({ error: "Scoter is offline", rental});
     }
 
+    const paymentMethod = req.body.paymentMethod;
+    const allowed = ["credit", "stripe"];
+    if (!allowed.includes(paymentMethod)) {
+      return res.status(400).json({ error: "Invalid payment method" });
+    }
+
     const updatedRental = await rental.endRental();
-    
+    const { cost } = await handelPrice(updatedRental);
+
+    // TODO: lösa med betalning både coins och med kort
+
+    if (paymentMethod === "credit") {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      if (user.credit < cost) {
+        return res.status(402).json({ error: "Too little credits" });
+      }
+
+      user.credit -= cost;
+      await user.save();
+    } else {
+      // TODO fixa med stipe betalning för resan
+      const r = await fetch("http://localhost:3000/v1/payments/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cost, currency: "sek", rentalId: rental._id, userId }),
+    });
+
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) return res.status(502).json({ error: "Stripe failed", body });
+
+    return res.status(200).json({ cost, stripe: body });
+    }
+
+    updatedRental.cost = cost;
+    await updatedRental.save();
     res.status(200).json(updatedRental);
   } catch (err) {
     next(err);
