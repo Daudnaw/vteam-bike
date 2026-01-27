@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { model } from "mongoose";
-import { sendCommand } from "../scooter/ws";
+import { sendCommand } from "../scooter/ws.js";
 import { requireAuth } from "../auth/middleware.js";
+import handelPrice from "./handelPayment.js";
 import User from "../users/model.js";
 import Scooter from "../scooter/model.js";
 
 const Rental = model("Rental");
-//const Location = model("Location");
 
 export const v1 = Router();
 
@@ -73,21 +73,21 @@ v1.post("/", requireAuth, async (req, res, next) => {
       return res.status(404).json({ error: "Scooter not found" });
     }
 
-    if (scooterDoc.status !== "active") {
+    if (scooterDoc.status !== "available") {
       return res.status(409).json({
         error: "Scooter is not available",
         status: scooterDoc.status,
       });
     }
 
+    const rental = new Rental({ user: userId, scooter });
+    await rental.startRental();
+
     const existed = sendCommand(rental.scooter, { action: "START"});
 
     if (!existed) {
       return res.status(409).json({ error: "Scoter is offline", rental});
     }
-
-    const rental = new Rental({ user: userId, scooter });
-    await rental.startRental();
 
     return res.status(201).json(rental);
   } catch (err) {

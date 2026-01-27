@@ -49,6 +49,43 @@ v1.get("/", async (req, res, next) => {
 });
 
 /**
+ * @route POST /v1/scooters
+ * @summary Create a scooter
+ * @description Creates a new scooter (admin only)
+ * @produces application/json
+ * @consumes application/json
+ * @returns {Scooter.model} 201 - Scooter created
+ * @returns {Error} 401 - Unauthorized
+ * @returns {Error} 403 - Forbidden
+ * @returns {Error} 400 - Validation error
+ */
+v1.post("/", requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Admins only" });
+    }
+
+    const {
+      battery,
+      lat,
+      lon,
+      status,
+    } = req.body;
+
+    const scooter = await Scooter.create({
+      battery: battery,
+      lat: lat,
+      lon: lon,
+      status: status,
+    });
+
+    return res.status(201).json(scooter.toJSON());
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * @route PUT /v1/scooters/:id
  * @summary Update the scooters's info
  * @description Updates the scooters's info based on the id
