@@ -2,6 +2,7 @@ import { Router } from "express";
 import { model } from "mongoose";
 import { requireAuth } from "../auth/middleware.js";
 const Scooter = model("Scooter");
+import Location from "../location/model.js";
 
 export const v1 = Router();
 
@@ -78,6 +79,14 @@ v1.post("/", requireAuth, async (req, res, next) => {
       lon: lon,
       status: status,
     });
+
+    await Location.create({
+      scooterId: scooter._id,
+      lat: scooter.lat,
+      lng: scooter.lon,
+      history: [],
+    });
+
 
     return res.status(201).json(scooter.toJSON());
   } catch (err) {

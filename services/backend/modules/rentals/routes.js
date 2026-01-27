@@ -73,7 +73,7 @@ v1.post("/", requireAuth, async (req, res, next) => {
       return res.status(404).json({ error: "Scooter not found" });
     }
 
-    if (scooterDoc.status !== "available") {
+    if (scooterDoc.status !== "idle") {
       return res.status(409).json({
         error: "Scooter is not available",
         status: scooterDoc.status,

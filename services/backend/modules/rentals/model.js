@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import mongoose from "mongoose";
+import "../location/model.js";
 
 /**
  * @typedef Rental
@@ -67,7 +68,7 @@ schema.options.toJSON = {
 schema.methods.startRental = async function () {
   //console.log("Before save:", this);
   const loc = await this.constructor.getLocationByScooter(this.scooter);
-  
+
   this.startTime = new Date();
   this.startHistoryIndex = loc.history.length;
 
