@@ -3,6 +3,7 @@ import { model } from "mongoose";
 import { sendCommand } from "../scooter/ws";
 import { requireAuth } from "../auth/middleware.js";
 import User from "../users/model.js";
+import Scooter from "../scooter/model.js";
 
 const Rental = model("Rental");
 //const Location = model("Location");
@@ -50,31 +51,45 @@ v1.get("/:id", requireAuth, async (req, res, next) => {
 
 /**
  * @route POST /v1/rentals
- * @summary Create a new rental
- * @description This creates a new rental by taking user and scooter
- * @body {string} user.required User ID
+ * @summary Start a rental
  * @body {string} scooter.required Scooter ID
- * @returns {Rental.model} 200 Created rental
- * @returns {Error} 400 - Invalid input
+ * @returns {Rental.model} 201 - Created rental
+ * @returns {Error} 400/401/403/409 - Errors
  */
 v1.post("/", requireAuth, async (req, res, next) => {
   try {
-    const { user, scooter } = req.body;
+    const userId = req.user.sub;
+    const { scooter } = req.body;
 
-    if (!user || !scooter) {
-      return res.status(400).json({ error: "User and Scooter are required" });
+    if (!scooter) {
+      return res.status(400).json({ error: "Scooter is required" });
     }
 
-    const existed = sendCommand(scooter, { action: "START"});
+    const user = await User.findById(userId).lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const scooterDoc = await Scooter.findById(scooter).lean();
+    if (!scooterDoc) {
+      return res.status(404).json({ error: "Scooter not found" });
+    }
+
+    if (scooterDoc.status !== "active") {
+      return res.status(409).json({
+        error: "Scooter is not available",
+        status: scooterDoc.status,
+      });
+    }
+
+    const existed = sendCommand(rental.scooter, { action: "START"});
 
     if (!existed) {
       return res.status(409).json({ error: "Scoter is offline", rental});
     }
 
-    const rental = new Rental({ user, scooter });
+    const rental = new Rental({ user: userId, scooter });
     await rental.startRental();
 
-    res.status(200).json(rental);
+    return res.status(201).json(rental);
   } catch (err) {
     next(err);
   }
