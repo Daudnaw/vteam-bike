@@ -99,50 +99,34 @@ v1.patch("/:id/end", requireAuth, async (req, res, next) => {
       return res.status(403).json({ error: "Forbidden" });
     }
 
+    if (rental.endTime) {
+      return res.status(200).json(rental);
+    }
+
     const existed = sendCommand(rental.scooter, { action: "STOP"});
 
     if (!existed) {
       return res.status(409).json({ error: "Scoter is offline", rental});
     }
 
-    const paymentMethod = req.body.paymentMethod;
-    const allowed = ["credit", "stripe"];
-    if (!allowed.includes(paymentMethod)) {
-      return res.status(400).json({ error: "Invalid payment method" });
-    }
-
     const updatedRental = await rental.endRental();
     const { cost } = await handelPrice(updatedRental);
 
-    // TODO: lösa med betalning både coins och med kort
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (paymentMethod === "credit") {
-      const user = await User.findById(userId);
-      if (!user) return res.status(404).json({ error: "User not found" });
-
-      if (user.credit < cost) {
-        return res.status(402).json({ error: "Too little credits" });
-      }
-
-      user.credit -= cost;
-      await user.save();
-    } else {
-      // TODO fixa med stipe betalning för resan
-      const r = await fetch("http://localhost:3000/v1/payments/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cost, currency: "sek", rentalId: rental._id, userId }),
-    });
-
-    const body = await r.json().catch(() => ({}));
-    if (!r.ok) return res.status(502).json({ error: "Stripe failed", body });
-
-    return res.status(200).json({ cost, stripe: body });
+    const credit = Number(user.credit ?? 0);
+    if (credit < cost) {
+      return res.status(402).json({ error: "Too little credits", cost, credit });
     }
+
+    user.credit = credit - cost;
+    await user.save();
 
     updatedRental.cost = cost;
     await updatedRental.save();
-    res.status(200).json(updatedRental);
+
+    return res.status(200).json(updatedRental);
   } catch (err) {
     next(err);
   }
