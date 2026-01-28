@@ -1,92 +1,109 @@
-'use server'
-
-const bikes = [
-  {
-    bikeId: "STOCKHOLM-001",
-    status: "available",
-    speed: 0,
-    batteryLevel: 87,
-    position: "Laddstation",
-    rideLogs: [],
-    needsCharge: false,
-    currentCustomer: null,
-    city: "Stockholm",
-  },
-  {
-    bikeId: "STOCKHOLM-002",
-    status: "in_use",
-    speed: 12,
-    batteryLevel: 65,
-    position: "Fri parkering",
-    rideLogs: [],
-    needsCharge: false,
-    currentCustomer: "KUND-001",
-    city: "Stockholm",
-  },
-  {
-    bikeId: "STOCKHOLM-003",
-    status: "in_service",
-    speed: 0,
-    batteryLevel: 20,
-    position: "Service",
-    rideLogs: [],
-    needsCharge: true,
-    currentCustomer: null,
-    city: "Stockholm",
-  },
-  {
-    bikeId: "STOCKHOLM-004",
-    status: "available",
-    speed: 0,
-    batteryLevel: 90,
-    position: "Accepterad",
-    rideLogs: [],
-    needsCharge: false,
-    currentCustomer: null,
-    city: "Stockholm",
-  },
-];
+'use server';
+import { cookies } from 'next/headers';
 
 export async function getBikes() {
-    return bikes;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+    });
+
+    if (res.ok) {
+        return res.json();
+    }
+
+    throw new Error(res.err || 'Fetching bikes failed!');
 }
 
 export async function deleteBike(bikeId) {
-  console.log(`Bike ${bikeId} is deleted`);
-  return { success: true };
+    console.log(`Bike ${bikeId} is deleted`);
+    return { success: true };
 }
 
 export async function stopBike(bikeId) {
-  console.log(`Bike ${bikeId} is stopped`);
-  return { success: true };
+    console.log(`Bike ${bikeId} is stopped`);
+    return { success: true };
 }
 
 export async function lockBike(bikeId) {
-  console.log(`Bike ${bikeId} is locked`);
-  return { success: true };
+    console.log(`Bike ${bikeId} is locked`);
+    return { success: true };
 }
 
 export async function maintainBike(bikeId) {
-  console.log(`Bike ${bikeId} is set to maintenance`);
-  return { success: true };
+    console.log(`Bike ${bikeId} is set to maintenance`);
+    return { success: true };
 }
 
 export async function readyBike(bikeId) {
-  console.log(`Bike ${bikeId} is ready to use again`);
-  return { success: true };
+    console.log(`Bike ${bikeId} is ready to use again`);
+    return { success: true };
 }
 
 export async function addBike(form) {
-  const formObject = Object.fromEntries(form.entries());
-  console.log("addBike", JSON.stringify(formObject, null, 2));
-  return { success: true };
+    const formObject = Object.fromEntries(form.entries());
+
+    const { bikeStatus, batteryLevel, lat, lon } = formObject;
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ batteryLevel, lat, lon, bikeStatus }),
+        cache: 'no-store',
+    });
+
+    if (res.ok) {
+        return { success: true };
+    }
+
+    throw new Error(res.err || 'Add bike failed');
 }
 
 export async function updateBike(id, form) {
-  console.log(`update ${form} `);
-  return { success: true };
+    console.log(`update ${form} `);
+    return { success: true };
 }
 
 export async function getSingelBike(bikeId) {
-  return bikes.find((bike) => bike.bikeId === bikeId) || null;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+    });
+
+    if (res.ok) {
+        return res.json();
+    }
+
+    throw new Error(res.err || 'Fetching bike failed!');
 }
