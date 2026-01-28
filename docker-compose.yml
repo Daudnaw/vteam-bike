@@ -24,6 +24,12 @@ services:
       - JWT_SECRET=hejsanhoppsan
       - STRIPE_PUBLISHABLE_KEY=pk_test_51ScB6U1SvvBu8btHmI7IH5j4j5Yeo3b8d7pNq2niIHVxBFk3X2yRTRYr2CZPOHWpWykLJgIbVNUWE4BO6ImzH413001zQAFdJg
       - STRIPE_SECRET_KEY=sk_test_51ScB6U1SvvBu8btHrQZkwdC2SSIYkWTnotcN8y2xfZYo9SG291VuAd7v2Z5h0TOEMuqCjMjCdIOtdaKt1bK4lbrc00l8OzKGi6
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+      start_period: 10s
 
   frontend:
     build: ./services/frontend
@@ -32,7 +38,9 @@ services:
     ports:
       - 8080:3000
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+
     volumes:
       - ./services/frontend:/app
       - /app/node_modules
@@ -52,3 +60,30 @@ services:
     command: mongod --bind_ip_all
     environment:
       - MONGO_DATA_DIR=/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || exit 1",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
+  simulator:
+    build:
+      context: .
+      dockerfile: services/scooter-simulator/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    environment:
+      - NUMBER_OF_SCOOTERS=10
+      - MONGODB_DSN=mongodb://db:27017/vteam-dev
+      - BACKEND_BASE_URL=http://backend:3000
+      - ROUTE_PROVIDER_API_URL=
+      - ROUTE_PROVIDER_API_KEY=
+    restart: "no"
