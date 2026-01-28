@@ -1,210 +1,288 @@
 import { expect } from "chai";
 import request from "supertest";
 import express from "express";
-import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import sinon from "sinon";
+import jwt from "jsonwebtoken";
+import esmock from "esmock";
 
-import Rental from "./model.js";
-import User from "../users/model.js";
-import Location from "../locations/model.js";
-import { v1 as rentalV1Router } from "./routes.js";
+const basePath = "/rentals";
 
-// Dummy Scooter
-const scooterSchema = new mongoose.Schema({
-  name: String,
-  status: String,
-});
-const Scooter = mongoose.model("Scooter", scooterSchema);
+function makeToken(overrides = {}) {
+  return jwt.sign(
+    {
+      sub: "507f1f77bcf86cd799439011",
+      email: "test@test.se",
+      role: "user",
+      ...overrides,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+}
 
-const baseUser = {
-  firstName: "Test",
-  lastName: "User",
-  email: "test@test.com",
-  password: "123456",
-};
-const baseScooter = {
-  name: "S1",
-  status: "idle",
-};
+function makeQuery(result) {
+  return {
+    populate() { return this; },
+    sort() { return this; },
+    lean: async () => result,
+    exec: async () => result,
+    then: (resolve) => Promise.resolve(result).then(resolve),
+  };
+}
 
-const baseLocation = (scooterId) => ({
-  scooterId,
-  current: { lat: 59, lng: 18 },
-  history: [{ lat: 58, lng: 17 }],
-});
-
-let mongoServer;
-let app;
-
-const basePath = "/v1/rentals";
-
-describe("Rental v1 routes", function () {
+describe("Rentals routes", function () {
   this.timeout(20000);
 
-  before(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
+  let app;
+  let router;
 
-    await Rental.syncIndexes();
-    await User.syncIndexes();
-    await Location.syncIndexes();
-    await Scooter.syncIndexes();
+  let RentalMock;
+  let UserMock;
+  let ScooterMock;
+  let sendCommandStub;
+  let handelPriceStub;
+
+  before(async () => {
+    process.env.JWT_SECRET = "test-secret";
+
+    const requireAuth = (req, res, next) => {
+      const auth = req.headers.authorization || "";
+      const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+      if (!token) return res.status(401).json({ error: "Missing auth token" });
+
+      try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+        return next();
+      } catch {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+    };
+
+    sendCommandStub = sinon.stub();
+
+    handelPriceStub = sinon.stub();
+
+    RentalMock = {
+      find: sinon.stub(),
+      findById: sinon.stub(),
+      findByIdAndDelete: sinon.stub(),
+      findOne: sinon.stub(),
+    };
+
+    UserMock = {
+      findById: sinon.stub(),
+    };
+
+    ScooterMock = {
+      findById: sinon.stub(),
+    };
+
+    const mod = await esmock("./routes.js", {
+      "../scooter/ws.js": { sendCommand: sendCommandStub },
+      "../auth/middleware.js": { requireAuth },
+      "../users/model.js": { default: UserMock },
+      "../scooter/model.js": { default: ScooterMock },
+      "./handelPayment.js": { default: handelPriceStub },
+      "mongoose": {
+        model: (name) => {
+          if (name === "Rental") return RentalMock;
+          throw new Error(`Unexpected model(${name})`);
+        },
+      },
+
+    });
+
+    router = mod.v1;
 
     app = express();
     app.use(express.json());
-    app.use(basePath, rentalV1Router);
+    app.use(basePath, router);
   });
 
-  after(async () => {
-    await mongoose.disconnect();
-    if (mongoServer) {
-        await mongoServer.stop();
-    }
+  beforeEach(() => {
+    sinon.resetHistory();
+    UserMock.findById.reset();
+    ScooterMock.findById.reset();
+    RentalMock.find.reset();
+    RentalMock.findById.reset();
+    RentalMock.findByIdAndDelete.reset();
+    RentalMock.findOne.reset();
+    sendCommandStub.reset();
+    handelPriceStub.reset();
   });
 
-  beforeEach(async () => {
-    const collections = mongoose.connection.collections;
-    for (const key of Object.keys(collections)) {
-      await collections[key].deleteMany({});
-    }
+  it("GET /rentals should return 200 and list", async () => {
+    const token = makeToken();
+    const rentals = [{ _id: "r1" }, { _id: "r2" }];
+
+    RentalMock.find.returns(makeQuery(rentals));
+
+    const res = await request(app)
+      .get(`${basePath}/`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    expect(res.body).to.deep.equal(rentals);
+    expect(RentalMock.find.calledOnce).to.equal(true);
   });
 
-  describe("POST /v1/rentals", () => {
-    it("should create a new rental", async () => {
-      const user = await User.create({
-        ...baseUser
-      });
+  it("GET /rentals/:id should return 404 when not found", async () => {
+    const token = makeToken();
+    RentalMock.findById.returns(makeQuery(null));
 
-      const scooter = await Scooter.create(baseScooter);
+    const res = await request(app)
+      .get(`${basePath}/abc123`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(404);
 
-      await Location.create(baseLocation(scooter._id));
-
-      const res = await request(app)
-        .post(basePath)
-        .send({ user: user._id, scooter: scooter._id })
-        .expect(200);
-
-      expect(res.body).to.have.property("_id");
-      expect(res.body.user).to.equal(user._id.toString());
-      expect(res.body.scooter).to.equal(scooter._id.toString());
-    });
+    expect(res.body).to.deep.equal({ error: "Rental not found" });
   });
 
+  it("POST /rentals should return 400 when scooter missing", async () => {
+    const token = makeToken();
 
-  describe("GET /v1/rentals", () => {
-    it("should return rentals with populated user and scooter", async () => {
-      const user = await User.create({
-        ...baseUser
-      });
+    UserMock.findById.returns(makeQuery({ _id: "u1" }));
+    ScooterMock.findById.returns(makeQuery(null));
 
-      const scooter = await Scooter.create(baseScooter);
+    const res = await request(app)
+      .post(`${basePath}/`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
+      .expect(400);
 
-      await Location.create(baseLocation(scooter._id));
-
-      await Rental.create({ user: user._id, scooter: scooter._id });
-
-      const res = await request(app).get(basePath).expect(200);
-      expect(res.body[0].user.firstName).to.equal("Test");
-      expect(res.body[0].scooter.name).to.equal("S1");
-    });
+    expect(res.body).to.deep.equal({ error: "Scooter is required" });
   });
 
-  describe("GET /v1/rentals/user/:userId", () => {
-    it("should return rentals for a specific user", async () => {
-      const u1 = await User.create({
-        firstName: "U1",
-        lastName: "Test",
-        email: "u1@test.com",
-        password: "123",
-      });
+  it("POST /rentals should return 404 when user not found", async () => {
+    const token = makeToken({ sub: "u1" });
 
-      const u2 = await User.create({
-        firstName: "U2",
-        lastName: "Test",
-        email: "u2@test.com",
-        password: "123",
-      });
+    UserMock.findById.returns(makeQuery(null));
 
-      const s1 = await Scooter.create({ name: "S1", status: "active" });
+    const res = await request(app)
+      .post(`${basePath}/`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ scooter: "s1" })
+      .expect(404);
 
-      await Location.create({
-        scooterId: s1._id,
-        current: { lat: 59, lng: 18 },
-        history: [],
-      });
-
-      await Rental.create({ user: u1._id, scooter: s1._id });
-      await Rental.create({ user: u2._id, scooter: s1._id });
-
-      const res = await request(app)
-        .get(`${basePath}/user/${u1._id}`)
-        .expect(200);
-
-      expect(res.body.length).to.equal(1);
-      expect(res.body[0].user.firstName).to.equal("U1");
-    });
+    expect(res.body).to.deep.equal({ error: "User not found" });
   });
 
-  describe("GET /v1/rentals/user/:userId/latest", () => {
-    it("should return the latest rental for a user", async () => {
-      const user = await User.create({
-        ...baseUser
-      });
+  it("POST /rentals should return 404 when scooter not found", async () => {
+    const token = makeToken({ sub: "u1" });
 
-      const scooter = await Scooter.create({ name: "S", status: "idle" });
+    UserMock.findById.returns(makeQuery({ _id: "u1" }));
+    ScooterMock.findById.returns(makeQuery(null));
 
-      await Location.create(baseLocation(scooter._id));
+    const res = await request(app)
+      .post(`${basePath}/`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ scooter: "s1" })
+      .expect(404);
 
-      const r1 = await Rental.create({
-        user: user._id,
-        scooter: scooter._id,
-        startTime: new Date(Date.now() - 100000),
-      });
-
-      const r2 = await Rental.create({
-        user: user._id,
-        scooter: scooter._id,
-        startTime: new Date(),
-      });
-
-      const res = await request(app)
-        .get(`${basePath}/user/${user._id}/latest`)
-        .expect(200);
-
-      expect(res.body._id).to.equal(r2._id.toString());
-    });
+    expect(res.body).to.deep.equal({ error: "Scooter not found" });
   });
 
-  describe("PATCH /v1/rentals/:id/end", () => {
-    it("should end the rental and set endTime + cost", async () => {
-      const user = await User.create({
-        ...baseUser
-      });
+  it("POST /rentals should return 409 when scooter not available", async () => {
+    const token = makeToken({ sub: "u1" });
 
-      const scooter = await Scooter.create({ name: "S", status: "idle" });
+    UserMock.findById.returns(makeQuery({ _id: "u1" }));
+    ScooterMock.findById.returns(makeQuery({ _id: "s1", status: "offline" }));
 
-      await Location.create({
-        scooterId: scooter._id,
-        current: { lat: 59, lng: 18 },
-        history: [{ lat: 58, lng: 17 }],
-      });
+    const res = await request(app)
+      .post(`${basePath}/`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ scooter: "s1" })
+      .expect(409);
 
-      const rental = await Rental.create({
-        user: user._id,
-        scooter: scooter._id,
-        startTime: new Date(Date.now() - 5 * 60 * 1000),
-        startHistoryIndex: 0,
-      });
+    expect(res.body).to.have.property("error", "Scooter is not available");
+    expect(res.body).to.have.property("status", "offline");
+  });
 
-      const res = await request(app)
-        .patch(`${basePath}/${rental._id}/end`)
-        .expect(200);
+  it("PATCH /rentals/:id/end should return 403 when not owner", async () => {
+    const token = makeToken({ sub: "u1" });
 
-      expect(res.body.endTime).to.exist;
-      expect(res.body.cost).to.be.greaterThan(0);
-      expect(res.body.tripHistory).to.be.an("array");
-      expect(res.body.tripHistory[0].lat).to.equal(58);
-    });
+    RentalMock.findById.returns(makeQuery({ _id: "r1", user: "someone-else" }));
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(403);
+
+    expect(res.body).to.deep.equal({ error: "Forbidden" });
+  });
+
+  it("PATCH /rentals/:id/end should return 200 immediately if already ended", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const ended = { _id: "r1", user: "u1", endTime: new Date().toISOString() };
+    RentalMock.findById.returns(makeQuery(ended));
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    expect(res.body).to.deep.equal(ended);
+  });
+
+  it("PATCH /rentals/:id/end should return 409 if scooter offline (STOP not sent)", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const rentalDoc = {
+      _id: "r1",
+      user: "u1",
+      scooter: "s1",
+      endTime: null,
+    };
+
+    RentalMock.findById.returns(makeQuery(rentalDoc));
+
+    sendCommandStub.returns(0);
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(409);
+
+    expect(res.body).to.have.property("error");
+  });
+
+  it("PATCH /rentals/:id/end should debit credits and return 200", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const userDoc = { _id: "u1", credit: 100, save: sinon.stub().resolves() };
+
+    const updatedRental = {
+      _id: "r1",
+      user: "u1",
+      scooter: "s1",
+      endTime: null,
+      cost: 0,
+      save: sinon.stub().resolves(),
+    };
+
+    const rentalDoc = {
+      _id: "r1",
+      user: "u1",
+      scooter: "s1",
+      endTime: null,
+      endRental: sinon.stub().resolves(updatedRental),
+    };
+
+    RentalMock.findById.resolves(rentalDoc);
+    UserMock.findById.resolves(userDoc);
+    sendCommandStub.returns(1);
+    handelPriceStub.resolves({ cost: 50 });
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    expect(userDoc.credit).to.equal(50);
+    expect(userDoc.save.calledOnce).to.equal(true);
+
+    expect(updatedRental.cost).to.equal(50);
+    expect(updatedRental.save.calledOnce).to.equal(true);
   });
 });

@@ -92,14 +92,13 @@ schema.options.toJSON = {
  * Keep speed consistent with status.
  * If the scooter is idle/offline, we never store a non-zero speed.
  */
-ScooterSchema.pre("save", function normalizeInvariants(next) {
+schema.pre("save", function normalizeInvariants() {
   if (this.status !== STATUSES.DRIVING) {
     this.speedKmh = 0;
   }
-  next();
 });
 
-ScooterSchema.pre(
+schema.pre(
   ["findOneAndUpdate", "updateOne", "updateMany"],
   function normalizeUpdate(next) {
     const update = this.getUpdate() ?? {};

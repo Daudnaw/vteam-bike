@@ -4,5 +4,6 @@ import * as zones from "./zones/index.js";
 import * as admin from "./admin/index.js";
 import * as payments from "./payments/index.js";
 import * as scooters from "./scooter/index.js";
+import * as rentals from "./rentals/index.js";
 
-export const modules = [users, auth, zones, admin, payments, scooters];
+export const modules = [users, auth, zones, admin, payments, scooters, rentals];

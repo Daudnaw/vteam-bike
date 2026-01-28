@@ -2,6 +2,7 @@ import { Router } from "express";
 import { model } from "mongoose";
 import { requireAuth } from "../auth/middleware.js";
 const Scooter = model("Scooter");
+import Location from "../location/model.js";
 
 export const v1 = Router();
 
@@ -45,6 +46,51 @@ v1.get("/", async (req, res, next) => {
     res.status(200).send(scooters);
   } catch (err) {
     return next(err);
+  }
+});
+
+/**
+ * @route POST /v1/scooters
+ * @summary Create a scooter
+ * @description Creates a new scooter (admin only)
+ * @produces application/json
+ * @consumes application/json
+ * @returns {Scooter.model} 201 - Scooter created
+ * @returns {Error} 401 - Unauthorized
+ * @returns {Error} 403 - Forbidden
+ * @returns {Error} 400 - Validation error
+ */
+v1.post("/", requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Admins only" });
+    }
+
+    const {
+      battery,
+      lat,
+      lon,
+      status,
+    } = req.body;
+
+    const scooter = await Scooter.create({
+      battery: battery,
+      lat: lat,
+      lon: lon,
+      status: status,
+    });
+
+    await Location.create({
+      scooterId: scooter._id,
+      lat: scooter.lat,
+      lng: scooter.lon,
+      history: [],
+    });
+
+
+    return res.status(201).json(scooter.toJSON());
+  } catch (err) {
+    next(err);
   }
 });
 

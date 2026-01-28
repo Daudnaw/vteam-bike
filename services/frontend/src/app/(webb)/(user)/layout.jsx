@@ -14,12 +14,7 @@ export default async function UserLayout({ children }) {
         <section className='flex'>
             <CustomerSidebar />
             <main className='flex-1'>
-<<<<<<< HEAD
-                
-                <CustomerHeader email={session.email} />
-=======
                 <CustomerHeader firstName={session.firstName} lastName={session.lastName}/>
->>>>>>> main
                 {children}
             </main>
         </section>

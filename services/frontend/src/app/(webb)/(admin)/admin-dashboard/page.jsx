@@ -24,7 +24,7 @@ export default function AdminDashboard() {
                 <LinkCard to='/admin-dashboard/map' text='Karta' />
                 <LinkCard to='/admin-dashboard/bikes' text='Cyklar' />
                 <LinkCard to='/admin-dashboard/zones' text='Zoner' />
-                <LinkCard to='/admin-dashboard/payments' text='Köp' />
+                <LinkCard to='/admin-dashboard/payments' text='Payments' />
                 <LinkCard to='/admin-dashboard/service' text='Service' />
             </div>
         </div>
