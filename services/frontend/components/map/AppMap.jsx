@@ -4,10 +4,10 @@ import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import UserLocation from './UserLocation';
 import LocateButton from './LocateButton';
+import ZonesLayer from './ZonesLayer';
+import BikesLayer from './BikesLayer';
 
-export default function AppMap({ zones }) {
-    console.log('ZONES:', zones);
-
+export default function AppMap({ zones, bikes }) {
     return (
         <MapContainer
             center={[0, 0]}
@@ -20,6 +20,8 @@ export default function AppMap({ zones }) {
             />
             <LocateButton />
             <UserLocation />
+            <ZonesLayer zones={zones} admin={false} />
+            <BikesLayer bikes={bikes} admin={false} />
         </MapContainer>
     );
 }

@@ -38,7 +38,7 @@ function createClusterCustomIcon(cluster) {
     });
 }
 
-export default function BikesLayer({ bikes }) {
+export default function BikesLayer({ bikes, admin }) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
 
@@ -64,20 +64,49 @@ export default function BikesLayer({ bikes }) {
                     icon={bikeIcon}
                 >
                     <Popup>
-                        <b>{bike.name}</b>
-                        <br />
-                        Status: {bike.status}
-                        <br />
                         <a
-                            href={`/admin-dashboard/bikes/single?bikeId=${bike.bikeId}`}
                             style={{
-                                color: '#1976d2',
-                                textDecoration: 'underline',
-                                cursor: 'pointer',
+                                color:
+                                    bike.status == 'offline'
+                                        ? '#F08080'
+                                        : '#000',
+                                fontWeight: 700,
                             }}
                         >
-                            More details
+                            {bike.status == 'offline' && (
+                                <span>Inte tillgänglig</span>
+                            )}
+                            {bike.status == 'idle' && <span>Tillgänglig</span>}
                         </a>
+                        <br />
+                        <br />
+                        {admin ? (
+                            <a
+                                href={`/admin-dashboard/bikes/single?bikeId=${bike._id}`}
+                                style={{
+                                    color: '#1976d2',
+                                    textDecoration: 'underline',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Se detaljer
+                            </a>
+                        ) : (
+                            bike.status == 'idle' && (
+                                <a
+                                    href={`/app/user-app/rent-bike?bikeId=${bike._id}`}
+                                    style={{
+                                        backgroundColor: 'green',
+                                        color: '#fff',
+                                        padding: '5px',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Hyr cykel
+                                </a>
+                            )
+                        )}
                     </Popup>
                 </Marker>
             ))}

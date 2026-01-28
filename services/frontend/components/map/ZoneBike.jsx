@@ -24,8 +24,8 @@ export default function ZonesAndBikesMap() {
 
     return (
         <BaseMap zones={zones}>
-            <ZonesLayer zones={zones} />
-            <BikesLayer bikes={bikes} />
+            <ZonesLayer zones={zones} admin={true} />
+            <BikesLayer bikes={bikes} admin={true} />
         </BaseMap>
     );
 }

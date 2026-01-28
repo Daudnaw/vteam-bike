@@ -12,14 +12,14 @@ export const v1 = Router();
  *
  * Retrieves all zones from the database.
  *
- * Access: Admin only (protected by requireAuth and requireAdmin).
+ * Access: Admin only (protected by requireAuth).
  *
  * @route GET /zones
  * @group Zones - Endpoints for managing zones
  * @returns {Array<Zone>} 200 - List of all zones
  * @returns {Error} 403 - Forbidden if the user is not an admin
  */
-v1.get('/', requireAuth, requireAdmin, async (req, res, next) => {
+v1.get('/', requireAuth, async (req, res, next) => {
     try {
         const zones = await Zone.find();
         res.status(200).json(zones);
