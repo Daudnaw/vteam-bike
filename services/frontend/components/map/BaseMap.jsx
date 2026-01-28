@@ -2,8 +2,11 @@
 
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
+import CityButton from './CityButton';
 
-export default function BaseMap({ children }) {
+export default function BaseMap({ children, zones }) {
+    const cityZones = zones.filter((zone) => zone.zoneType == 'city');
+
     return (
         <MapContainer
             center={[59.33, 18.07]}
@@ -16,6 +19,7 @@ export default function BaseMap({ children }) {
                 attribution='© OpenStreetMap © CARTO'
             />
             {children}
+            <CityButton zones={cityZones} />
         </MapContainer>
     );
 }
