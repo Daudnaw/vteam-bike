@@ -59,24 +59,14 @@ export default function AdminSidebar() {
                 text='Cyklar'
                 Icon={Motorbike}
             />
-            <NavLink
-                link='/admin-dashboard/zones'
-                collapsed={collapsed}
-                text='Zoner'
-                Icon={Locate}
-            />
+
             <NavLink
                 link='/admin-dashboard/service'
                 collapsed={collapsed}
                 text='Service'
                 Icon={Wrench}
             />
-            <NavLink
-                link='/admin-dashboard/payments'
-                collapsed={collapsed}
-                text='Köp'
-                Icon={DollarSign}
-            />
+
             <SignOutButton collapsed={collapsed} webb={true} />
             <ArrowLeftCircle
                 className={`${
