@@ -1,5 +1,12 @@
 import React from 'react';
-import { Bike, MapPin, Activity, Wrench, Plus } from 'lucide-react';
+import {
+    Bike,
+    MapPin,
+    Activity,
+    Wrench,
+    Plus,
+    CircleAlert,
+} from 'lucide-react';
 import Link from 'next/link';
 import { getBikes } from '../../../../../src/app/actions/bikes';
 
@@ -73,7 +80,16 @@ export default async function BikeTable() {
                                     </td>
 
                                     <td className='border border-detail-yellow px-2 py-2 text-center'>
-                                        {bike.battery}
+                                        {parseInt(bike.battery) <= 20 ? (
+                                            <span className='text-red-400 flex items-center gap-2 justify-center'>
+                                                {bike.battery} %{' '}
+                                                <CircleAlert className='h-4 w-4' />
+                                            </span>
+                                        ) : (
+                                            <span className='text-green-400'>
+                                                {bike.battery} %
+                                            </span>
+                                        )}
                                     </td>
 
                                     <td className='border border-detail-yellow px-2 py-2 text-center'>
