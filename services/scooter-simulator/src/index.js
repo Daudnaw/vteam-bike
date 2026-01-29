@@ -49,7 +49,7 @@ function pickNonRentedStatus() {
 function createCustomer(n) {
   return {
     firstName: "Kund",
-    lastName: String(n),
+    lastName: `${n}`,
     email: `${crypto.randomUUID()}@example.com`,
     password: "password",
   };
@@ -131,7 +131,19 @@ async function loginCustomer(customer) {
 }
 
 /**
- * Create a scooter (and if rented, a customer) and persist it.
+ * Set customer credits.
+ *
+ * @param {import("mongodb").Db} db
+ * @param {string} userId
+ * @param {number} credit=1000
+ */
+async function setUserCredit(db, userId, credit = 1000) {
+  const col = db.collection("users");
+  return col.findOneAndUpdate({ id: userId }, { $set: { credit } });
+}
+
+/**
+ * Generate a random scooter (and if rented, a customer) and persist it.
  *
  * @param {object} ctx
  * @param {import("mongodb").Collection} ctx.scootersCol
@@ -155,14 +167,67 @@ async function generateRandomScooter({ scootersCol, cityZones, idx }) {
   }
 
   let token;
+  let customer;
   try {
-    const customer = await registerCustomer(idx);
+    customer = await registerCustomer(idx);
     token = await loginCustomer(customer);
   } catch (err) {
     console.error(`Could not create and login user ${customer}, idx: ${idx}`);
   }
 
-  return { scooterId, rented: true, status: doc.status, idx, token };
+  return {
+    scooterId,
+    rented: true,
+    status: doc.status,
+    idx,
+    token,
+    customerId: customer._id,
+  };
+}
+
+/**
+ * Instantiate a scooter with sensors.
+ *
+ * @param {object} ctx
+ * @param {string} ctx.scooterId
+ * @param {number} ctx.battery
+ * @param {number} ctx.lat
+ * @param {number} ctx.lon
+ * @returns {{scooter: Scooter, speedSensor: SpeedSensor, locationSensor: LocationSensor}
+ *
+ */
+function scooterFactory({ scooterId, battery, lat, lon }) {
+  const batterySensor = new BatterySensor({ battery });
+  const speedSensor = new SpeedSensor({ speedKmh: 0 });
+  const locationSensor = new LocationSensor({ lat, lon });
+  const scooter = new Scooter({
+    id: scooterId,
+    url: `ws://backend:3000/ws/scooters`,
+    sensors: [batterySensor, speedSensor, locationSensor],
+  });
+
+  return { scooter, speedSensor, locationSensor };
+}
+
+async function driveLoop({ scooter, locationSensor, speedSensor }) {
+  scooter.start();
+
+  while (true) {}
+}
+
+/**
+ * Create a rental for a given scooter for the user.
+ *
+ * @param {string} scooterId
+ * @param {string} token
+ * @return {Promise}
+ */
+function startRental(scooterId, token) {
+  return postJson(
+    `${BACKEND_BASE_URL}/api/v1/rentals`,
+    { scooter: scooterId },
+    { token },
+  );
 }
 
 async function main() {
@@ -187,12 +252,20 @@ async function main() {
 
     for (let i = 1; i <= NUMBER_OF_SCOOTERS; i++) {
       console.debug(`Creating scooter ${i}/${NUMBER_OF_SCOOTERS}`);
-      const result = await createOneScooter({
+      const result = await generateRandomScooter({
         scootersCol,
         cityZones,
         idx: i,
       });
       results.push(result);
+
+      // only scooters that are rented need to call the API to rent
+      // and start their drive loop
+      if (!result.rented) continue;
+
+      await setUserCredit(db, result.customerId);
+
+      await startRental(result.scooterId, result.token);
     }
 
     console.log(
