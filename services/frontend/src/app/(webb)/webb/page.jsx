@@ -9,7 +9,7 @@ export default async function Page() {
     }
 
     if (session.role == 'admin') {
-        console.log("innei admin");
+        console.log('innei admin');
         redirect('/admin-dashboard');
     }
 

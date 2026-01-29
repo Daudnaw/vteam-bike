@@ -96,26 +96,26 @@ export default function LoginForm() {
                 >
                     {loading ? 'Loggar in...' : 'Logga in'}
                 </button>
-                <div className="flex mt-4 space-x-3">
+                <div className='flex mt-4 space-x-3'>
                     <button
-                        type="button"
+                        type='button'
                         onClick={() => {
-                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google?to=webb`;
+                            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google?to=webb`;
                         }}
-                        className="flex items-center justify-center gap-3 w-full rounded-md border bg-white px-4 py-3 text-black text-h5 hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                        className='flex items-center justify-center gap-3 w-full rounded-md border bg-white px-4 py-3 text-black text-h5 hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300'
                     >
-                        <Mail className="h-5 w-5" />
+                        <Mail className='h-5 w-5' />
                         <span>Fortsätt med Google</span>
                     </button>
 
                     <button
-                        type="button"
+                        type='button'
                         onClick={() => {
-                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github?to=webb`;
+                            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github?to=webb`;
                         }}
-                        className="flex items-center justify-center gap-3 w-full rounded-md border bg-slate-900 px-4 py-3 text-white text-h5 hover:bg-slate-800 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-700"
+                        className='flex items-center justify-center gap-3 w-full rounded-md border bg-slate-900 px-4 py-3 text-white text-h5 hover:bg-slate-800 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-700'
                     >
-                        <Github className="h-5 w-5" />
+                        <Github className='h-5 w-5' />
                         <span>Fortsätt med GitHub</span>
                     </button>
                 </div>

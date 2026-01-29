@@ -10,14 +10,14 @@ export default function CityButton({ zones }) {
         if (!zone) {
             return;
         }
-        const city = zones.find((z) => z.id.toString() === zone);
+        const city = zones.find((z) => z.name === zone);
 
         if (!city) {
             return;
         }
 
         function handleLocate(city) {
-            map.flyTo([city.latitude, city.longitude], 12, {
+            map.flyTo([city.area[0][0], city.area[0][1]], 12, {
                 animate: true,
                 duration: 1.5,
             });
@@ -32,7 +32,7 @@ export default function CityButton({ zones }) {
                 <option value=''>Välj stad</option>
                 {zones?.map((zone) => {
                     return (
-                        <option value={zone.id} key={zone.id}>
+                        <option value={zone.name} key={zone.id}>
                             {zone.name}
                         </option>
                     );

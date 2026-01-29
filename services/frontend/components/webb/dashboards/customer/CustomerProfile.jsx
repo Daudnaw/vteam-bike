@@ -12,14 +12,14 @@ export default function CustomerProfile({
             <h3 className='my-5 text-h3'>Översikt</h3>
             <div className='from-slate-600 to-slate-800 bg-linear-to-br p-5 rounded-md shadow-2xl text-white'>
                 <p className='mb-5'>
-                    Förnamn:
+                    Förnamn:{' '}
                     <span className='font-bold text-detail-yellow'>
                         {firstName}
                     </span>
                 </p>
 
                 <p className='mb-5'>
-                    Efternamn:
+                    Efternamn:{' '}
                     <span className='font-bold text-detail-yellow'>
                         {lastName}
                     </span>

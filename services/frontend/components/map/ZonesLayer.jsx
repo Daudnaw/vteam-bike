@@ -2,7 +2,7 @@
 
 import { Circle, Polygon, Popup } from 'react-leaflet';
 
-export default function ZonesLayer({ zones }) {
+export default function ZonesLayer({ zones, admin }) {
     const zoneStyles = {
         city: {
             color: '#4a90e2',
@@ -61,16 +61,18 @@ export default function ZonesLayer({ zones }) {
                             <br />
                             Type: {zone.zoneType}
                             <br />
-                            <a
-                                href='/admin-dashboard/cities'
-                                style={{
-                                    color: '#1976d2',
-                                    textDecoration: 'underline',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                To Edit go to relevent city
-                            </a>
+                            {admin && (
+                                <a
+                                    href='/admin-dashboard/cities'
+                                    style={{
+                                        color: '#1976d2',
+                                        textDecoration: 'underline',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    To Edit go to relevent city
+                                </a>
+                            )}
                         </div>
                     </Popup>
                 </Circle>
@@ -94,16 +96,18 @@ export default function ZonesLayer({ zones }) {
                             <br />
                             Type: {zone.zoneType}
                             <br />
-                            <a
-                                href='/admin-dashboard/cities'
-                                style={{
-                                    color: '#1976d2',
-                                    textDecoration: 'underline',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                To Edit go to relevent city
-                            </a>
+                            {admin && (
+                                <a
+                                    href='/admin-dashboard/cities'
+                                    style={{
+                                        color: '#1976d2',
+                                        textDecoration: 'underline',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    To Edit go to relevent city
+                                </a>
+                            )}
                         </div>
                     </Popup>
                 </Polygon>
