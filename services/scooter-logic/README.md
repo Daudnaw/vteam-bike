@@ -152,3 +152,13 @@ Kommandon:
 
 - `START`
 - `STOP`
+
+## Events
+
+Systemet skickar event vid ett antal tillfällen.
+
+| Event   | När                                                                  |
+| ------- | -------------------------------------------------------------------- |
+| `READY` | Efter kommunikation med backend upprättats och state mottagits       |
+| `START` | När scootern mottagit ett `START`-kommando från backend på WebSocket |
+| `STOP`  | När scootern mottagit ett `STOP`-kommando från backend på WebSocket  |
