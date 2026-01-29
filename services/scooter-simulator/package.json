@@ -1,0 +1,17 @@
+{
+  "name": "@vteam/scooter-simulator",
+  "version": "0.1.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@vteam/scooter-logic": "file:../scooter-logic",
+    "mongodb": "^7.0.0"
+  }
+}

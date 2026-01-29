@@ -2,7 +2,6 @@
   "name": "vteam-bike",
   "version": "1.0.0",
   "description": "A repo for bike-project in vteam.",
-  "main": "index.js",
   "private": true,
   "scripts": {
     "test": "npm -ws test"
@@ -11,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "services/*"
+    "services/*",
+    "scooter-simulator"
   ],
   "dependencies": {
     "cors": "^2.8.5",
