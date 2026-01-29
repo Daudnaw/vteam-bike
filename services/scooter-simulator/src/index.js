@@ -100,8 +100,8 @@ function createScooterDoc({ battery, lat, lon, rented }) {
 /**
  * Register a customer.
  *
- * @param {Number} n
- * @returns {Promise<{email: String, password: String, firstName: String, lastName: String}>}
+ * @param {number} n
+ * @returns {Promise<{email: string, password: string, firstName: string, lastName: string}>}
  */
 async function registerCustomer(n) {
   console.debug("Creating customer");
@@ -116,8 +116,8 @@ async function registerCustomer(n) {
 /**
  * Login a customer. Returns a token.
  *
- * @param {Object} customer
- * @returns {Promise<String>} token
+ * @param {object} customer
+ * @returns {Promise<string>} token
  */
 async function loginCustomer(customer) {
   const login = await postJson(`${BACKEND_BASE_URL}/api/auth/login`, {
@@ -138,7 +138,7 @@ async function loginCustomer(customer) {
  * @param {any[]} ctx.cityZones
  * @param {number} ctx.idx
  */
-async function createOneScooter({ scootersCol, cityZones, idx }) {
+async function generateRandomScooter({ scootersCol, cityZones, idx }) {
   const zone = pick(cityZones);
   const [lat, lon] = randomCoordinateInZone(zone);
 
