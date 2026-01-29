@@ -14,7 +14,10 @@ export default async function UserLayout({ children }) {
         <section className='flex'>
             <CustomerSidebar />
             <main className='flex-1'>
-                <CustomerHeader firstName={session.firstName} lastName={session.lastName}/>
+                <CustomerHeader
+                    firstName={session.firstName}
+                    lastName={session.lastName}
+                />
                 {children}
             </main>
         </section>

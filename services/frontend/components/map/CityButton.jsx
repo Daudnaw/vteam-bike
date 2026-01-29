@@ -6,8 +6,6 @@ export default function CityButton({ zones }) {
     const map = useMap();
     const [zone, setZone] = useState('');
 
-    console.log(zones);
-
     useEffect(() => {
         if (!zone) {
             return;
