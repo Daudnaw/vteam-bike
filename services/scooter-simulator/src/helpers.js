@@ -31,3 +31,11 @@ export function clamp(n, min, max) {
 export function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+/**
+ * Sleep for `n` ms
+ *
+ * @param {number} n
+ * @returns {Promise}
+ */
+export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
