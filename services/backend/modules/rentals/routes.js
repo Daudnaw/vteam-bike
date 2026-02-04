@@ -76,7 +76,7 @@ v1.post('/', requireAuth, async (req, res, next) => {
             return res.status(404).json({ error: 'Scooter not found' });
         }
 
-        if (scooterDoc.status !== 'available') {
+        if (scooterDoc.status !== 'idle') {
             return res.status(409).json({
                 error: 'Scooter is not available',
                 status: scooterDoc.status,
@@ -86,13 +86,56 @@ v1.post('/', requireAuth, async (req, res, next) => {
         const rental = new Rental({ user: userId, scooter });
         await rental.startRental();
 
-        // const existed = sendCommand(rental.scooter, { action: 'START' });
+        const existed = sendCommand(rental.scooter, { action: 'START' });
 
-        // if (!existed) {
-        //     return res
-        //         .status(409)
-        //         .json({ error: 'Scooter is offline', rental });
-        // }
+        if (!existed) {
+            return res
+                .status(409)
+                .json({ error: 'Scooter is offline', rental });
+        }
+
+        return res.status(201).json(rental);
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @route POST /v1/rentals
+ * @summary Start a rental
+ * @body {string} scooter.required Scooter ID
+ * @returns {Rental.model} 201 - Created rental
+ * @returns {Error} 400/401/403/409 - Errors
+ */
+v1.post('/app', requireAuth, async (req, res, next) => {
+    try {
+        const userId = req.user.sub;
+
+        const { scooter } = req.body;
+
+        if (!scooter) {
+            return res.status(400).json({ error: 'Scooter is required' });
+        }
+
+        const user = await User.findById(userId).lean();
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const scooterDoc = await Scooter.findById(scooter).lean();
+
+        if (!scooterDoc) {
+            return res.status(404).json({ error: 'Scooter not found' });
+        }
+
+        if (scooterDoc.status !== 'idle') {
+            return res.status(409).json({
+                error: 'Scooter is not available',
+                status: scooterDoc.status,
+            });
+        }
+
+        const rental = new Rental({ user: userId, scooter });
+        await rental.startRental();
 
         return res.status(201).json(rental);
     } catch (err) {
@@ -123,11 +166,11 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
             return res.status(200).json(rental);
         }
 
-        // const existed = sendCommand(rental.scooter, { action: 'STOP' });
+        const existed = sendCommand(rental.scooter, { action: 'STOP' });
 
-        // if (!existed) {
-        //     return res.status(409).json({ error: 'Scoter is offline', rental });
-        // }
+        if (!existed) {
+            return res.status(409).json({ error: 'Scoter is offline', rental });
+        }
 
         const updatedRental = await rental.endRental();
         const { cost } = await handelPrice(updatedRental);
@@ -135,15 +178,63 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // const credit = Number(user.credit ?? 0);
-        // if (credit < cost) {
-        //     return res
-        //         .status(402)
-        //         .json({ error: 'Too little credits', cost, credit });
-        // }
+        const credit = Number(user.credit ?? 0);
+        if (credit < cost) {
+            return res
+                .status(402)
+                .json({ error: 'Too little credits', cost, credit });
+        }
 
-        // user.credit = credit - cost;
-        // await user.save();
+        user.credit = credit - cost;
+        await user.save();
+
+        updatedRental.cost = cost;
+        await updatedRental.save();
+
+        return res.status(200).json(updatedRental);
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @route PATCH /v1/rentals/:id/end
+ * @summary End a rental
+ * @description Ends the rental and saves journy history into rental and the cost
+ * @param {string} id.path.required - Rental ID
+ * @returns {Rental.model} 200 - Updated rental with endTime, cost, tripHistory
+ * @returns {Error} 404 - Not found
+ */
+v1.patch('/:id/end/app', requireAuth, async (req, res, next) => {
+    try {
+        const userId = req.user.sub;
+
+        const rental = await Rental.findById(req.params.id);
+        if (!rental) return res.status(404).json({ error: 'Rental not found' });
+
+        if (String(rental.user) !== String(userId)) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        if (rental.endTime) {
+            return res.status(200).json(rental);
+        }
+
+        const updatedRental = await rental.endRental();
+        const { cost } = await handelPrice(updatedRental);
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const credit = Number(user.credit ?? 0);
+        if (credit < cost) {
+            return res
+                .status(402)
+                .json({ error: 'Too little credits', cost, credit });
+        }
+
+        user.credit = credit - cost;
+        await user.save();
 
         updatedRental.cost = cost;
         await updatedRental.save();

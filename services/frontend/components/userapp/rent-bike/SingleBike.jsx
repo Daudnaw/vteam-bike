@@ -40,6 +40,7 @@ export default function SingleBike({ bikeId }) {
     return (
         <div className="p-5">
             <h2 className="text-h2">Hyr cykel</h2>
+            <p>Notera att resan bara går att betla med credits, dessa går bara att köpa i user-webb</p>
             <div className="h-1 bg-slate-800 w-full my-5" />
             <div className=" w-full bg-slate-800 flex flex-col justify-center items-center h-[250px] rounded-lg">
                 <BatteryMedium className="text-green-500 h-20 w-20" />

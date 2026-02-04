@@ -14,7 +14,7 @@ export async function rentBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/rentals`, {
+    const res = await fetch(`http://backend:3000/api/v1/rentals/app`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export async function endRental(rentalId) {
     }
 
     const res = await fetch(
-        `http://backend:3000/api/v1/rentals/${rentalId}/end`,
+        `http://backend:3000/api/v1/rentals/${rentalId}/end/app`,
         {
             method: 'PATCH',
             headers: {

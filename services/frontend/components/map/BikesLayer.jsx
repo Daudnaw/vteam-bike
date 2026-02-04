@@ -78,7 +78,7 @@ export default function BikesLayer({ bikes, admin }) {
                             {bike.status == 'offline' && (
                                 <span>Inte tillgänglig</span>
                             )}
-                            {bike.status == 'available' && (
+                            {bike.status == 'idle' && (
                                 <span>Tillgänglig</span>
                             )}
                         </a>
@@ -96,7 +96,7 @@ export default function BikesLayer({ bikes, admin }) {
                                 Se detaljer
                             </a>
                         ) : (
-                            bike.status == 'available' && (
+                            bike.status == 'idle' && (
                                 <a
                                     href={`/app/user-app/rent-bike?bikeId=${bike._id}`}
                                     style={{
