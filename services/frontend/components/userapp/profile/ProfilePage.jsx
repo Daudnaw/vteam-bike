@@ -5,7 +5,7 @@ import SignOutButton from '../../webb/dashboards/shared/SignOutButton';
 
 export default async function ProfilePage({ profile }) {
     return (
-        <div className='p-4'>
+        <div className='p-4 mb-20'>
             <h2 className='text-center font-bold'>Profil</h2>
             <div className='flex justify-center mt-5'>
                 <div className='rounded-full bg-slate-800 p-20 w-fit'>
