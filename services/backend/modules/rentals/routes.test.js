@@ -285,4 +285,226 @@ describe("Rentals routes", function () {
     expect(updatedRental.cost).to.equal(50);
     expect(updatedRental.save.calledOnce).to.equal(true);
   });
+
+  it("POST /rentals/app should return 400 when scooter missing", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const res = await request(app)
+      .post(`${basePath}/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
+      .expect(400);
+
+    expect(res.body).to.deep.equal({ error: "Scooter is required" });
+    expect(UserMock.findById.called).to.equal(false);
+    expect(ScooterMock.findById.called).to.equal(false);
+  });
+
+  it("POST /rentals/app should return 404 when user not found", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    UserMock.findById.returns(makeQuery(null));
+
+    const res = await request(app)
+      .post(`${basePath}/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ scooter: "s1" })
+      .expect(404);
+
+    expect(res.body).to.deep.equal({ error: "User not found" });
+    expect(UserMock.findById.calledOnceWith("u1")).to.equal(true);
+    expect(ScooterMock.findById.called).to.equal(false);
+  });
+
+  it("POST /rentals/app should return 404 when scooter not found", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    UserMock.findById.returns(makeQuery({ _id: "u1" }));
+    ScooterMock.findById.returns(makeQuery(null));
+
+    const res = await request(app)
+      .post(`${basePath}/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ scooter: "s1" })
+      .expect(404);
+
+    expect(res.body).to.deep.equal({ error: "Scooter not found" });
+    expect(UserMock.findById.calledOnceWith("u1")).to.equal(true);
+    expect(ScooterMock.findById.calledOnceWith("s1")).to.equal(true);
+  });
+
+  it("POST /rentals/app should return 409 when scooter not idle", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    UserMock.findById.returns(makeQuery({ _id: "u1" }));
+    ScooterMock.findById.returns(makeQuery({ _id: "s1", status: "offline" }));
+
+    const res = await request(app)
+      .post(`${basePath}/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ scooter: "s1" })
+      .expect(409);
+
+    expect(res.body).to.deep.equal({
+      error: "Scooter is not available",
+      status: "offline",
+    });
+  });
+
+  it("PATCH /rentals/:id/end/app should return 404 when rental not found", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    RentalMock.findById.resolves(null);
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(404);
+
+    expect(res.body).to.deep.equal({ error: "Rental not found" });
+    expect(RentalMock.findById.calledOnceWith("r1")).to.equal(true);
+  });
+
+  it("PATCH /rentals/:id/end/app should return 403 when not owner", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const rentalDoc = { _id: "r1", user: "someone-else" };
+    RentalMock.findById.resolves(rentalDoc);
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(403);
+
+    expect(res.body).to.deep.equal({ error: "Forbidden" });
+  });
+
+  it("PATCH /rentals/:id/end/app should return 200 immediately if already ended", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const rentalDoc = {
+      _id: "r1",
+      user: "u1",
+      endTime: new Date().toISOString(),
+    };
+
+    RentalMock.findById.resolves(rentalDoc);
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    expect(res.body).to.deep.equal(rentalDoc);
+  });
+
+  it("PATCH /rentals/:id/end/app should return 404 when user not found after ending", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const updatedRental = {
+      _id: "r1",
+      user: "u1",
+      endTime: new Date().toISOString(),
+      cost: 0,
+      save: sinon.stub().resolves(),
+    };
+
+    const rentalDoc = {
+      _id: "r1",
+      user: "u1",
+      endTime: null,
+      endRental: sinon.stub().resolves(updatedRental),
+    };
+
+    RentalMock.findById.resolves(rentalDoc);
+    handelPriceStub.resolves({ cost: 50 });
+    UserMock.findById.resolves(null);
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(404);
+
+    expect(res.body).to.deep.equal({ error: "User not found" });
+    expect(rentalDoc.endRental.calledOnce).to.equal(true);
+    expect(handelPriceStub.calledOnceWith(updatedRental)).to.equal(true);
+    expect(UserMock.findById.calledOnceWith("u1")).to.equal(true);
+  });
+
+  it("PATCH /rentals/:id/end/app should return 402 when user has too little credits", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const updatedRental = {
+      _id: "r1",
+      user: "u1",
+      endTime: new Date().toISOString(),
+      cost: 0,
+      save: sinon.stub().resolves(),
+    };
+
+    const rentalDoc = {
+      _id: "r1",
+      user: "u1",
+      endTime: null,
+      endRental: sinon.stub().resolves(updatedRental),
+    };
+
+    RentalMock.findById.resolves(rentalDoc);
+    handelPriceStub.resolves({ cost: 80 });
+
+    const userDoc = { _id: "u1", credit: 50, save: sinon.stub().resolves() };
+    UserMock.findById.resolves(userDoc);
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(402);
+
+    expect(res.body).to.deep.equal({
+      error: "Too little credits",
+      cost: 80,
+      credit: 50,
+    });
+
+    expect(userDoc.save.called).to.equal(false);
+    expect(updatedRental.save.called).to.equal(false);
+  });
+
+  it("PATCH /rentals/:id/end/app should debit credits, set rental cost and return 200", async () => {
+    const token = makeToken({ sub: "u1" });
+
+    const updatedRental = {
+      _id: "r1",
+      user: "u1",
+      endTime: new Date().toISOString(),
+      cost: 0,
+      save: sinon.stub().resolves(),
+    };
+
+    const rentalDoc = {
+      _id: "r1",
+      user: "u1",
+      endTime: null,
+      endRental: sinon.stub().resolves(updatedRental),
+    };
+
+    RentalMock.findById.resolves(rentalDoc);
+    handelPriceStub.resolves({ cost: 40 });
+
+    const userDoc = { _id: "u1", credit: 100, save: sinon.stub().resolves() };
+    UserMock.findById.resolves(userDoc);
+
+    const res = await request(app)
+      .patch(`${basePath}/r1/end/app`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    expect(userDoc.credit).to.equal(60);
+    expect(userDoc.save.calledOnce).to.equal(true);
+
+    expect(updatedRental.cost).to.equal(40);
+    expect(updatedRental.save.calledOnce).to.equal(true);
+
+    expect(res.body).to.include({ _id: "r1", user: "u1", cost: 40 });
+  });
 });
