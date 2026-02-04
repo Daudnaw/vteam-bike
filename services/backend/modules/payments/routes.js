@@ -67,8 +67,8 @@ router.post("/checkout", requireAuth, async (req, res, next) => {
   const session = await stripe.checkout.sessions.create({
     mode,
     line_items,
-    success_url: `http://localhost:8080/admin-dashboard/payments/complete?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `http://localhost:8080/admin-dashboard/payments`,
+    success_url: `http://localhost:8080/user-dashboard/payments/complete?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `http://localhost:8080/user-dashboard/payments`,
     client_reference_id: userId,
     metadata: { userId, type: mode === "payment" ? "credits" : "membership", tier: tier ?? "" },
   });
