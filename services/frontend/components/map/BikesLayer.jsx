@@ -42,7 +42,7 @@ export default function BikesLayer({ bikes, admin }) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
 
-    const availableBikes = bikes.filter((bike) => bike.status == 'available');
+    const availableBikes = bikes.filter((bike) => bike.status == 'idle');
 
     useEffect(() => {
         const onZoom = () => setZoom(map.getZoom());

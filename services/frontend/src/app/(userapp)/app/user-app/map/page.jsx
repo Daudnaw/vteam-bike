@@ -1,10 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
 import React from 'react';
-import AppMap from '../../../../../../components/map/AppMap';
+// import AppMap from '../../../../../../components/map/AppMap';
+import dynamic from 'next/dynamic';
 import LocateButton from '../../../../../../components/map/LocateButton';
 import { getAllZones } from '../../../../actions/zones';
 import { getBikes } from '../../../../actions/bikes';
+
+const AppMap = dynamic(
+  () => import('../../../../../../components/map/AppMap'),
+  { ssr: false }
+);
 
 export default function Page() {
     const [zones, setZones] = useState([]);
