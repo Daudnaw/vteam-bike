@@ -32,58 +32,57 @@ export default function CreateBike() {
     }
 
     return (
-        <div className='w-md mx-auto border border-detail-yellow rounded-md p-6 shadow-xl from-slate-600 to-slate-800 bg-linear-to-br'>
-            <h2 className='text-3xl text-white mb-6 text-center'>
+        <div className="w-md mx-auto border border-detail-yellow rounded-md p-6 shadow-xl from-slate-600 to-slate-800 bg-linear-to-br">
+            <h2 className="text-3xl text-white mb-6 text-center">
                 Create New Bike
             </h2>
 
             <form action={handleAction}>
                 <select
-                    name='bikeStatus'
+                    name="bikeStatus"
                     required
-                    className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
+                    className="w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black"
                 >
-                    <option value=''>Select status</option>
-                    <option value='available'>Available</option>
-                    <option value='in_use'>In use</option>
-                    <option value='maintenance'>Maintenance</option>
+                    <option value="">Select status</option>
+                    <option value="idle">Tillgänglig</option>
+                    <option value="offline">Offline</option>
                 </select>
 
                 <input
-                    className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
+                    className="w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black"
                     required
-                    placeholder='Battery level (%)'
-                    name='batteryLevel'
-                    type='number'
-                    min='0'
-                    max='100'
+                    placeholder="Battery level (%)"
+                    name="batteryLevel"
+                    type="number"
+                    min="0"
+                    max="100"
                 />
 
                 <input
-                    className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
+                    className="w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black"
                     required
-                    placeholder='Latitude'
-                    name='lat'
-                    type='number'
-                    step='any'
+                    placeholder="Latitude"
+                    name="lat"
+                    type="number"
+                    step="any"
                 />
 
                 <input
-                    className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
+                    className="w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black"
                     required
-                    placeholder='Longitude'
-                    name='lon'
-                    type='number'
-                    step='any'
+                    placeholder="Longitude"
+                    name="lon"
+                    type="number"
+                    step="any"
                 />
 
                 {error && (
-                    <p className='mt-2 text-detail-red'>{error.message}</p>
+                    <p className="mt-2 text-detail-red">{error.message}</p>
                 )}
 
                 <button
-                    type='submit'
-                    className='bg-detail-yellow text-black rounded-md w-full text-h4 text-center mt-5 py-2 hover:opacity-90 cursor-pointer'
+                    type="submit"
+                    className="bg-detail-yellow text-black rounded-md w-full text-h4 text-center mt-5 py-2 hover:opacity-90 cursor-pointer"
                 >
                     {loading ? 'Creating bike...' : 'Create bike'}
                 </button>

@@ -42,6 +42,8 @@ export default function BikesLayer({ bikes, admin }) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
 
+    const availableBikes = bikes.filter((bike) => bike.status == 'available');
+
     useEffect(() => {
         const onZoom = () => setZoom(map.getZoom());
         map.on('zoomend', onZoom);
@@ -57,7 +59,7 @@ export default function BikesLayer({ bikes, admin }) {
             showCoverageOnHover={false}
             iconCreateFunction={createClusterCustomIcon}
         >
-            {bikes.map((bike) => (
+            {availableBikes.map((bike) => (
                 <Marker
                     key={bike._id}
                     position={[bike.lat, bike.lon]}
@@ -76,7 +78,9 @@ export default function BikesLayer({ bikes, admin }) {
                             {bike.status == 'offline' && (
                                 <span>Inte tillgänglig</span>
                             )}
-                            {bike.status == 'idle' && <span>Tillgänglig</span>}
+                            {bike.status == 'available' && (
+                                <span>Tillgänglig</span>
+                            )}
                         </a>
                         <br />
                         <br />
@@ -92,7 +96,7 @@ export default function BikesLayer({ bikes, admin }) {
                                 Se detaljer
                             </a>
                         ) : (
-                            bike.status == 'idle' && (
+                            bike.status == 'available' && (
                                 <a
                                     href={`/app/user-app/rent-bike?bikeId=${bike._id}`}
                                     style={{

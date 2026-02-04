@@ -59,19 +59,21 @@ export default function ZonesLayer({ zones, admin }) {
                         <div style={{ minWidth: 180 }}>
                             <b>{zone.name}</b>
                             <br />
-                            Type: {zone.zoneType}
-                            <br />
                             {admin && (
-                                <a
-                                    href='/admin-dashboard/cities'
-                                    style={{
-                                        color: '#1976d2',
-                                        textDecoration: 'underline',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    To Edit go to relevent city
-                                </a>
+                                <div>
+                                    <span>Type: {zone.zoneType}</span>
+                                    <br />
+                                    <a
+                                        href="/admin-dashboard/cities"
+                                        style={{
+                                            color: '#1976d2',
+                                            textDecoration: 'underline',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        To Edit go to relevent city
+                                    </a>
+                                </div>
                             )}
                         </div>
                     </Popup>
@@ -90,15 +92,15 @@ export default function ZonesLayer({ zones, admin }) {
                         mouseout: (e) => e.target.setStyle(style),
                     }}
                 >
-                    <Popup>
-                        <div style={{ minWidth: 180 }}>
-                            <b>{zone.name}</b>
-                            <br />
-                            Type: {zone.zoneType}
-                            <br />
-                            {admin && (
+                    {admin && (
+                        <Popup>
+                            <div style={{ minWidth: 180 }}>
+                                <b>{zone.name}</b>
+                                <br />
+                                Type: {zone.zoneType}
+                                <br />
                                 <a
-                                    href='/admin-dashboard/cities'
+                                    href="/admin-dashboard/cities"
                                     style={{
                                         color: '#1976d2',
                                         textDecoration: 'underline',
@@ -107,9 +109,9 @@ export default function ZonesLayer({ zones, admin }) {
                                 >
                                     To Edit go to relevent city
                                 </a>
-                            )}
-                        </div>
-                    </Popup>
+                            </div>
+                        </Popup>
+                    )}
                 </Polygon>
             );
         }

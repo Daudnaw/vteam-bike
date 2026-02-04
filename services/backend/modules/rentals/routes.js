@@ -76,7 +76,7 @@ v1.post('/', requireAuth, async (req, res, next) => {
             return res.status(404).json({ error: 'Scooter not found' });
         }
 
-        if (scooterDoc.status !== 'idle') {
+        if (scooterDoc.status !== 'available') {
             return res.status(409).json({
                 error: 'Scooter is not available',
                 status: scooterDoc.status,
@@ -86,13 +86,13 @@ v1.post('/', requireAuth, async (req, res, next) => {
         const rental = new Rental({ user: userId, scooter });
         await rental.startRental();
 
-        const existed = sendCommand(rental.scooter, { action: 'START' });
+        // const existed = sendCommand(rental.scooter, { action: 'START' });
 
-        if (!existed) {
-            return res
-                .status(409)
-                .json({ error: 'Scooter is offline', rental });
-        }
+        // if (!existed) {
+        //     return res
+        //         .status(409)
+        //         .json({ error: 'Scooter is offline', rental });
+        // }
 
         return res.status(201).json(rental);
     } catch (err) {
@@ -123,11 +123,11 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
             return res.status(200).json(rental);
         }
 
-        const existed = sendCommand(rental.scooter, { action: 'STOP' });
+        // const existed = sendCommand(rental.scooter, { action: 'STOP' });
 
-        if (!existed) {
-            return res.status(409).json({ error: 'Scoter is offline', rental });
-        }
+        // if (!existed) {
+        //     return res.status(409).json({ error: 'Scoter is offline', rental });
+        // }
 
         const updatedRental = await rental.endRental();
         const { cost } = await handelPrice(updatedRental);
@@ -135,15 +135,15 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        const credit = Number(user.credit ?? 0);
-        if (credit < cost) {
-            return res
-                .status(402)
-                .json({ error: 'Too little credits', cost, credit });
-        }
+        // const credit = Number(user.credit ?? 0);
+        // if (credit < cost) {
+        //     return res
+        //         .status(402)
+        //         .json({ error: 'Too little credits', cost, credit });
+        // }
 
-        user.credit = credit - cost;
-        await user.save();
+        // user.credit = credit - cost;
+        // await user.save();
 
         updatedRental.cost = cost;
         await updatedRental.save();
