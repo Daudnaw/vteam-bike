@@ -2,9 +2,17 @@ import React from 'react';
 import { User, Bike, Mail, Coins, Flame } from 'lucide-react';
 import IconCard from './IconCard';
 import SignOutButton from '../../webb/dashboards/shared/SignOutButton';
+import { getAllRentalUser } from '../../../src/app/actions/rental.js';
 
 export default async function ProfilePage({ profile }) {
     console.log(profile);
+    const rents = await getAllRentalUser(profile._id);
+    const rentCount = Array.isArray(rents) ? rents.length : rents;
+    let totalCost = 0;
+    for (const item of rents) {
+        totalCost += item.cost;
+    }
+
     return (
         <div className='p-4 mb-20'>
             <h2 className='text-center font-bold'>Profil</h2>
@@ -26,9 +34,9 @@ export default async function ProfilePage({ profile }) {
             </p>
 
             <div className='grid grid-cols-3 gap-5 mt-5'>
-                <IconCard Icon={Bike} amount={0} text='Resor' />
-                <IconCard Icon={Bike} amount={0} text='Resor' />
-                <IconCard Icon={Bike} amount={0} text='Resor' />
+                <IconCard Icon={Bike} amount={rentCount} text='Resor' />
+                <IconCard Icon={Bike} amount={totalCost} text='Kr rest för' />
+                <IconCard Icon={Bike} amount={0} text='' />
             </div>
 
             <div className='h-1 w-full bg-slate-800 my-4' />
