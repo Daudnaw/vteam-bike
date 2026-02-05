@@ -224,7 +224,8 @@ describe("Zone v1 routes", function () {
       active: true,
       zoneType: "parking",
     });
-    expect(res.body[0]).to.have.property("id", zone.id);
+    expect(res.body[0]).to.have.property("_id");
+    expect(String(res.body[0]._id)).to.equal(String(zone._id));
   });
 
   it("GET /zones/:id should return 403", async () => {
