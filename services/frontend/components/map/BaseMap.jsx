@@ -20,8 +20,8 @@ export default function BaseMap({ children, zones }) {
             style={{ height: '600px', width: '100%' }}
         >
             <TileLayer
-                url='https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
-                attribution='© OpenStreetMap © CARTO'
+                url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                attribution='&copy; OpenStreetMap contributors'
             />
             {children}
             <CityButton zones={cityZones} />
