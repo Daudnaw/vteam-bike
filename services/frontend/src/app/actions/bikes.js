@@ -54,7 +54,7 @@ export async function deleteBike(bikeId) {
         return res.json();
     }
 
-    throw new Error(res.err || 'Fetching bikes failed!');
+    throw new Error(res.err || 'Deleting bike failed!');
 }
 
 /**
@@ -63,8 +63,26 @@ export async function deleteBike(bikeId) {
  * @returns
  */
 export async function stopBike(bikeId) {
-    console.log(`Bike ${bikeId} is stopped`);
-    return { success: true };
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (res.ok) {
+        return res.json();
+    }
+
+    throw new Error(res.err || 'Updating bike failed!');
 }
 
 /**
@@ -73,8 +91,26 @@ export async function stopBike(bikeId) {
  * @returns
  */
 export async function lockBike(bikeId) {
-    console.log(`Bike ${bikeId} is locked`);
-    return { success: true };
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (res.ok) {
+        return res.json();
+    }
+
+    throw new Error(res.err || 'Lock bike failed!');
 }
 
 /**
@@ -83,8 +119,26 @@ export async function lockBike(bikeId) {
  * @returns
  */
 export async function maintainBike(bikeId) {
-    console.log(`Bike ${bikeId} is set to maintenance`);
-    return { success: true };
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (res.ok) {
+        return res.json();
+    }
+
+    throw new Error(res.err || 'Maintance bike failed!');
 }
 
 /**
@@ -93,8 +147,26 @@ export async function maintainBike(bikeId) {
  * @returns
  */
 export async function readyBike(bikeId) {
-    console.log(`Bike ${bikeId} is ready to use again`);
-    return { success: true };
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (res.ok) {
+        return res.json();
+    }
+
+    throw new Error(res.err || 'Ready bike failed!');
 }
 
 /**
