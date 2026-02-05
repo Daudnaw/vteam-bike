@@ -7,6 +7,10 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { Github, Mail } from 'lucide-react';
 
+/**
+ * Login form webb.
+ * @returns
+ */
 export default function LoginForm() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);

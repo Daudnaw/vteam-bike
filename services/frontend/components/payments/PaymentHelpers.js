@@ -2,6 +2,11 @@
 
 const BASE_URL = 'http://localhost:3000';
 
+/**
+ * Checkut payment.
+ * @param {*} payload
+ * @returns
+ */
 export default async function checkOut(payload) {
     try {
         const res = await fetch(`${BASE_URL}/api/payments/checkout`, {

@@ -5,6 +5,10 @@ import BaseMap from './BaseMap';
 import ZonesLayer from './ZonesLayer';
 import { getAllZones } from '../../src/app/actions/zones';
 
+/**
+ * Zones only map.
+ * @returns
+ */
 export default function ZonesOnlyMap() {
     const [zones, setZones] = useState([]);
 

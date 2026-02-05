@@ -2,6 +2,10 @@ import React from 'react';
 import LoginForm from './forms/LoginForm';
 import Image from 'next/image';
 
+/**
+ * Login layout user app.
+ * @returns
+ */
 export default function Login() {
     return (
         <div className='h-screen p-5'>

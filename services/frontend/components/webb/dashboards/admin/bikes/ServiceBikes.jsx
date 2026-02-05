@@ -3,6 +3,10 @@ import { Bike, MapPin, Activity, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import { getBikes } from '../../../../../src/app/actions/bikes';
 
+/**
+ * All bikes in service.
+ * @returns
+ */
 export default async function ServiceBikes() {
     const bikes = await getBikes();
 

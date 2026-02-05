@@ -7,6 +7,10 @@ import BikesLayer from './BikesLayer';
 import { getAllZones } from '../../src/app/actions/zones';
 import { getBikes } from '../../src/app/actions/bikes';
 
+/**
+ * Zone and bike map.
+ * @returns
+ */
 export default function ZonesAndBikesMap() {
     const [zones, setZones] = useState([]);
     const [bikes, setBikes] = useState([]);

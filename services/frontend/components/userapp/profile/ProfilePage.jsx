@@ -4,6 +4,11 @@ import IconCard from './IconCard';
 import SignOutButton from '../../webb/dashboards/shared/SignOutButton';
 import { getAllRentalUser } from '../../../src/app/actions/rental.js';
 
+/**
+ * Profile page on user app.
+ * @param {*} param0
+ * @returns
+ */
 export default async function ProfilePage({ profile }) {
     console.log(profile);
     const rents = await getAllRentalUser(profile._id);
@@ -44,17 +49,19 @@ export default async function ProfilePage({ profile }) {
             <div className='flex items-center gap-2 text-xl'>
                 <Mail /> <span>{profile.email}</span>
             </div>
-            
+
             <div className='h-1 w-full bg-slate-800 my-4' />
 
             <div className='flex items-center gap-2 text-xl'>
-                <Coins /><span>Credits: </span>
+                <Coins />
+                <span>Credits: </span>
                 <span>{profile.credit}</span>
             </div>
 
             <div className='flex items-center gap-2 text-xl'>
-                <Flame /><span>Medlemskap: </span>
-                <span>{profile?.membership?.tier ?? "Inget medlemskap"}</span>
+                <Flame />
+                <span>Medlemskap: </span>
+                <span>{profile?.membership?.tier ?? 'Inget medlemskap'}</span>
             </div>
 
             <div className='h-1 w-full bg-slate-800 my-4' />

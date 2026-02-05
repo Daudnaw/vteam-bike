@@ -2,6 +2,11 @@ import React from 'react';
 import { Calendar, ArrowLeft, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 
+/**
+ * Single trip view.
+ * @param {*} param0
+ * @returns
+ */
 export default function SingleTrip({ trip }) {
     function formatTime(date) {
         const newDate = new Date(date);

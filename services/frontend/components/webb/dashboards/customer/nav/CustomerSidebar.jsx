@@ -13,6 +13,10 @@ import {
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
 
+/**
+ * Customer sidebar in dashboard.
+ * @returns
+ */
 export default function CustomerSidebar() {
     const [collapsed, setCollapsed] = useState(false);
 

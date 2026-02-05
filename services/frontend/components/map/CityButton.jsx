@@ -2,6 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 
+/**
+ * A button to relocate to a city.
+ * @param {*} param0
+ * @returns
+ */
 export default function CityButton({ zones }) {
     const map = useMap();
     const [zone, setZone] = useState('');

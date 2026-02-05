@@ -2,6 +2,11 @@
 
 import { Circle, Polygon, Popup } from 'react-leaflet';
 
+/**
+ * Zones layer to load on map.
+ * @param {*} param0
+ * @returns
+ */
 export default function ZonesLayer({ zones, admin }) {
     const zoneStyles = {
         city: {
@@ -64,7 +69,7 @@ export default function ZonesLayer({ zones, admin }) {
                                     <span>Type: {zone.zoneType}</span>
                                     <br />
                                     <a
-                                        href="/admin-dashboard/cities"
+                                        href='/admin-dashboard/cities'
                                         style={{
                                             color: '#1976d2',
                                             textDecoration: 'underline',
@@ -100,7 +105,7 @@ export default function ZonesLayer({ zones, admin }) {
                                 Type: {zone.zoneType}
                                 <br />
                                 <a
-                                    href="/admin-dashboard/cities"
+                                    href='/admin-dashboard/cities'
                                     style={{
                                         color: '#1976d2',
                                         textDecoration: 'underline',

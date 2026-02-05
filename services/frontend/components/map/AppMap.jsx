@@ -7,6 +7,11 @@ import LocateButton from './LocateButton';
 import ZonesLayer from './ZonesLayer';
 import BikesLayer from './BikesLayer';
 
+/**
+ * Map for user app.
+ * @param {*} param0
+ * @returns
+ */
 export default function AppMap({ zones, bikes }) {
     return (
         <MapContainer

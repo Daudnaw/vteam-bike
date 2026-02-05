@@ -15,6 +15,10 @@ import {
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
 
+/**
+ * Admin sidebar in dashboard.
+ * @returns
+ */
 export default function AdminSidebar() {
     const [collapsed, setCollapsed] = useState(false);
 

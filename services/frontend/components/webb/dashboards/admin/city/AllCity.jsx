@@ -7,6 +7,10 @@ import { MoreVertical, Trash2, Plus } from 'lucide-react';
 import { getAllCities, deleteZone } from '../../../../../src/app/actions/zones';
 import CityCard from './CityCard';
 
+/**
+ * All cities.
+ * @returns
+ */
 export default function CitiesList() {
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState(true);

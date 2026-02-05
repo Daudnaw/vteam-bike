@@ -24,6 +24,11 @@ import {
     getSingelBike,
 } from '../../../../../src/app/actions/bikes';
 
+/**
+ * Single bike
+ * @param {*} param0
+ * @returns
+ */
 export default function SingleBike({ bikeId }) {
     const [bike, setBike] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -39,7 +44,7 @@ export default function SingleBike({ bikeId }) {
     }, [bikeId]);
 
     if (loading) return <p>Loading bike...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (error) return <p className='text-red-500'>{error}</p>;
     if (!bike) return <p>bike not found</p>;
 
     const actionRules = {
@@ -97,44 +102,44 @@ export default function SingleBike({ bikeId }) {
                     Edit me
                 </Link>
             </div> */}
-            <div className="overflow-hidden rounded-md border border-detail-yellow shadow-2xl">
-                <table className="w-full border-collapse divide-detail-yellow from-slate-600 to-slate-800 bg-linear-to-br text-white">
-                    <thead className="bg-slate-900">
+            <div className='overflow-hidden rounded-md border border-detail-yellow shadow-2xl'>
+                <table className='w-full border-collapse divide-detail-yellow from-slate-600 to-slate-800 bg-linear-to-br text-white'>
+                    <thead className='bg-slate-900'>
                         <tr>
-                            <th className="border border-detail-yellow text-2xl py-2 text-center">
-                                <div className="flex gap-2 items-center justify-center">
-                                    <Bike className="text-detail-yellow" />
+                            <th className='border border-detail-yellow text-2xl py-2 text-center'>
+                                <div className='flex gap-2 items-center justify-center'>
+                                    <Bike className='text-detail-yellow' />
                                     Cykel
                                 </div>
                             </th>
-                            <th className="border border-detail-yellow text-2xl py-2 text-center">
-                                <div className="flex gap-2 items-center justify-center">
-                                    <Activity className="text-detail-yellow" />
+                            <th className='border border-detail-yellow text-2xl py-2 text-center'>
+                                <div className='flex gap-2 items-center justify-center'>
+                                    <Activity className='text-detail-yellow' />
                                     Status
                                 </div>
                             </th>
-                            <th className="border border-detail-yellow text-2xl py-2 text-center">
-                                <div className="flex gap-2 items-center justify-center">
-                                    <MapPin className="text-detail-yellow" />
+                            <th className='border border-detail-yellow text-2xl py-2 text-center'>
+                                <div className='flex gap-2 items-center justify-center'>
+                                    <MapPin className='text-detail-yellow' />
                                     Plats (lat, lon)
                                 </div>
                             </th>
-                            <th className="border border-detail-yellow text-2xl py-2 text-center">
-                                <div className="flex gap-2 items-center justify-center">
-                                    <Wrench className="text-detail-yellow" />
+                            <th className='border border-detail-yellow text-2xl py-2 text-center'>
+                                <div className='flex gap-2 items-center justify-center'>
+                                    <Wrench className='text-detail-yellow' />
                                     Åtgärder
                                 </div>
                             </th>
                         </tr>
                     </thead>
 
-                    <tbody className="divide-detail-yellow">
+                    <tbody className='divide-detail-yellow'>
                         <tr>
-                            <td className="border border-detail-yellow px-2 py-4 text-center">
+                            <td className='border border-detail-yellow px-2 py-4 text-center'>
                                 {bike._id}
                             </td>
 
-                            <td className="border border-detail-yellow px-2 py-4 text-center">
+                            <td className='border border-detail-yellow px-2 py-4 text-center'>
                                 <span
                                     className={`font-semibold ${
                                         bike.status === 'available'
@@ -156,12 +161,12 @@ export default function SingleBike({ bikeId }) {
                                 </span>
                             </td>
 
-                            <td className="border border-detail-yellow px-2 py-4 text-center">
+                            <td className='border border-detail-yellow px-2 py-4 text-center'>
                                 {bike.lat}. {bike.lon}
                             </td>
 
-                            <td className="border border-detail-yellow px-2 py-4 text-center">
-                                <div className="flex items-center justify-center gap-3">
+                            <td className='border border-detail-yellow px-2 py-4 text-center'>
+                                <div className='flex items-center justify-center gap-3'>
                                     <button
                                         disabled={!canDo(bike.status, 'stop')}
                                         onClick={() =>

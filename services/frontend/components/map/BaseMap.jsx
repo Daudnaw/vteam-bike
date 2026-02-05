@@ -4,6 +4,11 @@ import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import CityButton from './CityButton';
 
+/**
+ * Basemap.
+ * @param {*} param0
+ * @returns
+ */
 export default function BaseMap({ children, zones }) {
     const cityZones = zones.filter((zone) => zone.zoneType == 'city');
 

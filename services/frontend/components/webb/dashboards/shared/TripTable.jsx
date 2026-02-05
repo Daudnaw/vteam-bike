@@ -9,6 +9,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+/**
+ * Table to show trips made by user.
+ * @param {*} param0
+ * @returns
+ */
 export default function TripTable({ rentals }) {
     function formatTime(date) {
         const newDate = new Date(date);

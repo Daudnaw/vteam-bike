@@ -9,6 +9,11 @@ import {
     updateBike,
 } from '../../../../../../src/app/actions/bikes';
 
+/**
+ * Update bike form admin.
+ * @param {*} param0
+ * @returns
+ */
 export default function UpdateBike({ bikeId }) {
     const router = useRouter();
     const [bike, setBike] = useState(null);

@@ -14,6 +14,9 @@ import { getBikes } from '../../src/app/actions/bikes';
 import { useState, useEffect } from 'react';
 import L from 'leaflet';
 
+/**
+ * Bike icon.
+ */
 const bikeIcon = new L.Icon({
     iconUrl: '/scooter.png',
     iconSize: [32, 32],
@@ -21,6 +24,10 @@ const bikeIcon = new L.Icon({
     popupAnchor: [0, -32],
 });
 
+/**
+ * Leaflet map.
+ * @returns
+ */
 export default function LeafMap() {
     const [zones, setZones] = useState([]);
     const [bikes, setBikes] = useState([]);

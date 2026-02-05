@@ -7,6 +7,11 @@ const MarkerClusterGroup = dynamic(() => import('react-leaflet-cluster'), {
     ssr: false,
 });
 
+/**
+ * Bike icon.
+ * @param {*} size
+ * @returns
+ */
 function createBikeIcon(size) {
     return new L.Icon({
         iconUrl: '/scooter.png',
@@ -16,6 +21,11 @@ function createBikeIcon(size) {
     });
 }
 
+/**
+ * Create a custom cluster icon.
+ * @param {*} cluster
+ * @returns
+ */
 function createClusterCustomIcon(cluster) {
     const count = cluster.getChildCount();
     const size = count < 10 ? 30 : count < 50 ? 40 : 50;
@@ -38,6 +48,11 @@ function createClusterCustomIcon(cluster) {
     });
 }
 
+/**
+ * Bikes layer to load onto a map.
+ * @param {*} param0
+ * @returns
+ */
 export default function BikesLayer({ bikes, admin }) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
@@ -78,9 +93,7 @@ export default function BikesLayer({ bikes, admin }) {
                             {bike.status == 'offline' && (
                                 <span>Inte tillgänglig</span>
                             )}
-                            {bike.status == 'idle' && (
-                                <span>Tillgänglig</span>
-                            )}
+                            {bike.status == 'idle' && <span>Tillgänglig</span>}
                         </a>
                         <br />
                         <br />

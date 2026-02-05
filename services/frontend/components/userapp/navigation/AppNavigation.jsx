@@ -2,6 +2,10 @@ import React from 'react';
 import Link from 'next/link';
 import { Map, User, Camera, Bike } from 'lucide-react';
 
+/**
+ * Navigation bar on user app.
+ * @returns
+ */
 export default function AppNavigation() {
     return (
         <div className='fixed bottom-0 flex bg-slate-800 text-white py-5 w-full px-4 z-1000'>
