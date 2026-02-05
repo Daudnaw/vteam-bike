@@ -4,7 +4,7 @@ import { sendCommand } from "../scooter/ws.js";
 import { requireAuth } from "../auth/middleware.js";
 import handelPrice from "./handelPayment.js";
 import User from "../users/model.js";
-import Scooter from "../scooter/model.js";
+import Scooter, { STATUSES } from "../scooter/model.js";
 
 const Rental = model("Rental");
 
@@ -73,7 +73,7 @@ v1.post("/", requireAuth, async (req, res, next) => {
       return res.status(404).json({ error: "Scooter not found" });
     }
 
-    if (scooterDoc.status !== "idle") {
+    if (scooterDoc.status !== STATUSES.AVAILABLE) {
       return res.status(409).json({
         error: "Scooter is not available",
         status: scooterDoc.status,
@@ -83,10 +83,10 @@ v1.post("/", requireAuth, async (req, res, next) => {
     const rental = new Rental({ user: userId, scooter });
     await rental.startRental();
 
-    const existed = sendCommand(rental.scooter, { action: "START"});
+    const existed = sendCommand(rental.scooter, { action: "START" });
 
     if (!existed) {
-      return res.status(409).json({ error: "Scoter is offline", rental});
+      return res.status(409).json({ error: "Scooter is offline", rental });
     }
 
     return res.status(201).json(rental);
@@ -118,10 +118,10 @@ v1.patch("/:id/end", requireAuth, async (req, res, next) => {
       return res.status(200).json(rental);
     }
 
-    const existed = sendCommand(rental.scooter, { action: "STOP"});
+    const existed = sendCommand(rental.scooter, { action: "STOP" });
 
     if (!existed) {
-      return res.status(409).json({ error: "Scoter is offline", rental});
+      return res.status(409).json({ error: "Scoter is offline", rental });
     }
 
     const updatedRental = await rental.endRental();
@@ -132,7 +132,9 @@ v1.patch("/:id/end", requireAuth, async (req, res, next) => {
 
     const credit = Number(user.credit ?? 0);
     if (credit < cost) {
-      return res.status(402).json({ error: "Too little credits", cost, credit });
+      return res
+        .status(402)
+        .json({ error: "Too little credits", cost, credit });
     }
 
     user.credit = credit - cost;
@@ -202,7 +204,9 @@ v1.get("/user/:userId", requireAuth, async (req, res, next) => {
       .populate("scooter", "name status");
 
     if (rentals.length === 0) {
-      return res.status(404).json({ message: "No rentals found for this user" });
+      return res
+        .status(404)
+        .json({ message: "No rentals found for this user" });
     }
 
     res.status(200).json(rentals);
@@ -228,7 +232,9 @@ v1.get("/user/:userId/latest", requireAuth, async (req, res, next) => {
       .populate("scooter", "name status");
 
     if (!rental) {
-      return res.status(404).json({ message: "No rentals found for this user" });
+      return res
+        .status(404)
+        .json({ message: "No rentals found for this user" });
     }
 
     res.status(200).json(rental);

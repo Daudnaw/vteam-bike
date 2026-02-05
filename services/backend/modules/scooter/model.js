@@ -8,9 +8,10 @@ import { Schema, model } from "mongoose";
  * - scooter-logic device code (idle/driving)
  */
 export const STATUSES = Object.freeze({
-  IDLE: "idle",
-  DRIVING: "driving",
-  OFFLINE: "offline",
+  AVAILABLE: "available",
+  CHARGING: "charging",
+  MAINTENANCE: "maintenance",
+  RENTED: "rented",
 });
 
 /**
@@ -59,7 +60,7 @@ const schema = new Schema(
     status: {
       type: String,
       enum: Object.values(STATUSES),
-      default: STATUSES.OFFLINE,
+      default: STATUSES.AVAILABLE,
       index: true,
     },
     lastSeenAt: {
@@ -93,24 +94,22 @@ schema.options.toJSON = {
  * If the scooter is idle/offline, we never store a non-zero speed.
  */
 schema.pre("save", function normalizeInvariants() {
-  if (this.status !== STATUSES.DRIVING) {
+  if (this.status !== STATUSES.RENTED) {
     this.speedKmh = 0;
   }
 });
 
 schema.pre(
   ["findOneAndUpdate", "updateOne", "updateMany"],
-  function normalizeUpdate(next) {
+  function normalizeUpdate() {
     const update = this.getUpdate() ?? {};
     const $set = update.$set ?? update;
 
-    // If status is being set to anything other than driving, force speed to 0.
-    if ($set.status && $set.status !== STATUSES.DRIVING) {
+    // If status is being set to anything other than rented, force speed to 0.
+    if ($set.status && $set.status !== STATUSES.RENTED) {
       if (update.$set) update.$set.speedKmh = 0;
       else update.speedKmh = 0;
     }
-
-    next();
   },
 );
 
