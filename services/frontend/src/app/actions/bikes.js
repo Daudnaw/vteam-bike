@@ -35,8 +35,26 @@ export async function getBikes() {
  * @returns
  */
 export async function deleteBike(bikeId) {
-    console.log(`Bike ${bikeId} is deleted`);
-    return { success: true };
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (res.ok) {
+        return res.json();
+    }
+
+    throw new Error(res.err || 'Fetching bikes failed!');
 }
 
 /**
