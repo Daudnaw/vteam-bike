@@ -12,9 +12,7 @@ export default async function Page() {
     const totalOffline = bikes.filter(
         (bike) => bike.status == 'offline'
     ).length;
-    const totalDriving = bikes.filter(
-        (bike) => bike.status == 'driving'
-    ).length;
+    const totalDriving = bikes.filter((bike) => bike.status == 'rented').length;
 
     return (
         <div className='p-5'>

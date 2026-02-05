@@ -56,8 +56,11 @@ function createClusterCustomIcon(cluster) {
 export default function BikesLayer({ bikes, admin }) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
+    let availableBikes = bikes;
 
-    const availableBikes = bikes.filter((bike) => bike.status == 'idle');
+    if (!admin) {
+        availableBikes = bikes.filter((bike) => bike.status == 'available');
+    }
 
     useEffect(() => {
         const onZoom = () => setZoom(map.getZoom());
@@ -93,7 +96,14 @@ export default function BikesLayer({ bikes, admin }) {
                             {bike.status == 'offline' && (
                                 <span>Inte tillgänglig</span>
                             )}
-                            {bike.status == 'idle' && <span>Tillgänglig</span>}
+                            {bike.status == 'available' && (
+                                <span>Tillgänglig</span>
+                            )}
+                            {bike.status == 'charging' && <span>Laddar</span>}
+                            {bike.status == 'maintenance' && (
+                                <span>Service</span>
+                            )}
+                            {bike.status == 'rented' && <span>Aktiv</span>}
                         </a>
                         <br />
                         <br />
@@ -109,7 +119,7 @@ export default function BikesLayer({ bikes, admin }) {
                                 Se detaljer
                             </a>
                         ) : (
-                            bike.status == 'idle' && (
+                            bike.status == 'available' && (
                                 <a
                                     href={`/app/user-app/rent-bike?bikeId=${bike._id}`}
                                     style={{
