@@ -3,6 +3,11 @@ import Link from 'next/link';
 import ToolTip from './ToolTip';
 import { useState } from 'react';
 
+/**
+ * Link in dashboard navigation.
+ * @param {*} param0
+ * @returns
+ */
 export default function NavLink({ collapsed, Icon, link, text }) {
     const [showTooltip, setShowTooltip] = useState(false);
 

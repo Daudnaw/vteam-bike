@@ -2,6 +2,10 @@
 //import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
+/**
+ * Get all users.
+ * @returns
+ */
 export async function getAllUsers() {
     const res = await fetch('http://backend:3000/api/v1/users', {
         cache: 'no-store',
@@ -14,6 +18,11 @@ export async function getAllUsers() {
     return res.json();
 }
 
+/**
+ * Delete a user.
+ * @param {*} userId
+ * @returns
+ */
 export async function deleteUser(userId) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -38,6 +47,12 @@ export async function deleteUser(userId) {
     return res.json();
 }
 
+/**
+ * Update a user.
+ * @param {*} userId
+ * @param {*} data
+ * @returns
+ */
 export async function updateUser(userId, data) {
     const { firstName, lastName, email, role } = data;
 
@@ -67,11 +82,21 @@ export async function updateUser(userId, data) {
     return { ok: true, data: responseData };
 }
 
+/**
+ * Create a new user
+ * @param {*} formData
+ * @returns
+ */
 export async function createUser(formData) {
     console.log('Dummy updateUser', formData);
     return { success: true };
 }
 
+/**
+ * Get a single user
+ * @param {*} id
+ * @returns
+ */
 export async function getSingleUser(id) {
     const res = await fetch(`http://backend:3000/api/v1/users/${id}`, {
         cache: 'no-store',

@@ -4,33 +4,15 @@ import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import UserLocation from './UserLocation';
 import LocateButton from './LocateButton';
-import CityButton from './CityButton';
-import { useState } from 'react';
+import ZonesLayer from './ZonesLayer';
+import BikesLayer from './BikesLayer';
 
-const zones = [
-    {
-        id: 1,
-        name: 'Göteborg',
-        latitude: 57.7089,
-        longitude: 11.9746,
-    },
-    {
-        id: 2,
-        name: 'Malmö',
-        latitude: 55.60498,
-        longitude: 13.0038,
-    },
-    {
-        id: 3,
-        name: 'Stockholm',
-        latitude: 59.3293,
-        longitude: 18.0686,
-    },
-];
-
-export default function AppMap({ zones }) {
-    console.log('ZONES:', zones);
-
+/**
+ * Map for user app.
+ * @param {*} param0
+ * @returns
+ */
+export default function AppMap({ zones, bikes }) {
     return (
         <MapContainer
             center={[0, 0]}
@@ -42,8 +24,9 @@ export default function AppMap({ zones }) {
                 attribution='&copy; OpenStreetMap contributors'
             />
             <LocateButton />
-            <CityButton zones={zones} />
             <UserLocation />
+            <ZonesLayer zones={zones} admin={false} />
+            <BikesLayer bikes={bikes} admin={false} />
         </MapContainer>
     );
 }

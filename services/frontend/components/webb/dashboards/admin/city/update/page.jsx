@@ -9,6 +9,11 @@ import { toast } from 'react-toastify';
 import { deleteZone } from '../../../../../../src/app/actions/zones';
 import { useRouter } from 'next/navigation';
 
+/**
+ * Update a city.
+ * @param {*} param0
+ * @returns
+ */
 export default function UpdateCity({ cityId }) {
     const [city, setCity] = useState(null);
     const [loading, setLoading] = useState(true);

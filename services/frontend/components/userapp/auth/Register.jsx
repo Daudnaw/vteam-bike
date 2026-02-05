@@ -2,6 +2,10 @@ import React from 'react';
 import Image from 'next/image';
 import RegisterForm from './forms/RegisterForm';
 
+/**
+ * Register layout user app.
+ * @returns
+ */
 export default function RegisterPage() {
     return (
         <div className='h-screen p-5'>

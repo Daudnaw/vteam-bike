@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * Card component for user app.
+ * @param {*} param0
+ * @returns
+ */
 export default function IconCard({ Icon, text, amount }) {
     return (
         <div className='bg-slate-800 text-white rounded-xl shadow-xl p-4'>

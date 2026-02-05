@@ -1,6 +1,10 @@
 'use server';
 import { cookies } from 'next/headers';
 
+/**
+ * Get all cities
+ * @returns
+ */
 export async function getAllCities() {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -24,6 +28,11 @@ export async function getAllCities() {
     return res.json();
 }
 
+/**
+ * Delete a zone
+ * @param {*} zoneId
+ * @returns
+ */
 export async function deleteZone(zoneId) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -47,6 +56,11 @@ export async function deleteZone(zoneId) {
     return res.json();
 }
 
+/**
+ * Create a new zone
+ * @param {*} formData
+ * @returns
+ */
 export async function createZone(formData) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -72,6 +86,11 @@ export async function createZone(formData) {
     return res.json();
 }
 
+/**
+ * Get a single zone
+ * @param {*} zoneId
+ * @returns
+ */
 export async function getSingelZone(zoneId) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -95,6 +114,10 @@ export async function getSingelZone(zoneId) {
     return res.json();
 }
 
+/**
+ * Get all zones
+ * @returns
+ */
 export async function getAllZones() {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -118,6 +141,12 @@ export async function getAllZones() {
     return res.json();
 }
 
+/**
+ * Update a zone
+ * @param {*} zoneId
+ * @param {*} formData
+ * @returns
+ */
 export async function updateZone(zoneId, formData) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;

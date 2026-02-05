@@ -5,6 +5,10 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { createZone } from '../../../../../../src/app/actions/zones';
 
+/**
+ * Create a new city.
+ * @returns
+ */
 export default function CreateCity() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);

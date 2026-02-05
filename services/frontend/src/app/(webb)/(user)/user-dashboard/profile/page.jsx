@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
-import CustomerProfile from "../../../../../../components/webb/dashboards/customer/CustomerProfile";
-import { getSession } from "../../../../../../utils/user.server";
+import { redirect } from 'next/navigation';
+import CustomerProfile from '../../../../../../components/webb/dashboards/customer/CustomerProfile';
+import { getSession } from '../../../../../../utils/user.server';
 
 export default async function Page() {
     let session = await getSession();
-    
+
     if (!session) {
         redirect('/webb/auth/login');
     }

@@ -8,6 +8,11 @@ import {
     updateUser,
 } from '../../../../../../src/app/actions/user';
 
+/**
+ * Update a user.
+ * @param {*} param0
+ * @returns
+ */
 export default function UpdateUser({ userId }) {
     const router = useRouter();
     const [user, setUser] = useState(null);

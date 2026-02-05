@@ -6,6 +6,10 @@ import { register } from '../../../../../../src/app/actions/auth';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 
+/**
+ * Create a new user.
+ * @returns
+ */
 export default function CreateUser() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);

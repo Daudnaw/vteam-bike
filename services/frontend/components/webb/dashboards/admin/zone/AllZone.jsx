@@ -7,6 +7,11 @@ import { Trash2, Edit3 } from 'lucide-react';
 import { getAllZones, deleteZone } from '../../../../../src/app/actions/zones';
 import { Plus } from 'lucide-react';
 
+/**
+ * All zones.
+ * @param {*} param0
+ * @returns
+ */
 export default function ZonesList({ cityId }) {
     const [zones, setZones] = useState([]);
     const [loading, setLoading] = useState(true);

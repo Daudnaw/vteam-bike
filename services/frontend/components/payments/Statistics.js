@@ -5,6 +5,10 @@ import StatCard from '../webb/dashboards/shared/StatCard';
 
 const BASE_URL = 'http://localhost:3000';
 
+/**
+ * Card to show net volume.
+ * @returns
+ */
 export default function NetVolumeCard() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);

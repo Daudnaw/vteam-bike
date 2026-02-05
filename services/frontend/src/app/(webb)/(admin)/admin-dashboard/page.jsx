@@ -2,15 +2,22 @@ import React from 'react';
 import StatCard from '../../../../../components/webb/dashboards/shared/StatCard';
 import NetVolumeCard from '../../../../../components/payments/Statistics';
 import LinkCard from '../../../../../components/webb/dashboards/admin/LinkCard';
+import { getAllCities } from '../../../actions/zones.js';
+import { getBikes } from '../../../actions/bikes.js';
+import { getAllUsers } from '../../../actions/user.js';
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+    const cities = await getAllCities();
+    const bikes = await getBikes();
+    const users = await getAllUsers();
+
     return (
         <div className='p-5'>
             <h2 className='text-h2 mb-5 font-bold'>Översikt</h2>
             <div className='grid grid-cols-3 gap-5'>
-                <StatCard nr={0} text='Cyklar' />
-                <StatCard nr={0} text='Användare' />
-                <StatCard nr={0} text='Städer' />
+                <StatCard nr={bikes.length} text='Cyklar' />
+                <StatCard nr={users.length} text='Användare' />
+                <StatCard nr={cities.length} text='Städer' />
             </div>
             <div className='mt-5'>
                 <NetVolumeCard />

@@ -6,6 +6,10 @@ import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 
+/**
+ * Register form on user app.
+ * @returns
+ */
 export default function RegisterForm() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);

@@ -29,6 +29,10 @@ const bills = [
     },
 ];
 
+/**
+ * Bill table.
+ * @returns
+ */
 export default function BillTable() {
     return (
         <div className='overflow-hidden rounded-md border border-detail-yellow shadow-2xl'>
