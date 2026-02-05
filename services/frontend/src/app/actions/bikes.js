@@ -1,5 +1,6 @@
 'use server';
 import { cookies } from 'next/headers';
+import { refresh } from 'next/cache';
 
 /**
  * Get all bikes.
@@ -31,10 +32,10 @@ export async function getBikes() {
 
 /**
  * Delete a bike.
- * @param {*} bikeId
+ * @param {*} bike
  * @returns
  */
-export async function deleteBike(bikeId) {
+export async function deleteBike(bike) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -42,7 +43,7 @@ export async function deleteBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -51,6 +52,7 @@ export async function deleteBike(bikeId) {
     });
 
     if (res.ok) {
+        refresh();
         return res.json();
     }
 
@@ -59,10 +61,10 @@ export async function deleteBike(bikeId) {
 
 /**
  * Stop a bike.
- * @param {*} bikeId
+ * @param {*} bike
  * @returns
  */
-export async function stopBike(bikeId) {
+export async function stopBike(bike) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -70,15 +72,22 @@ export async function stopBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
-        method: 'PATCH',
+    bike.status = 'offline';
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+            bike,
+        }),
+        cache: 'no-store',
     });
 
     if (res.ok) {
+        refresh();
         return res.json();
     }
 
@@ -87,10 +96,10 @@ export async function stopBike(bikeId) {
 
 /**
  * Lock a bike.
- * @param {*} bikeId
+ * @param {*} bike
  * @returns
  */
-export async function lockBike(bikeId) {
+export async function lockBike(bike) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -98,15 +107,22 @@ export async function lockBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
-        method: 'PATCH',
+    bike.status = 'locked';
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+            bike,
+        }),
+        cache: 'no-store',
     });
 
     if (res.ok) {
+        refresh();
         return res.json();
     }
 
@@ -115,10 +131,10 @@ export async function lockBike(bikeId) {
 
 /**
  * Maintain a bike.
- * @param {*} bikeId
+ * @param {*} bike
  * @returns
  */
-export async function maintainBike(bikeId) {
+export async function maintainBike(bike) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -126,15 +142,22 @@ export async function maintainBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
-        method: 'PATCH',
+    bike.status = 'maintenance';
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+            bike,
+        }),
+        cache: 'no-store',
     });
 
     if (res.ok) {
+        refresh();
         return res.json();
     }
 
@@ -143,10 +166,10 @@ export async function maintainBike(bikeId) {
 
 /**
  * Set a bike to ready.
- * @param {*} bikeId
+ * @param {*} bike
  * @returns
  */
-export async function readyBike(bikeId) {
+export async function readyBike(bike) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -154,15 +177,22 @@ export async function readyBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
-        method: 'PATCH',
+    bike.status = 'available';
+
+    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+            bike,
+        }),
+        cache: 'no-store',
     });
 
     if (res.ok) {
+        refresh();
         return res.json();
     }
 

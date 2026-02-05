@@ -8,15 +8,18 @@ import { Schema, model } from 'mongoose';
  * - scooter-logic device code (idle/driving)
  */
 export const STATUSES = Object.freeze({
-    IDLE: 'idle',
-    DRIVING: 'driving',
+    RENTED: 'rented',
+    AVAILABLE: 'available',
+    MAINTENANCE: 'maintenance',
+    CHARGING: 'charging',
     OFFLINE: 'offline',
+    LOCKED: 'locked',
 });
 
 /**
  * Allowed scooter status values persisted in MongoDB.
  *
- * @typedef {"idle" | "driving" | "offline"} ScooterStatus
+ * @typedef {"rented" | "available" | "maintenance" | "charging" | "offline" | "locked"} ScooterStatus
  */
 
 /**
@@ -109,8 +112,6 @@ schema.pre(
             if (update.$set) update.$set.speedKmh = 0;
             else update.speedKmh = 0;
         }
-
-        next();
     }
 );
 

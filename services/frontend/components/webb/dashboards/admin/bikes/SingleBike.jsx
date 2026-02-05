@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
     Trash2,
     Lock,
@@ -23,6 +22,7 @@ import {
     readyBike,
     getSingelBike,
 } from '../../../../../src/app/actions/bikes';
+import { useRouter } from 'next/navigation';
 
 /**
  * Single bike
@@ -33,6 +33,7 @@ export default function SingleBike({ bikeId }) {
     const [bike, setBike] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         if (!bikeId) return;
@@ -55,21 +56,28 @@ export default function SingleBike({ bikeId }) {
             delete: true,
             ready: false,
         },
-        locked: {
-            stop: false,
-            lock: false,
-            maintain: true,
-            delete: true,
-            ready: false,
-        },
-        riding: {
+        rented: {
             stop: true,
             lock: false,
             maintain: false,
             delete: false,
             ready: false,
         },
-        in_service: {
+        charging: {
+            stop: false,
+            lock: true,
+            maintain: true,
+            delete: false,
+            ready: true,
+        },
+        maintenance: {
+            stop: false,
+            lock: false,
+            maintain: false,
+            delete: true,
+            ready: true,
+        },
+        offline: {
             stop: false,
             lock: false,
             maintain: false,
@@ -86,8 +94,9 @@ export default function SingleBike({ bikeId }) {
             return;
         }
 
-        await actionFn(bike.bikeId);
+        await actionFn(bike);
         toast.success(actionName);
+        router.push('/admin-dashboard/bikes');
     };
 
     return (
@@ -146,12 +155,14 @@ export default function SingleBike({ bikeId }) {
                                             ? 'text-green-400'
                                             : bike.status === 'rented'
                                             ? 'text-yellow-400'
-                                            : bike.status === 'offline'
-                                            ? 'text-red-400'
-                                            : bike.status === 'idle'
-                                            ? 'text-gray-400'
-                                            : bike.status === 'maintance'
+                                            : bike.status === 'charging'
                                             ? 'text-blue-400'
+                                            : bike.status === 'maintenance'
+                                            ? 'text-orange-400'
+                                            : bike.status === 'offline'
+                                            ? 'text-gray-400'
+                                            : bike.status === 'locked'
+                                            ? 'text-red-400'
                                             : 'text-gray-400'
                                     }`}
                                 >

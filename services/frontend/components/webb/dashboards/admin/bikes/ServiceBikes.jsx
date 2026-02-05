@@ -10,7 +10,7 @@ import { getBikes } from '../../../../../src/app/actions/bikes';
 export default async function ServiceBikes() {
     const bikes = await getBikes();
 
-    const serviceBikes = bikes.filter((bike) => bike.status === 'in_service');
+    const serviceBikes = bikes.filter((bike) => bike.status === 'maintenance');
 
     return (
         <div className='overflow-hidden rounded-md border border-detail-yellow shadow-2xl'>
@@ -48,20 +48,20 @@ export default async function ServiceBikes() {
                     {serviceBikes.map((bike) => (
                         <tr key={bike.bikeId}>
                             <td className='border border-detail-yellow px-2 py-2 text-center'>
-                                {bike.bikeId}
+                                {bike._id}
                             </td>
 
-                            <td className='border border-detail-yellow px-2 py-2 text-center text-red-400 font-semibold'>
+                            <td className='border border-detail-yellow px-2 py-2 text-center text-orange-400 font-semibold'>
                                 ● Service
                             </td>
 
                             <td className='border border-detail-yellow px-2 py-2 text-center'>
-                                {bike.position}
+                                {bike.lat}, {bike.lon}
                             </td>
 
                             <td className='border border-detail-yellow px-2 py-2 text-center'>
                                 <Link
-                                    href={`/admin-dashboard/bikes/single?bikeId=${bike.bikeId}`}
+                                    href={`/admin-dashboard/bikes/single?bikeId=${bike._id}`}
                                     className='underline underline-offset-4'
                                 >
                                     Hantera

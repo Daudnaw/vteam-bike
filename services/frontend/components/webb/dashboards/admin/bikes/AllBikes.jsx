@@ -13,9 +13,10 @@ import { getBikes } from '../../../../../src/app/actions/bikes';
 const statusConfig = {
     available: { label: 'Tillgänglig', color: 'text-green-400' },
     rented: { label: 'Används', color: 'text-yellow-400' },
-    offline: { label: 'Offline', color: 'text-red-400' },
-    idle: { label: 'Inaktiv', color: 'text-gray-400' },
-    maintance: { label: 'Service', color: 'text-blue-400' },
+    charging: { label: 'Laddar', color: 'text-blue-400' },
+    maintenance: { label: 'Service', color: 'text-orange-400' },
+    offline: { label: 'Offline', color: 'text-gray-400' },
+    locked: { label: 'Locked', color: 'text-red-400' },
 };
 
 /**

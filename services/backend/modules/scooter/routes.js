@@ -106,7 +106,7 @@ v1.put('/:id', requireAuth, async (req, res) => {
 
     const updatedscooter = await Scooter.findByIdAndUpdate(
         req.params.id,
-        req.body,
+        req.body.bike,
         { new: true, runValidators: true }
     );
 
