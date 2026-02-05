@@ -52,8 +52,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests (verbose)
-        run: |
-          node -v
-          npm -v
-          npm test -- --reporter spec
+      - name: Run tests
+        run: npm test
