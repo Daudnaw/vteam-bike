@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Dokumentation för frontend
 
-## Getting Started
+## Om frontend
 
-First, run the development server:
+Frontend är uppbygd med ramverket `Next.js` som i sin tur är ett ramverk byggd på `React`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Paket som används:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+-   `jsonwebtoken`
+-   `jwt-decode`
+-   `leaflet`
+-   `lucide-react`
+-   `react-leaflet`
+-   `react-leaflet-cluster`
+-   `react-toastify`
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Stylingen är gjord med `tailwindcss`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Färger som används:
 
-## Learn More
+-   background: #f3f4f6;
+-   text: #1f2937;
+-   detail-mint: #10b981;
+-   detail-yellow: #facc15;
+-   detail-red: #ef4444;
+-   primary-dark: #1e40af;
+-   primary: #3b82f6;
+-   primary-light: #93c5fd;
 
-To learn more about Next.js, take a look at the following resources:
+## Struktur
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Frontend är uppbygd i två större delar kan man säga. Det är två applikationer som körs via den, både `användar appen` och `webb gränsnittet` för både admin och användare.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Vid start av applikationen möts man av ett val `Användarapp` eller `Webb version` och beroende på vilket val man gör så skickas man vidare till korrekt del av applikationen. I vår mapp struktur kan man se att vi delat upp det i `(userapp)` och `(webb)`.
 
-## Deploy on Vercel
+I vår `webb version` har vi delat upp `admin` och `user` då funktionalitet skiljer sig kring de båda. Allt som har med `admin` att göra hanterar vi i `(webb)/(admin)` och allt som har med user att göra hanterar vi i `(webb)/(user)`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Alla api anrop till backend gör vi i mappen `actions`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Komponenter som byggts och återanvänds i våra sidor finns under `components`.

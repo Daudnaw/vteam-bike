@@ -6,6 +6,10 @@ import { toast } from 'react-toastify';
 import { User, Mail, Trash2, Edit3, Plus } from 'lucide-react';
 import { getAllUsers, deleteUser } from '../../../../../src/app/actions/user';
 
+/**
+ * All users in a table.
+ * @returns
+ */
 export default function UsersList() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);

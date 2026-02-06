@@ -8,17 +8,22 @@ import {
     Map,
     CreditCard,
     User,
+    DollarSign,
 } from 'lucide-react';
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
 
+/**
+ * Customer sidebar in dashboard.
+ * @returns
+ */
 export default function CustomerSidebar() {
     const [collapsed, setCollapsed] = useState(false);
 
     return (
         <div
             className={`${
-                collapsed ? 'w-[80px]' : 'w-[300px]'
+                collapsed ? 'w-20' : 'w-[300px]'
             } p-5 bg-slate-800 h-screen relative transition-all ease-in-out duration-300 border-r border-background`}
         >
             <div className='flex gap-2 items-center'>
@@ -49,6 +54,12 @@ export default function CustomerSidebar() {
                 collapsed={collapsed}
                 text='Profil'
                 Icon={User}
+            />
+            <NavLink
+                link='/user-dashboard/payments'
+                collapsed={collapsed}
+                text='Köpa'
+                Icon={DollarSign}
             />
             <SignOutButton collapsed={collapsed} webb={true} />
             <ArrowLeftCircle

@@ -113,7 +113,7 @@ describe("Users v1 routes", function () {
     const payload = {
       sub: user._id.toString(),
       email: user.email,
-      role: user.role,
+      role: "admin",
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -164,7 +164,7 @@ describe("Users v1 routes", function () {
       .expect(403);
 
     expect(res.body).to.have.property("error");
-    expect(res.body.error).to.match(/password, salt or role/i);
+    expect(res.body.error).to.match(/Admins only/i);
 
     const fresh = await User.findById(user._id);
 

@@ -1,34 +1,39 @@
-"use client";
+'use client';
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = 'http://localhost:3000';
 
+/**
+ * Checkut payment.
+ * @param {*} payload
+ * @returns
+ */
 export default async function checkOut(payload) {
     try {
         const res = await fetch(`${BASE_URL}/api/payments/checkout`, {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
             },
-            credentials: "include",
+            credentials: 'include',
             body: JSON.stringify(payload),
         });
 
-    if (!res.ok) {
-        console.error("Failed to create checkout session", res.status);
-        alert("Could not start payment");
-        return;
-    }
+        if (!res.ok) {
+            console.error('Failed to create checkout session', res.status);
+            alert('Could not start payment');
+            return;
+        }
 
-    const { url } = await res.json();
+        const { url } = await res.json();
 
-    if (!url) {
-        alert("No Stripe URL returned from server");
-        return;
-    }
+        if (!url) {
+            alert('No Stripe URL returned from server');
+            return;
+        }
 
-    window.location.href = url;
+        window.location.href = url;
     } catch (err) {
-        console.error("Unexpected error in checkOut:", err);
-        alert("Unexpected error during payment");
+        console.error('Unexpected error in checkOut:', err);
+        alert('Unexpected error during payment');
     }
 }

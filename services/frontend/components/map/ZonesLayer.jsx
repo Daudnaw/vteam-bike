@@ -2,7 +2,12 @@
 
 import { Circle, Polygon, Popup } from 'react-leaflet';
 
-export default function ZonesLayer({ zones }) {
+/**
+ * Zones layer to load on map.
+ * @param {*} param0
+ * @returns
+ */
+export default function ZonesLayer({ zones, admin }) {
     const zoneStyles = {
         city: {
             color: '#4a90e2',
@@ -59,18 +64,22 @@ export default function ZonesLayer({ zones }) {
                         <div style={{ minWidth: 180 }}>
                             <b>{zone.name}</b>
                             <br />
-                            Type: {zone.zoneType}
-                            <br />
-                            <a
-                                href='/admin-dashboard/cities'
-                                style={{
-                                    color: '#1976d2',
-                                    textDecoration: 'underline',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                To Edit go to relevent city
-                            </a>
+                            {admin && (
+                                <div>
+                                    <span>Type: {zone.zoneType}</span>
+                                    <br />
+                                    <a
+                                        href='/admin-dashboard/cities'
+                                        style={{
+                                            color: '#1976d2',
+                                            textDecoration: 'underline',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        To Edit go to relevent city
+                                    </a>
+                                </div>
+                            )}
                         </div>
                     </Popup>
                 </Circle>
@@ -88,24 +97,26 @@ export default function ZonesLayer({ zones }) {
                         mouseout: (e) => e.target.setStyle(style),
                     }}
                 >
-                    <Popup>
-                        <div style={{ minWidth: 180 }}>
-                            <b>{zone.name}</b>
-                            <br />
-                            Type: {zone.zoneType}
-                            <br />
-                            <a
-                                href='/admin-dashboard/cities'
-                                style={{
-                                    color: '#1976d2',
-                                    textDecoration: 'underline',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                To Edit go to relevent city
-                            </a>
-                        </div>
-                    </Popup>
+                    {admin && (
+                        <Popup>
+                            <div style={{ minWidth: 180 }}>
+                                <b>{zone.name}</b>
+                                <br />
+                                Type: {zone.zoneType}
+                                <br />
+                                <a
+                                    href='/admin-dashboard/cities'
+                                    style={{
+                                        color: '#1976d2',
+                                        textDecoration: 'underline',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    To Edit go to relevent city
+                                </a>
+                            </div>
+                        </Popup>
+                    )}
                 </Polygon>
             );
         }

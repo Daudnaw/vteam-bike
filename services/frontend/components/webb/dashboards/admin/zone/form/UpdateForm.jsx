@@ -8,6 +8,11 @@ import {
     updateZone,
 } from '../../../../../../src/app/actions/zones';
 
+/**
+ * Update a zone.
+ * @param {*} param0
+ * @returns
+ */
 export default function UpdateZonePage({ zoneId }) {
     const router = useRouter();
     const [loading, setLoading] = useState(true);

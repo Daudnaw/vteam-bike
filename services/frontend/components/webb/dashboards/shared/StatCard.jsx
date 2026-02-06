@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * Card to show some stats.
+ * @param {*} param0
+ * @returns
+ */
 export default function StatCard({ nr, text }) {
     return (
         <div className='from-slate-600 to-slate-800 bg-linear-to-br flex flex-col justify-center items-center p-5 rounded-md shadow-2xl w-full'>

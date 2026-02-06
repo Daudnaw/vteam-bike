@@ -1,6 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
 
+/**
+ * Link card to use.
+ * @param {*} param0
+ * @returns
+ */
 export default function LinkCard({ to, text }) {
     return (
         <Link href={to}>

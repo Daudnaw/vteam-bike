@@ -1,9 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useMap } from 'react-leaflet';
-import L from 'leaflet';
+// import L from 'leaflet';
 import { Pin } from 'lucide-react';
 
+/**
+ * Locate the user and relocate the map to user.
+ * @returns
+ */
 export default function LocateButton() {
     const map = useMap();
 

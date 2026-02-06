@@ -15,6 +15,10 @@ import {
 import NavLink from '../../shared/NavLink';
 import SignOutButton from '../../shared/SignOutButton';
 
+/**
+ * Admin sidebar in dashboard.
+ * @returns
+ */
 export default function AdminSidebar() {
     const [collapsed, setCollapsed] = useState(false);
 
@@ -59,24 +63,14 @@ export default function AdminSidebar() {
                 text='Cyklar'
                 Icon={Motorbike}
             />
-            <NavLink
-                link='/admin-dashboard/zones'
-                collapsed={collapsed}
-                text='Zoner'
-                Icon={Locate}
-            />
+
             <NavLink
                 link='/admin-dashboard/service'
                 collapsed={collapsed}
                 text='Service'
                 Icon={Wrench}
             />
-            <NavLink
-                link='/admin-dashboard/payments'
-                collapsed={collapsed}
-                text='Köp'
-                Icon={DollarSign}
-            />
+
             <SignOutButton collapsed={collapsed} webb={true} />
             <ArrowLeftCircle
                 className={`${
