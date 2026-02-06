@@ -1,11 +1,13 @@
+import { EventEmitter } from "node:events";
+
 export const MODES = Object.freeze({
   IDLE: "idle",
   ACTIVE: "active",
 });
 
 export const STATUSES = Object.freeze({
-  IDLE: "idle",
-  DRIVING: "driving",
+  AVAILABLE: "available",
+  RENTED: "rented",
 });
 
 /**
@@ -29,7 +31,7 @@ export const STATUSES = Object.freeze({
  * - Periodically sends STATE messages at an interval determined by mode
  * - Merges partial state snapshots from sensors before sending
  */
-export class Scooter {
+export class Scooter extends EventEmitter {
   #ws;
   #tickTimer = null;
   #ready = false;
@@ -53,6 +55,8 @@ export class Scooter {
    * @param {number} [opts.reconnectDelayMs=1000] Delay before reconnecting after a close.
    */
   constructor({ id, url, sensors = [], reconnectDelayMs = 1000 }) {
+    super();
+
     this.id = String(id);
     this.url = url;
     this.reconnectDelayMs = reconnectDelayMs;
@@ -69,7 +73,7 @@ export class Scooter {
     this.state = {
       _id: this.id,
       mode: MODES.IDLE,
-      status: STATUSES.IDLE,
+      status: STATUSES.AVAILABLE,
       lastSeenAt: null,
     };
 
@@ -85,13 +89,18 @@ export class Scooter {
     this.#connect();
   }
 
+  /** Get the ready state of the scooter */
+  get ready() {
+    return this.#ready;
+  }
+
   /** Start the scooter (active mode). Idempotent. */
   start() {
     if (this.mode === MODES.ACTIVE) return;
 
     this.mode = MODES.ACTIVE;
     this.state.mode = MODES.ACTIVE;
-    this.state.status = STATUSES.DRIVING;
+    this.state.status = STATUSES.RENTED;
 
     // Start/stop should be visible immediately on the server/dashboard,
     // not delayed until the next periodic tick.
@@ -105,7 +114,7 @@ export class Scooter {
 
     this.mode = MODES.IDLE;
     this.state.mode = MODES.IDLE;
-    this.state.status = STATUSES.IDLE;
+    this.state.status = STATUSES.AVAILABLE;
     this.state.speedKmh = 0;
 
     // Send an immediate state change so the system reacts promptly.
@@ -190,7 +199,7 @@ export class Scooter {
 
       const active =
         this.state.mode === MODES.ACTIVE ||
-        this.state.status === STATUSES.DRIVING;
+        this.state.status === STATUSES.RENTED;
 
       this.mode = active ? MODES.ACTIVE : MODES.IDLE;
       this.state.mode = this.mode;
@@ -201,6 +210,8 @@ export class Scooter {
       // - a first sensor snapshot
       this.#ready = true;
       this.#rescheduleTick(0);
+
+      this.emit("READY");
       return;
     }
 
@@ -212,9 +223,11 @@ export class Scooter {
       switch (msg.action) {
         case "START":
           this.start();
+          this.emit("START");
           break;
         case "STOP":
           this.stop();
+          this.emit("STOP");
           break;
         default:
           break;

@@ -134,18 +134,17 @@ schema.virtual('durationMinutes').get(function () {
 
 /**
  * fetch the Location document associated with a scooter
+ * if no document exists, create one.
  *
  * @param {string} scooterId pass the scooter id
  * @returns {Promise<Location>} The Location document
- * @throws {Error} if no location exists for the scooter.
  */
 schema.statics.getLocationByScooter = async function (scooterId) {
     const Location = mongoose.model('Location');
-
-    const loc = await Location.findOne({ scooterId });
+    let loc = await Location.findOne({ scooterId });
 
     if (!loc) {
-        throw new Error(`Location not found for scooterId ${scooterId}`);
+        loc = await Location.insertOne({ scooterId });
     }
 
     return loc;

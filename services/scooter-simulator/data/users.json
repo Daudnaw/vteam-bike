@@ -1,0 +1,25 @@
+[{
+  "_id": {
+    "$oid": "697b65b9247e2cb1f0ad95f7"
+  },
+  "firstName": "Admin",
+  "lastName": "Admin",
+  "email": "admin@example.com",
+  "credit": 1000,
+  "membership": {
+    "tier": "",
+    "status": "none",
+    "stripeSubscriptionId": "",
+    "currentPeriodEnd": null
+  },
+  "password": "fcf4e2dac640aaaecc2332019c5842ef2a8b1442c3920d492ec5b3c336fbad8df65fd0cc87a04e15d3248ccd1d0bdd69ac0f99038f3ac2c1a0a9b8095262d13d",
+  "role": "admin",
+  "createdAt": {
+    "$date": "2026-01-29T13:50:49.768Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-29T13:50:49.768Z"
+  },
+  "salt": "7afe962534cf8b7aaa3095c475e65e52",
+  "__v": 0
+}]

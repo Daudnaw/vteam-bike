@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "@vteam/scooter-logic": "file:../scooter-logic",
+    "bson": "^7.1.1",
     "mongodb": "^7.0.0"
   }
 }
