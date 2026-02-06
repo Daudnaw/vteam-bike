@@ -28,6 +28,10 @@ export async function rentBike(bikeId) {
         return await res.json();
     }
 
+    if (res.status == 402) {
+        return { message: 'För lite krediter på kontot!' };
+    }
+
     const resError = await res.json();
 
     throw new Error(resError.error || 'Renting bike failed!');
