@@ -6,7 +6,7 @@
  * @returns {Number}
  */
 export function rand(min, max) {
-  return min + Math.random() * (max - min);
+    return min + Math.random() * (max - min);
 }
 
 /**
@@ -19,7 +19,7 @@ export function rand(min, max) {
  * @returns {Number}
  */
 export function clamp(n, min, max) {
-  return Math.max(min, Math.min(max, n));
+    return Math.max(min, Math.min(max, n));
 }
 
 /**
@@ -29,7 +29,7 @@ export function clamp(n, min, max) {
  * @returns a random value from the array
  */
 export function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
 /**

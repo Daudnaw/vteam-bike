@@ -14,7 +14,7 @@ export async function rentBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/rentals/app`, {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/v1/rentals`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -27,6 +27,10 @@ export async function rentBike(bikeId) {
     if (res.status == 201) {
         return await res.json();
     }
+
+    // if (res.status == 402) {
+    //     return { message: 'För lite krediter på kontot!' };
+    // }
 
     const resError = await res.json();
 
@@ -47,7 +51,7 @@ export async function endRental(rentalId) {
     }
 
     const res = await fetch(
-        `http://backend:3000/api/v1/rentals/${rentalId}/end/app`,
+        `${process.env.API_URL_INTERNAL}/api/v1/rentals/${rentalId}/end`,
         {
             method: 'PATCH',
             headers: {
@@ -79,14 +83,17 @@ export async function getAllRentalUser(id) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/rentals/user/${id}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/rentals/user/${id}`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        }
+    );
 
     if (res.status == 404) {
         return [];
@@ -112,14 +119,17 @@ export async function getSingleRental(id) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/rentals/${id}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/rentals/${id}`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        }
+    );
 
     if (res.ok) {
         return res.json();

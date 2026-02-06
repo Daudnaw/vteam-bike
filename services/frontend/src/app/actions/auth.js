@@ -12,14 +12,11 @@ export async function signin(formData) {
 
     let password = formData.get('password');
 
-    const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        }
-    );
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
 
     const data = await res.json();
 
@@ -48,14 +45,11 @@ export async function signinapp(formData) {
 
     let password = formData.get('password');
 
-    const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        }
-    );
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
 
     const data = await res.json();
 
@@ -107,7 +101,7 @@ export async function register(formData) {
     let password = formData.get('password');
 
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
+        `${process.env.API_URL_INTERNAL}/api/auth/register`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -143,7 +137,7 @@ export async function registerapp(formData) {
     let password = formData.get('password');
 
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
+        `${process.env.API_URL_INTERNAL}/api/auth/register`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

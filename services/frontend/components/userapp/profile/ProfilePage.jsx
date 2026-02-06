@@ -10,7 +10,6 @@ import { getAllRentalUser } from '../../../src/app/actions/rental.js';
  * @returns
  */
 export default async function ProfilePage({ profile }) {
-    console.log(profile);
     const rents = await getAllRentalUser(profile._id);
     const rentCount = Array.isArray(rents) ? rents.length : rents;
     let totalCost = 0;

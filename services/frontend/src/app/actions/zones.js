@@ -13,13 +13,16 @@ export async function getAllCities() {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/zones/zonetype/city`, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/zones/zonetype/city`,
+        {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        }
+    );
 
     if (!res.ok) {
         throw new Error(`Failed to fetch cities (${res.status})`);
@@ -41,13 +44,16 @@ export async function deleteZone(zoneId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/zones/${zoneId}`, {
-        method: 'DELETE',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/zones/${zoneId}`,
+        {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        }
+    );
 
     if (!res.ok) {
         throw new Error(`Failed to delete zone (${res.status})`);
@@ -69,7 +75,7 @@ export async function createZone(formData) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch('http://backend:3000/api/v1/zones', {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/v1/zones`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -99,13 +105,16 @@ export async function getSingelZone(zoneId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/zones/${zoneId}`, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/zones/${zoneId}`,
+        {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        }
+    );
 
     if (!res.ok) {
         throw new Error(`Failed to fetch the zone (${res.status})`);
@@ -126,7 +135,7 @@ export async function getAllZones() {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/zones`, {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/v1/zones`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -155,15 +164,18 @@ export async function updateZone(zoneId, formData) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/zones/${zoneId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/zones/${zoneId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(formData),
+            cache: 'no-store',
+        }
+    );
 
     if (!res.ok) {
         throw new Error(`Failed to update the zone (${res.status})`);

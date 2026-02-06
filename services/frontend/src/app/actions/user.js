@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
  * @returns
  */
 export async function getAllUsers() {
-    const res = await fetch('http://backend:3000/api/v1/users', {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/v1/users`, {
         cache: 'no-store',
     });
 
@@ -31,13 +31,16 @@ export async function deleteUser(userId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/users/${userId}`,
+        {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        }
+    );
 
     if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -63,15 +66,18 @@ export async function updateUser(userId, data) {
         throw new Error('Not authenticated');
     }
     //dubbelkolla om pull är gjort och om url är korrekt
-    const res = await fetch(`http://backend:3000/api/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ firstName, lastName, email, role }),
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/admin/users/${userId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ firstName, lastName, email, role }),
+            cache: 'no-store',
+        }
+    );
 
     const responseData = await res.json();
 
@@ -98,9 +104,12 @@ export async function createUser(formData) {
  * @returns
  */
 export async function getSingleUser(id) {
-    const res = await fetch(`http://backend:3000/api/v1/users/${id}`, {
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/users/${id}`,
+        {
+            cache: 'no-store',
+        }
+    );
 
     if (!res.ok) {
         throw new Error(`Failed to fetch user with id: ${id}`);

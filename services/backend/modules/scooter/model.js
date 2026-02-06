@@ -62,7 +62,7 @@ const schema = new Schema(
         status: {
             type: String,
             enum: Object.values(STATUSES),
-            default: STATUSES.OFFLINE,
+            default: STATUSES.AVAILABLE,
             index: true,
         },
         lastSeenAt: {
@@ -107,7 +107,7 @@ schema.pre(
         const update = this.getUpdate() ?? {};
         const $set = update.$set ?? update;
 
-        // If status is being set to anything other than driving, force speed to 0.
+        // If status is being set to anything other than rented, force speed to 0.
         if ($set.status && $set.status !== STATUSES.RENTED) {
             if (update.$set) update.$set.speedKmh = 0;
             else update.speedKmh = 0;

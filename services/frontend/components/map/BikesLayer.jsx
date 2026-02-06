@@ -80,7 +80,7 @@ export default function BikesLayer({ bikes, admin }) {
             {availableBikes.map((bike) => (
                 <Marker
                     key={bike._id}
-                    position={[bike.lat, bike.lon]}
+                    position={[bike.lon, bike.lat]}
                     icon={bikeIcon}
                 >
                     <Popup>

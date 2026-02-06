@@ -25,6 +25,7 @@ function createBikeIcon(size) {
  */
 export default function SingleBikeMap({ bike, admin }) {
     const bikeIcon = useMemo(() => createBikeIcon(20), [20]);
+
     return (
         <MapContainer
             center={[bike?.lat, bike?.lon]}
