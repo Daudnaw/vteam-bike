@@ -2,6 +2,10 @@ import React from 'react';
 import Image from 'next/image';
 import LoginForm from './forms/LoginForm';
 
+/**
+ * Login layout webb.
+ * @returns
+ */
 export default function Login() {
     return (
         <div className='h-screen flex'>

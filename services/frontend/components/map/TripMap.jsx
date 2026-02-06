@@ -18,6 +18,11 @@ const pinIcon = new L.Icon({
     popupAnchor: [0, -32],
 });
 
+/**
+ * Map to view a trip.
+ * @param {*} param0
+ * @returns
+ */
 export default function TripMap({ startPos, endPos }) {
     return (
         <MapContainer

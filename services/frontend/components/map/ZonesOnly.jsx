@@ -5,20 +5,24 @@ import BaseMap from './BaseMap';
 import ZonesLayer from './ZonesLayer';
 import { getAllZones } from '../../src/app/actions/zones';
 
+/**
+ * Zones only map.
+ * @returns
+ */
 export default function ZonesOnlyMap() {
-  const [zones, setZones] = useState([]);
+    const [zones, setZones] = useState([]);
 
-  useEffect(() => {
-    async function fetchZones() {
-      const zonesData = await getAllZones();
-      setZones(zonesData);
-    }
-    fetchZones();
-  }, []);
+    useEffect(() => {
+        async function fetchZones() {
+            const zonesData = await getAllZones();
+            setZones(zonesData);
+        }
+        fetchZones();
+    }, []);
 
-  return (
-    <BaseMap>
-      <ZonesLayer zones={zones} />
-    </BaseMap>
-  );
+    return (
+        <BaseMap>
+            <ZonesLayer zones={zones} />
+        </BaseMap>
+    );
 }

@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { model } from "mongoose";
-import { requireAuth } from "../auth/middleware.js";
-const Scooter = model("Scooter");
-import Location from "../location/model.js";
+import { Router } from 'express';
+import { model } from 'mongoose';
+import { requireAuth } from '../auth/middleware.js';
+const Scooter = model('Scooter');
+import Location from '../location/model.js';
 
 export const v1 = Router();
 
@@ -17,15 +17,15 @@ export const v1 = Router();
  * @returns {Error} 401 - Unauthorized
  * @returns {Error} 404 - Not found
  */
-v1.get("/:id", async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const scooter = await Scooter.findById(id);
+v1.get('/:id', async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const scooter = await Scooter.findById(id);
 
-    res.status(200).send(scooter.toJSON());
-  } catch (err) {
-    return next(err);
-  }
+        res.status(200).send(scooter.toJSON());
+    } catch (err) {
+        return next(err);
+    }
 });
 
 /**
@@ -39,14 +39,14 @@ v1.get("/:id", async (req, res, next) => {
  * @returns {Error} 401 - Unauthorized
  * @returns {Error} 404 - Not found
  */
-v1.get("/", async (req, res, next) => {
-  try {
-    const scooters = await Scooter.find({});
+v1.get('/', async (req, res, next) => {
+    try {
+        const scooters = await Scooter.find({});
 
-    res.status(200).send(scooters);
-  } catch (err) {
-    return next(err);
-  }
+        res.status(200).send(scooters);
+    } catch (err) {
+        return next(err);
+    }
 });
 
 /**
@@ -60,38 +60,32 @@ v1.get("/", async (req, res, next) => {
  * @returns {Error} 403 - Forbidden
  * @returns {Error} 400 - Validation error
  */
-v1.post("/", requireAuth, async (req, res, next) => {
-  try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Admins only" });
+v1.post('/', requireAuth, async (req, res, next) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admins only' });
+        }
+
+        const { battery, lat, lon, status } = req.body;
+
+        const scooter = await Scooter.create({
+            battery: battery,
+            lat: lat,
+            lon: lon,
+            status: status,
+        });
+
+        await Location.create({
+            scooterId: scooter._id,
+            lat: scooter.lat,
+            lng: scooter.lon,
+            history: [],
+        });
+
+        return res.status(201).json(scooter.toJSON());
+    } catch (err) {
+        next(err);
     }
-
-    const {
-      battery,
-      lat,
-      lon,
-      status,
-    } = req.body;
-
-    const scooter = await Scooter.create({
-      battery: battery,
-      lat: lat,
-      lon: lon,
-      status: status,
-    });
-
-    await Location.create({
-      scooterId: scooter._id,
-      lat: scooter.lat,
-      lng: scooter.lon,
-      history: [],
-    });
-
-
-    return res.status(201).json(scooter.toJSON());
-  } catch (err) {
-    next(err);
-  }
 });
 
 /**
@@ -105,22 +99,22 @@ v1.post("/", requireAuth, async (req, res, next) => {
  * @returns {Error} 403 - Forbidden
  * @returns {Error} 404 - Not found
  */
-v1.put("/:id", requireAuth, async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ error: "Admins only" });
-  }
+v1.put('/:id', requireAuth, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admins only' });
+    }
 
-  const updatedscooter = await Scooter.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true, runValidators: true },
-  );
+    const updatedscooter = await Scooter.findByIdAndUpdate(
+        req.params.id,
+        req.body.bike,
+        { new: true, runValidators: true }
+    );
 
-  if (!updatedscooter) {
-    return res.status(404).json({ error: "scooter not found" });
-  }
+    if (!updatedscooter) {
+        return res.status(404).json({ error: 'scooter not found' });
+    }
 
-  res.json(updatedscooter);
+    res.json(updatedscooter);
 });
 
 /**
@@ -134,22 +128,22 @@ v1.put("/:id", requireAuth, async (req, res) => {
  * @returns {Error} 403 - Forbidden
  * @returns {Error} 404 - Not found
  */
-v1.delete("/:id", requireAuth, async (req, res, next) => {
-  const { id } = req.params;
+v1.delete('/:id', requireAuth, async (req, res, next) => {
+    const { id } = req.params;
 
-  try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Admins only" });
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admins only' });
+        }
+
+        const deletedscooter = await Scooter.findByIdAndDelete(id);
+
+        if (!deletedscooter) {
+            return res.status(404).json({ error: 'scooter not found' });
+        }
+
+        return res.status(200).json(deletedscooter.toJSON());
+    } catch (err) {
+        next(err);
     }
-
-    const deletedscooter = await Scooter.findByIdAndDelete(id);
-
-    if (!deletedscooter) {
-      return res.status(404).json({ error: "scooter not found" });
-    }
-
-    return res.status(200).json(deletedscooter.toJSON());
-  } catch (err) {
-    next(err);
-  }
 });

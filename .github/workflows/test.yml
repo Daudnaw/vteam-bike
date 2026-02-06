@@ -1,0 +1,62 @@
+name: Backend tests + coverage
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "services/backend/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      matrix:
+        node-version: [20]
+      fail-fast: false
+
+    env:
+      NODE_ENV: test
+      JWT_SECRET: test-secret
+      MONGODB_DSN: mongodb://mongo:27017/testdb
+      STRIPE_SECRET_KEY: sk_test_dummy
+
+    defaults:
+      run:
+        working-directory: services/backend
+
+    services:
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: services/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run coverage
+        run: npm run coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: services/backend/coverage

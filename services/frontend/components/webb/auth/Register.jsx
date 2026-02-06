@@ -2,6 +2,10 @@ import React from 'react';
 import Image from 'next/image';
 import RegisterForm from './forms/RegisterForm';
 
+/**
+ * Register layout webb.
+ * @returns
+ */
 export default function RegisterPage() {
     return (
         <div className='h-screen flex'>

@@ -2,6 +2,11 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+/**
+ * City card to use.
+ * @param {*} param0
+ * @returns
+ */
 export default function CityCard({ name, id }) {
     return (
         <Link href={`/admin-dashboard/cities/update?cityId=${id}`}>

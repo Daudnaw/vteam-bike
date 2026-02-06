@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { createZone } from '../../../../../../src/app/actions/zones';
 
+/**
+ * Create a new zone.
+ * @param {*} param0
+ * @returns
+ */
 export default function CreateNewZone({ cityId }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);

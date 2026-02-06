@@ -2,6 +2,11 @@ import React from 'react';
 import { signout, signoutapp } from '../../../../src/app/actions/auth';
 import { LogOut } from 'lucide-react';
 
+/**
+ * Sign out button in dashboard.
+ * @param {*} param0
+ * @returns
+ */
 export default function SignOutButton({ collapsed, webb }) {
     return (
         <form action={webb ? signout : signoutapp}>

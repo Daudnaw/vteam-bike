@@ -3,29 +3,35 @@ import { useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
 import dynamic from 'next/dynamic';
 
-const MarkerClusterGroup = dynamic(
-  () => import('react-leaflet-cluster'),
-  { ssr: false }
-);
+const MarkerClusterGroup = dynamic(() => import('react-leaflet-cluster'), {
+    ssr: false,
+});
 
+/**
+ * Bike icon.
+ * @param {*} size
+ * @returns
+ */
 function createBikeIcon(size) {
-  return new L.Icon({
-    iconUrl: '/scooter.png',
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size],
-    popupAnchor: [0, -size],
-  });
+    return new L.Icon({
+        iconUrl: '/scooter.png',
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size],
+        popupAnchor: [0, -size],
+    });
 }
 
+/**
+ * Create a custom cluster icon.
+ * @param {*} cluster
+ * @returns
+ */
 function createClusterCustomIcon(cluster) {
-  const count = cluster.getChildCount();
-  const size =
-    count < 10 ? 30 :
-    count < 50 ? 40 :
-    50;
+    const count = cluster.getChildCount();
+    const size = count < 10 ? 30 : count < 50 ? 40 : 50;
 
-  return L.divIcon({
-    html: `<div style="
+    return L.divIcon({
+        html: `<div style="
       background: rgba(25, 118, 210, 0.8);
       color: white;
       border-radius: 50%;
@@ -37,56 +43,100 @@ function createClusterCustomIcon(cluster) {
       font-weight: bold;
       border: 2px solid white;
     ">${count}</div>`,
-    className: '',
-    iconSize: L.point(size, size, true),
-  });
+        className: '',
+        iconSize: L.point(size, size, true),
+    });
 }
 
-export default function BikesLayer({ bikes }) {
-  const map = useMap();
-  const [zoom, setZoom] = useState(map.getZoom());
+/**
+ * Bikes layer to load onto a map.
+ * @param {*} param0
+ * @returns
+ */
+export default function BikesLayer({ bikes, admin }) {
+    const map = useMap();
+    const [zoom, setZoom] = useState(map.getZoom());
+    let availableBikes = bikes;
 
-  useEffect(() => {
-    const onZoom = () => setZoom(map.getZoom());
-    map.on('zoomend', onZoom);
-    return () => map.off('zoomend', onZoom);
-  }, [map]);
+    if (!admin) {
+        availableBikes = bikes.filter((bike) => bike.status == 'available');
+    }
 
-  const iconSize = Math.min(40, Math.max(18, zoom * 2));
+    useEffect(() => {
+        const onZoom = () => setZoom(map.getZoom());
+        map.on('zoomend', onZoom);
+        return () => map.off('zoomend', onZoom);
+    }, [map]);
 
-  const bikeIcon = useMemo(() => createBikeIcon(iconSize), [iconSize]);
+    const bikeIcon = useMemo(() => createBikeIcon(20), [20]);
 
-  return (
-    <MarkerClusterGroup
-      chunkedLoading
-      disableClusteringAtZoom={14}
-      showCoverageOnHover={false}
-      iconCreateFunction={createClusterCustomIcon}
-    >
-      {bikes.map((bike) => (
-        <Marker
-          key={bike.bikeId}
-          position={[bike.lat, bike.lng]}
-          icon={bikeIcon}
+    return (
+        <MarkerClusterGroup
+            chunkedLoading
+            disableClusteringAtZoom={14}
+            showCoverageOnHover={false}
+            iconCreateFunction={createClusterCustomIcon}
         >
-          <Popup>
-            <b>{bike.name}</b>
-            <br />
-            Status: {bike.status}
-            <br />
-            <a
-              href={`/admin-dashboard/bikes/single?bikeId=${bike.bikeId}`}
-              style={{
-                color: '#1976d2',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-              }}
-            >
-              More details
-            </a>
-          </Popup>
-        </Marker>
-      ))}
-    </MarkerClusterGroup>
-  );
+            {availableBikes.map((bike) => (
+                <Marker
+                    key={bike._id}
+                    position={[bike.lat, bike.lon]}
+                    icon={bikeIcon}
+                >
+                    <Popup>
+                        <a
+                            style={{
+                                color:
+                                    bike.status == 'offline'
+                                        ? '#F08080'
+                                        : '#000',
+                                fontWeight: 700,
+                            }}
+                        >
+                            {bike.status == 'offline' && (
+                                <span>Inte tillgänglig</span>
+                            )}
+                            {bike.status == 'available' && (
+                                <span>Tillgänglig</span>
+                            )}
+                            {bike.status == 'charging' && <span>Laddar</span>}
+                            {bike.status == 'maintenance' && (
+                                <span>Service</span>
+                            )}
+                            {bike.status == 'rented' && <span>Aktiv</span>}
+                        </a>
+                        <br />
+                        <br />
+                        {admin ? (
+                            <a
+                                href={`/admin-dashboard/bikes/single?bikeId=${bike._id}`}
+                                style={{
+                                    color: '#1976d2',
+                                    textDecoration: 'underline',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Se detaljer
+                            </a>
+                        ) : (
+                            bike.status == 'available' && (
+                                <a
+                                    href={`/app/user-app/rent-bike?bikeId=${bike._id}`}
+                                    style={{
+                                        backgroundColor: 'green',
+                                        color: '#fff',
+                                        padding: '5px',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Hyr cykel
+                                </a>
+                            )
+                        )}
+                    </Popup>
+                </Marker>
+            ))}
+        </MarkerClusterGroup>
+    );
 }

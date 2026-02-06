@@ -2,6 +2,11 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+/**
+ * Sign in webb.
+ * @param {*} formData
+ * @returns
+ */
 export async function signin(formData) {
     let email = formData.get('email');
 
@@ -30,6 +35,11 @@ export async function signin(formData) {
     };
 }
 
+/**
+ * Sign in app.
+ * @param {*} formData
+ * @returns
+ */
 export async function signinapp(formData) {
     let email = formData.get('email');
 
@@ -57,6 +67,9 @@ export async function signinapp(formData) {
     };
 }
 
+/**
+ * Signout app.
+ */
 export async function signoutapp() {
     const cookieStore = await cookies();
 
@@ -65,6 +78,9 @@ export async function signoutapp() {
     redirect('/app/auth/login');
 }
 
+/**
+ * Signout webb.
+ */
 export async function signout() {
     const cookieStore = await cookies();
 
@@ -72,6 +88,12 @@ export async function signout() {
 
     redirect('/webb/auth/login');
 }
+
+/**
+ * Register new user.
+ * @param {*} formData
+ * @returns
+ */
 export async function register(formData) {
     let firstName = formData.get('firstName');
     let lastName = formData.get('lastName');
@@ -100,6 +122,11 @@ export async function register(formData) {
     };
 }
 
+/**
+ * Register in app.
+ * @param {*} formData
+ * @returns
+ */
 export async function registerapp(formData) {
     let firstName = formData.get('firstName');
     let lastName = formData.get('lastName');

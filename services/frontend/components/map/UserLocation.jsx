@@ -10,6 +10,10 @@ const pinIcon = new L.Icon({
     popupAnchor: [0, -32],
 });
 
+/**
+ * Find the user.
+ * @returns
+ */
 export default function UserLocation() {
     const map = useMap();
     const [pos, setPos] = useState();

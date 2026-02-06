@@ -6,13 +6,11 @@ import { redirect } from 'next/navigation';
 export default async function AdminLayout({ children }) {
     const session = await getSession();
 
-    console.log('SEssion:', session);
-
     if (!session) {
         redirect('/webb/auth/login');
     }
 
-    if (session.role !== "admin") {
+    if (session.role !== 'admin') {
         redirect('/user-dashboard');
     }
 
