@@ -76,7 +76,7 @@ v1.post('/', requireAuth, async (req, res, next) => {
             return res.status(404).json({ error: 'Scooter not found' });
         }
 
-        if (scooterDoc.status !== 'idle') {
+        if (scooterDoc.status !== 'available') {
             return res.status(409).json({
                 error: 'Scooter is not available',
                 status: scooterDoc.status,
@@ -84,6 +84,7 @@ v1.post('/', requireAuth, async (req, res, next) => {
         }
 
         const rental = new Rental({ user: userId, scooter });
+
         await rental.startRental();
 
         const existed = sendCommand(rental.scooter, { action: 'START' });

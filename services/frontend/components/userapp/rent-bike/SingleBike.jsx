@@ -32,6 +32,7 @@ export default function SingleBike({ bikeId }) {
     // Rent new bike.
     async function rentNewBike() {
         const res = await rentBike(bike._id);
+
         toast.success('Hyrning lyckades', { autoClose: 1500 });
 
         setScooter(res);

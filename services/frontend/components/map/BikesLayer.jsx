@@ -62,6 +62,8 @@ export default function BikesLayer({ bikes, admin }) {
         availableBikes = bikes.filter((bike) => bike.status == 'available');
     }
 
+    console.log('AVAILABLE BIKES:', availableBikes);
+
     useEffect(() => {
         const onZoom = () => setZoom(map.getZoom());
         map.on('zoomend', onZoom);
@@ -80,7 +82,7 @@ export default function BikesLayer({ bikes, admin }) {
             {availableBikes.map((bike) => (
                 <Marker
                     key={bike._id}
-                    position={[bike.lat, bike.lon]}
+                    position={[bike.lon, bike.lat]}
                     icon={bikeIcon}
                 >
                     <Popup>

@@ -1,6 +1,6 @@
-import { Schema, model } from "mongoose";
-import mongoose from "mongoose";
-import "../location/model.js";
+import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
+import '../location/model.js';
 
 /**
  * @typedef Rental
@@ -11,7 +11,7 @@ import "../location/model.js";
  * @property {number} cost total cost of the rental
  * @property {number} startHistoryIndex index inside Location.history where rental begins
  * @property {Array<Position>} tripHistory slice of scooter for thsi rental
- * 
+ *
  * @property {Function} startRental startTime and get the index of Location.history
  * @property {Function} getDurationMinutes Returns total duration of the rental
  * @property {Function} calculateCost calculate cost upon time
@@ -20,43 +20,47 @@ import "../location/model.js";
  */
 
 const schema = new Schema(
-  {
-    startTime: { type: Date },
-    endTime: { type: Date },
+    {
+        startTime: { type: Date },
+        endTime: { type: Date },
 
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    scooter: { type: Schema.Types.ObjectId, ref: "Scooter", required: true },
+        user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        scooter: {
+            type: Schema.Types.ObjectId,
+            ref: 'Scooter',
+            required: true,
+        },
 
-    cost: { type: Number, default: 0 },
+        cost: { type: Number, default: 0 },
 
-    //för att hämta korrekt slice av history
-    startHistoryIndex: { type: Number, default: 0 },
+        //för att hämta korrekt slice av history
+        startHistoryIndex: { type: Number, default: 0 },
 
-    tripHistory: [
-      {
-        lat: { type: Number },
-        lng: { type: Number },
-      }
-    ]
-  },
-  { timestamps: true }
+        tripHistory: [
+            {
+                lat: { type: Number },
+                lng: { type: Number },
+            },
+        ],
+    },
+    { timestamps: true }
 );
 
 /**
  * Transform the object to JSON
  * Removes internal fields before sending to client
- * 
+ *
  * @param {Object} schema - The schema of the model
  * @param {Object} ret - The object to be returned
  *
  * @return {Object} - The transformed object
  */
 schema.options.toJSON = {
-  transform: (_, ret) => {
-    ret._id = ret._id.toString();
-    delete ret.__v;
-    return ret;
-  },
+    transform: (_, ret) => {
+        ret._id = ret._id.toString();
+        delete ret.__v;
+        return ret;
+    },
 };
 
 /**
@@ -66,13 +70,12 @@ schema.options.toJSON = {
  * @returns {Promise<void>}
  */
 schema.methods.startRental = async function () {
-  //console.log("Before save:", this);
-  const loc = await this.constructor.getLocationByScooter(this.scooter);
+    const loc = await this.constructor.getLocationByScooter(this.scooter);
 
-  this.startTime = new Date();
-  this.startHistoryIndex = loc.history.length;
+    this.startTime = new Date();
+    this.startHistoryIndex = loc.history.length;
 
-  await this.save();
+    await this.save();
 };
 
 /**
@@ -81,8 +84,8 @@ schema.methods.startRental = async function () {
  * @returns {number} Duration in minutes if both start and end Time exist
  */
 schema.methods.getDurationMinutes = function () {
-  if (!this.startTime || !this.endTime) return 0;
-  return Math.ceil((this.endTime - this.startTime) / 60000);
+    if (!this.startTime || !this.endTime) return 0;
+    return Math.ceil((this.endTime - this.startTime) / 60000);
 };
 
 /**
@@ -91,13 +94,13 @@ schema.methods.getDurationMinutes = function () {
  * @returns {number} The calculated cost.
  */
 schema.methods.calculateCost = function () {
-  const minutes = this.getDurationMinutes();
-  if (minutes === 0) return 0;
+    const minutes = this.getDurationMinutes();
+    if (minutes === 0) return 0;
 
-  const startFee = 10;
-  const pricePerMinute = 2;
+    const startFee = 10;
+    const pricePerMinute = 2;
 
-  return startFee + minutes * pricePerMinute;
+    return startFee + minutes * pricePerMinute;
 };
 
 /**
@@ -106,17 +109,17 @@ schema.methods.calculateCost = function () {
  * @returns {Promise<Rental>} updated rental document
  */
 schema.methods.endRental = async function () {
-  const loc = await this.constructor.getLocationByScooter(this.scooter);
+    const loc = await this.constructor.getLocationByScooter(this.scooter);
 
-  this.endTime = new Date();
-  this.tripHistory = loc.history.slice(this.startHistoryIndex);
+    this.endTime = new Date();
+    this.tripHistory = loc.history.slice(this.startHistoryIndex);
 
-  //här skulle vi kunna hämta status på cykel när det gäller godkänd parkering och ge en bonus eller panelty eller vad tcyks?
-  //skicka med status till calculatecost så har vi löst det??
-  this.cost = this.calculateCost();
-  await this.save();
+    //här skulle vi kunna hämta status på cykel när det gäller godkänd parkering och ge en bonus eller panelty eller vad tcyks?
+    //skicka med status till calculatecost så har vi löst det??
+    this.cost = this.calculateCost();
+    await this.save();
 
-  return this;
+    return this;
 };
 
 /**
@@ -125,8 +128,8 @@ schema.methods.endRental = async function () {
  *
  * @returns {number|null} Duration in minutes or null if not completed
  */
-schema.virtual("durationMinutes").get(function () {
-  return this.getDurationMinutes(); 
+schema.virtual('durationMinutes').get(function () {
+    return this.getDurationMinutes();
 });
 
 /**
@@ -137,15 +140,16 @@ schema.virtual("durationMinutes").get(function () {
  * @throws {Error} if no location exists for the scooter.
  */
 schema.statics.getLocationByScooter = async function (scooterId) {
-  const Location = mongoose.model("Location");
-  const loc = await Location.findOne({ scooterId });
+    const Location = mongoose.model('Location');
 
-  if (!loc) {
-    throw new Error(`Location not found for scooterId ${scooterId}`);
-  }
+    const loc = await Location.findOne({ scooterId });
 
-  return loc;
+    if (!loc) {
+        throw new Error(`Location not found for scooterId ${scooterId}`);
+    }
+
+    return loc;
 };
 
-const Rental = model("Rental", schema);
+const Rental = model('Rental', schema);
 export default Rental;
