@@ -81,7 +81,7 @@ services:
       backend:
         condition: service_healthy
     environment:
-      - NUMBER_OF_SCOOTERS=10
+      - NUMBER_OF_SCOOTERS=100
       - MONGODB_DSN=mongodb://db:27017/vteam-dev
       - BACKEND_BASE_URL=http://backend:3000
       - ROUTE_PROVIDER_API_URL=

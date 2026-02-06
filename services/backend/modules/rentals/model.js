@@ -11,7 +11,7 @@ import "../location/model.js";
  * @property {number} cost total cost of the rental
  * @property {number} startHistoryIndex index inside Location.history where rental begins
  * @property {Array<Position>} tripHistory slice of scooter for thsi rental
- * 
+ *
  * @property {Function} startRental startTime and get the index of Location.history
  * @property {Function} getDurationMinutes Returns total duration of the rental
  * @property {Function} calculateCost calculate cost upon time
@@ -36,16 +36,16 @@ const schema = new Schema(
       {
         lat: { type: Number },
         lng: { type: Number },
-      }
-    ]
+      },
+    ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**
  * Transform the object to JSON
  * Removes internal fields before sending to client
- * 
+ *
  * @param {Object} schema - The schema of the model
  * @param {Object} ret - The object to be returned
  *
@@ -126,22 +126,22 @@ schema.methods.endRental = async function () {
  * @returns {number|null} Duration in minutes or null if not completed
  */
 schema.virtual("durationMinutes").get(function () {
-  return this.getDurationMinutes(); 
+  return this.getDurationMinutes();
 });
 
 /**
  * fetch the Location document associated with a scooter
+ * if no document exists, create one.
  *
  * @param {string} scooterId pass the scooter id
  * @returns {Promise<Location>} The Location document
- * @throws {Error} if no location exists for the scooter.
  */
 schema.statics.getLocationByScooter = async function (scooterId) {
   const Location = mongoose.model("Location");
-  const loc = await Location.findOne({ scooterId });
+  let loc = await Location.findOne({ scooterId });
 
   if (!loc) {
-    throw new Error(`Location not found for scooterId ${scooterId}`);
+    loc = await Location.insertOne({ scooterId });
   }
 
   return loc;

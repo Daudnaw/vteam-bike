@@ -20,11 +20,13 @@ export async function getBikes() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
-        cache: 'no-store',
     });
 
-    if (res.ok) {
-        return res.json();
+    if (res.status == 200) {
+        const bikes = await res.json();
+        console.log('BIKES:', bikes);
+
+        return bikes;
     }
 
     throw new Error(res.err || 'Fetching bikes failed!');

@@ -1,10 +1,13 @@
-import { WebSocketServer } from "ws";
-import Scooter from "./model.js";
+import createDebug from 'debug';
+import { WebSocketServer } from 'ws';
+import Scooter from './model.js';
 
 const DEFAULT_TELEMETRY = {
-  activeIntervalMs: 5000,
-  idleIntervalMs: 60000,
+    activeIntervalMs: 5000,
+    idleIntervalMs: 60000,
 };
+
+const debug = createDebug('backend:websockets:scooters');
 
 /**
  * In-memory "room" cache.
@@ -25,7 +28,8 @@ const rooms = new Map();
  * @param {object} message - JSON-serializable payload.
  */
 export function send(ws, message) {
-  ws.send(JSON.stringify(message));
+    debug(`SEND: ${JSON.stringify(message)}`);
+    ws.send(JSON.stringify(message));
 }
 
 /**
@@ -35,12 +39,14 @@ export function send(ws, message) {
  * @returns {Set<WebSocket>} The Set of WebSockets subscribed to this scooter.
  */
 export function getRoom(key) {
-  let set = rooms.get(key);
-  if (!set) {
-    set = new Set();
-    rooms.set(key, set);
-  }
-  return set;
+    debug(`Getting room ${key}`);
+    let set = rooms.get(key);
+    if (!set) {
+        debug("Room doesn't exist. Creating.");
+        set = new Set();
+        rooms.set(key, set);
+    }
+    return set;
 }
 
 /**
@@ -52,13 +58,13 @@ export function getRoom(key) {
  * @param {WebSocket} ws - The WebSocket to add.
  */
 export function joinRoom(key, ws) {
-  const set = getRoom(key);
-  set.add(ws);
+    const set = getRoom(key);
+    set.add(ws);
 
-  ws.on("close", () => {
-    set.delete(ws);
-    if (set.size === 0) rooms.delete(key);
-  });
+    ws.on('close', () => {
+        set.delete(ws);
+        if (set.size === 0) rooms.delete(key);
+    });
 }
 
 /**
@@ -69,19 +75,19 @@ export function joinRoom(key, ws) {
  * @returns {number} How many clients were sent to (open sockets only).
  */
 export function broadcastToRoom(key, message) {
-  const set = rooms.get(key);
-  if (!set) return 0;
+    const set = rooms.get(key);
+    if (!set) return 0;
 
-  const data = JSON.stringify(message);
-  let sent = 0;
+    const data = JSON.stringify(message);
+    let sent = 0;
 
-  for (const ws of set) {
-    if (ws.readyState === ws.OPEN) {
-      ws.send(data);
-      sent++;
+    for (const ws of set) {
+        if (ws.readyState === ws.OPEN) {
+            ws.send(data);
+            sent++;
+        }
     }
-  }
-  return sent;
+    return sent;
 }
 
 /**
@@ -97,10 +103,10 @@ export function broadcastToRoom(key, message) {
  * @returns {boolean} True if the room existed (even if no sockets were open), else false.
  */
 export function sendCommand(scooterId, cmd) {
-  const key = String(scooterId);
-  const existed = rooms.has(key);
-  broadcastToRoom(key, { type: "CMD", ...cmd });
-  return existed;
+    const key = String(scooterId);
+    const existed = rooms.has(key);
+    broadcastToRoom(key, { type: 'CMD', ...cmd });
+    return existed;
 }
 
 /**
@@ -113,11 +119,11 @@ export function sendCommand(scooterId, cmd) {
  * @throws {Error} if invalid
  */
 export function parseHello(msg) {
-  if (msg?.type !== "HELLO") throw new Error("Expected HELLO");
-  if (!msg.scooterId) throw new Error("Missing scooterId");
+    if (msg?.type !== 'HELLO') throw new Error('Expected HELLO');
+    if (!msg.scooterId) throw new Error('Missing scooterId');
 
-  const role = msg.role === "admin" ? "admin" : "device";
-  return { scooterId: String(msg.scooterId), role };
+    const role = msg.role === 'admin' ? 'admin' : 'device';
+    return { scooterId: String(msg.scooterId), role };
 }
 
 /**
@@ -128,19 +134,19 @@ export function parseHello(msg) {
  * @throws {Error} if invalid
  */
 export function parseState(msg) {
-  if (msg?.type !== "STATE") throw new Error("Expected STATE");
+    if (msg?.type !== 'STATE') throw new Error('Expected STATE');
 
-  const { battery, lat, lon, speedKmh, status } = msg;
+    const { battery, lat, lon, speedKmh, status } = msg;
 
-  const out = {};
-  if (battery != null)
-    out.battery = Math.max(Math.min(100, Number(battery)), 0); // normalize battery level 0-100
-  if (lat != null) out.lat = Number(lat);
-  if (lon != null) out.lon = Number(lon);
-  if (speedKmh != null) out.speedKmh = Number(speedKmh);
-  if (status != null) out.status = String(status);
+    const out = {};
+    if (battery != null)
+        out.battery = Math.max(Math.min(100, Number(battery)), 0); // normalize battery level 0-100
+    if (lat != null) out.lat = Number(lat);
+    if (lon != null) out.lon = Number(lon);
+    if (speedKmh != null) out.speedKmh = Number(speedKmh);
+    if (status != null) out.status = String(status);
 
-  return out;
+    return out;
 }
 
 /**
@@ -151,114 +157,116 @@ export function parseState(msg) {
  * @returns {(ws: WebSocket) => void} connection handler
  */
 export function createConnectionHandler({ ScooterModel }) {
-  return (ws) => {
-    /**
-     * First message must be HELLO, which identifies the scooter and (optionally) role.
-     * We keep this "HELLO first" pattern because it works for both device clients and dashboards.
-     */
-    ws.once("message", async (raw) => {
-      let hello;
-      try {
-        hello = JSON.parse(raw.toString());
-      } catch {
-        ws.close(1008, "Bad JSON");
-        return;
-      }
+    return (ws) => {
+        /**
+         * First message must be HELLO, which identifies the scooter and (optionally) role.
+         * We keep this "HELLO first" pattern because it works for both device clients and dashboards.
+         */
+        ws.once('message', async (raw) => {
+            let hello;
+            try {
+                hello = JSON.parse(raw.toString());
+            } catch {
+                ws.close(1008, 'Bad JSON');
+                return;
+            }
 
-      let normalized;
-      try {
-        normalized = parseHello(hello);
-      } catch (err) {
-        ws.close(1008, err.message);
-        return;
-      }
+            let normalized;
+            try {
+                normalized = parseHello(hello);
+            } catch (err) {
+                ws.close(1008, err.message);
+                return;
+            }
 
-      const key = normalized.scooterId;
-      ws.scooterId = key;
-      ws.role = normalized.role;
-      joinRoom(key, ws);
+            const key = normalized.scooterId;
+            ws.scooterId = key;
+            ws.role = normalized.role;
+            joinRoom(key, ws);
 
-      // Load scooter state from Mongo and send INIT to this socket
-      const doc = await ScooterModel.findById(normalized.scooterId).lean();
-      if (!doc) {
-        ws.close(1008, "Unknown scooter");
-        return;
-      }
+            // Load scooter state from Mongo and send INIT to this socket
+            const doc = await ScooterModel.findById(
+                normalized.scooterId
+            ).lean();
+            if (!doc) {
+                ws.close(1008, 'Unknown scooter');
+                return;
+            }
 
-      send(ws, {
-        type: "INIT",
-        serverTime: Date.now(),
-        telemetry: DEFAULT_TELEMETRY,
-        state: {
-          battery: doc.battery,
-          lat: doc.lat,
-          lon: doc.lon,
-          speedKmh: doc.speedKmh,
-          status: doc.status,
-          mode: doc.mode,
-        },
-      });
+            send(ws, {
+                type: 'INIT',
+                serverTime: Date.now(),
+                telemetry: DEFAULT_TELEMETRY,
+                state: {
+                    battery: doc.battery,
+                    lat: doc.lat,
+                    lon: doc.lon,
+                    speedKmh: doc.speedKmh,
+                    status: doc.status,
+                    mode: doc.mode,
+                },
+            });
 
-      /**
-       * Subsequent messages.
-       * - Devices send STATE once per second or so
-       */
-      ws.on("message", async (raw2) => {
-        let msg;
-        try {
-          msg = JSON.parse(raw2.toString());
-        } catch {
-          return; // ignore malformed
-        }
+            /**
+             * Subsequent messages.
+             * - Devices send STATE once per second or so
+             */
+            ws.on('message', async (raw2) => {
+                let msg;
+                try {
+                    msg = JSON.parse(raw2.toString());
+                } catch {
+                    return; // ignore malformed
+                }
 
-        if (msg.type === "STATE") {
-          // Only accept state updates from device connections
-          if (ws.role !== "device") return;
+                if (msg.type === 'STATE') {
+                    // Only accept state updates from device connections
+                    if (ws.role !== 'device') return;
 
-          let patch;
-          try {
-            patch = parseState(msg);
-          } catch {
-            return;
-          }
+                    let patch;
+                    try {
+                        patch = parseState(msg);
+                    } catch {
+                        return;
+                    }
 
-          const updated = await ScooterModel.findByIdAndUpdate(
-            normalized.scooterId,
-            {
-              $set: {
-                ...patch,
-                lastSeenAt: new Date(),
-              },
-            },
-            { new: true, runValidators: true },
-          ).lean();
+                    const updated = await ScooterModel.findByIdAndUpdate(
+                        normalized.scooterId,
+                        {
+                            $set: {
+                                ...patch,
+                                lastSeenAt: new Date(),
+                            },
+                        },
+                        { new: true, runValidators: true }
+                    ).lean();
 
-          if (!updated) {
-            ws.close(1008, "Unknown scooter");
-            return;
-          }
+                    if (!updated) {
+                        ws.close(1008, 'Unknown scooter');
+                        return;
+                    }
 
-          // Notify all subscribers (admin dashboards + device itself)
-          broadcastToRoom(key, {
-            type: "STATE",
-            scooterId: normalized.scooterId,
-            state: updated,
-            serverTime: Date.now(),
-          });
-        }
-      });
+                    // Notify all subscribers (admin dashboards + device itself)
+                    broadcastToRoom(key, {
+                        type: 'STATE',
+                        scooterId: normalized.scooterId,
+                        state: updated,
+                        serverTime: Date.now(),
+                    });
+                }
+            });
 
-      ws.on("close", async () => {
-        // Mark offline when the device disconnects
-        if (ws.role === "device") {
-          await ScooterModel.findByIdAndUpdate(normalized.scooterId, {
-            status: "offline",
-            lastSeenAt: new Date(),
-          });
-        }
-      });
-    });
-  };
+            ws.on('close', async () => {
+                // Mark offline when the device disconnects
+                if (ws.role === 'device') {
+                    await ScooterModel.findByIdAndUpdate(normalized.scooterId, {
+                        status: 'offline',
+                        lastSeenAt: new Date(),
+                    });
+                }
+            });
+        });
+    };
 }
 
 /**
@@ -279,11 +287,11 @@ export function createConnectionHandler({ ScooterModel }) {
  * @param {{ server: import("http").Server }} ctx
  */
 export function registerWebSockets({ server }) {
-  const wss = new WebSocketServer({ server, path: "/ws/scooters" });
+    const wss = new WebSocketServer({ server, path: '/ws/scooters' });
 
-  const onConnection = createConnectionHandler({ ScooterModel: Scooter });
+    const onConnection = createConnectionHandler({ ScooterModel: Scooter });
 
-  wss.on("connection", onConnection);
+    wss.on('connection', onConnection);
 }
 
 /**
@@ -292,5 +300,5 @@ export function registerWebSockets({ server }) {
  * @returns {void}
  */
 export function __resetForTests() {
-  rooms.clear();
+    rooms.clear();
 }
