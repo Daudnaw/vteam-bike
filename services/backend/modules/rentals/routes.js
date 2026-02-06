@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { model } from "mongoose";
-import { sendCommand } from "../scooter/ws.js";
-import { requireAuth } from "../auth/middleware.js";
-import handelPrice from "./handelPayment.js";
-import User from "../users/model.js";
-import Scooter, { STATUSES } from "../scooter/model.js";
+import { Router } from 'express';
+import { model } from 'mongoose';
+import { sendCommand } from '../scooter/ws.js';
+import { requireAuth } from '../auth/middleware.js';
+import handelPrice from './handelPayment.js';
+import User from '../users/model.js';
+import Scooter, { STATUSES } from '../scooter/model.js';
 
 const Rental = model('Rental');
 
@@ -178,11 +178,12 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const credit = Number(user.credit ?? 0);
-    if (credit < cost) {
-      return res
-        .status(402)
-        .json({ error: "Too little credits", cost, credit });
+        const credit = Number(user.credit ?? 0);
+        if (credit < cost) {
+            return res
+                .status(402)
+                .json({ error: 'Too little credits', cost, credit });
+        }
         user.credit = credit - cost;
         await user.save();
 

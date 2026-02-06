@@ -71,36 +71,7 @@ const schema = new Schema(
             index: true,
         },
     },
-    lat: {
-      type: Number,
-      min: -90,
-      max: 90,
-      default: 0,
-    },
-    lon: {
-      type: Number,
-      min: -180,
-      max: 180,
-      default: 0,
-    },
-    speedKmh: {
-      type: Number,
-      min: 0,
-      default: 0,
-    },
-    status: {
-      type: String,
-      enum: Object.values(STATUSES),
-      default: STATUSES.AVAILABLE,
-      index: true,
-    },
-    lastSeenAt: {
-      type: Date,
-      default: null,
-      index: true,
-    },
-  },
-  { timestamps: true },
+    { timestamps: true },
 );
 
 /**
@@ -124,24 +95,24 @@ schema.options.toJSON = {
  * Keep speed consistent with status.
  * If the scooter is idle/offline, we never store a non-zero speed.
  */
-schema.pre("save", function normalizeInvariants() {
-  if (this.status !== STATUSES.RENTED) {
-    this.speedKmh = 0;
-  }
+schema.pre('save', function normalizeInvariants() {
+    if (this.status !== STATUSES.RENTED) {
+        this.speedKmh = 0;
+    }
 });
 
 schema.pre(
-  ["findOneAndUpdate", "updateOne", "updateMany"],
-  function normalizeUpdate() {
-    const update = this.getUpdate() ?? {};
-    const $set = update.$set ?? update;
+    ['findOneAndUpdate', 'updateOne', 'updateMany'],
+    function normalizeUpdate() {
+        const update = this.getUpdate() ?? {};
+        const $set = update.$set ?? update;
 
-    // If status is being set to anything other than rented, force speed to 0.
-    if ($set.status && $set.status !== STATUSES.RENTED) {
-      if (update.$set) update.$set.speedKmh = 0;
-      else update.speedKmh = 0;
-    }
-  },
+        // If status is being set to anything other than rented, force speed to 0.
+        if ($set.status && $set.status !== STATUSES.RENTED) {
+            if (update.$set) update.$set.speedKmh = 0;
+            else update.speedKmh = 0;
+        }
+    },
 );
 
 const Scooter = model('Scooter', schema);
