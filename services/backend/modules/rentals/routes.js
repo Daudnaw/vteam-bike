@@ -179,6 +179,9 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
         if (!existed) {
             return res.status(409).json({ error: 'Scoter is offline', rental });
         }
+        if (!existed) {
+            return res.status(409).json({ error: 'Scoter is offline', rental });
+        }
 
         const updatedRental = await rental.endRental();
         const { cost } = await handelPrice(updatedRental);

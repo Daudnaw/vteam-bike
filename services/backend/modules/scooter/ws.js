@@ -104,12 +104,7 @@ export function broadcastToRoom(key, message) {
  */
 export function sendCommand(scooterId, cmd) {
     const key = String(scooterId);
-    console.log('KEY', key);
-
     const existed = rooms.has(key);
-
-    console.log('ROOMS EXIST:', existed);
-
     broadcastToRoom(key, { type: 'CMD', ...cmd });
     return existed;
 }
