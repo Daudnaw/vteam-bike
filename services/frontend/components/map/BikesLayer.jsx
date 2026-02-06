@@ -62,8 +62,6 @@ export default function BikesLayer({ bikes, admin }) {
         availableBikes = bikes.filter((bike) => bike.status == 'available');
     }
 
-    console.log('AVAILABLE BIKES:', availableBikes);
-
     useEffect(() => {
         const onZoom = () => setZoom(map.getZoom());
         map.on('zoomend', onZoom);

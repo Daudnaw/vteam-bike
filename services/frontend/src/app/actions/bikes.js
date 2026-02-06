@@ -24,7 +24,6 @@ export async function getBikes() {
 
     if (res.status == 200) {
         const bikes = await res.json();
-        console.log('BIKES:', bikes);
 
         return bikes;
     }
@@ -262,7 +261,6 @@ export async function addBike(form) {
  * @returns
  */
 export async function updateBike(id, form) {
-    console.log(`update ${form} `);
     return { success: true };
 }
 

@@ -4,6 +4,7 @@ import { BatteryMedium } from 'lucide-react';
 import { rentBike, endRental } from '../../../src/app/actions/rental';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import SingleBikeMap from '../../map/SingleBikeMap';
 
 /**
  * Rent a bike on user app.
@@ -15,6 +16,7 @@ export default function SingleBike({ bikeId }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [scooter, setScooter] = useState(null);
+    const [bikeState, setBikeState] = useState(null);
 
     useEffect(() => {
         if (!bikeId) return;
@@ -23,6 +25,48 @@ export default function SingleBike({ bikeId }) {
             .then(setBike)
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
+    }, [bikeId]);
+
+    useEffect(() => {
+        const ws = new WebSocket('ws://localhost:3000/ws/scooters');
+
+        ws.onopen = () => {
+            ws.send(
+                JSON.stringify({
+                    type: 'HELLO',
+                    scooterId: bikeId,
+                    role: 'admin',
+                })
+            );
+
+            console.log('Websocket connected');
+        };
+
+        ws.onmessage = (e) => {
+            let msg;
+
+            try {
+                msg = JSON.parse(e.data);
+                setBikeState(msg.state);
+            } catch {
+                return;
+            }
+
+            console.log(msg);
+        };
+
+        ws.onerror = (e) => {
+            console.log('WS error:', e);
+        };
+
+        ws.onclose = (e) => {
+            console.log('WS close:', e.code);
+        };
+
+        return () => {
+            ws.close();
+            console.log('Websocket closed');
+        };
     }, [bikeId]);
 
     if (loading) return <p>Loading bike...</p>;
@@ -37,7 +81,7 @@ export default function SingleBike({ bikeId }) {
             toast.error(res.message, { autoClose: 1500 });
         } else {
             toast.success('Hyrning lyckades', { autoClose: 1500 });
-
+            setBikeState(bikeState);
             setScooter(res);
         }
     }
@@ -71,6 +115,13 @@ export default function SingleBike({ bikeId }) {
             >
                 {!scooter ? 'Hyr cykel' : 'Avsluta resan'}
             </button>
+            {/* {bikeState && (
+                <div className='my-10'>
+                    <div className='mt-10 mb-10 h-[400px]'>
+                        <SingleBikeMap bike={bikeState} admin={false} />
+                    </div>
+                </div>
+            )} */}
         </div>
     );
 }

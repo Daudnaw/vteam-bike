@@ -48,7 +48,7 @@ export default function CreateBike() {
                     className='w-full bg-slate-200 p-2 rounded-md text-xl mt-3 h-14 border-detail border-2 text-black'
                 >
                     <option value=''>Select status</option>
-                    <option value='idle'>Tillgänglig</option>
+                    <option value='available'>Tillgänglig</option>
                     <option value='offline'>Offline</option>
                 </select>
 

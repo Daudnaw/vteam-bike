@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import SingleBike from '../../../../../../../components/webb/dashboards/admin/bikes/SingleBike';
+import { useRef, useState, useEffect } from 'react';
 
 export default function Page() {
     const searchParams = useSearchParams();
