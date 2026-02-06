@@ -56,6 +56,8 @@ function createClusterCustomIcon(cluster) {
 export default function BikesLayer({ bikes, admin }) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
+    const [ws, setWs] = useState(null);
+
     let availableBikes = bikes;
 
     if (!admin) {
@@ -63,10 +65,20 @@ export default function BikesLayer({ bikes, admin }) {
     }
 
     useEffect(() => {
+        const wss = new WebSocket('ws://localhost:3000/ws/scooters');
+
+        ws.onopen = () => setWs(wss);
+    }, []);
+
+    useEffect(() => {
         const onZoom = () => setZoom(map.getZoom());
         map.on('zoomend', onZoom);
         return () => map.off('zoomend', onZoom);
     }, [map]);
+
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'PING' }));
+    }
 
     const bikeIcon = useMemo(() => createBikeIcon(20), [20]);
 
