@@ -179,8 +179,52 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
         if (!existed) {
             return res.status(409).json({ error: 'Scoter is offline', rental });
         }
-        if (!existed) {
-            return res.status(409).json({ error: 'Scoter is offline', rental });
+
+        const updatedRental = await rental.endRental();
+        const { cost } = await handelPrice(updatedRental);
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const credit = Number(user.credit ?? 0);
+        if (credit < cost) {
+            return res
+                .status(402)
+                .json({ error: 'Too little credits', cost, credit });
+        }
+        user.credit = credit - cost;
+        await user.save();
+
+        updatedRental.cost = cost;
+        await updatedRental.save();
+
+        return res.status(200).json(updatedRental);
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @route PATCH /v1/rentals/:id/end
+ * @summary End a rental
+ * @description Ends the rental and saves journy history into rental and the cost
+ * @param {string} id.path.required - Rental ID
+ * @returns {Rental.model} 200 - Updated rental with endTime, cost, tripHistory
+ * @returns {Error} 404 - Not found
+ */
+v1.patch('/:id/end/app', requireAuth, async (req, res, next) => {
+    try {
+        const userId = req.user.sub;
+
+        const rental = await Rental.findById(req.params.id);
+        if (!rental) return res.status(404).json({ error: 'Rental not found' });
+
+        if (String(rental.user) !== String(userId)) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        if (rental.endTime) {
+            return res.status(200).json(rental);
         }
 
         const updatedRental = await rental.endRental();

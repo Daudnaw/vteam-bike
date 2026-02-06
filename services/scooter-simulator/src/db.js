@@ -25,7 +25,7 @@ export async function connect(dsn) {
  */
 export async function seed(db) {
     const files = (await fs.readdir(SEED_DATA_DIR)).filter((f) =>
-        f.endsWith('.json')
+        f.endsWith('.json'),
     );
 
     console.debug(`SEEDING DATABASE FROM ${files.length} FILES`);

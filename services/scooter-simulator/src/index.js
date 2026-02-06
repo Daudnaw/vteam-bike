@@ -102,7 +102,7 @@ async function registerCustomer(n) {
 
     const customerDoc = await postJson(
         `${BACKEND_BASE_URL}/api/auth/register`,
-        customer
+        customer,
     );
 
     return { customerDoc, customer };
@@ -149,7 +149,7 @@ async function setUserCredit(db, userId, credit = 1000) {
  */
 async function generateRandomScooter({ scootersCol, routes, idx }) {
     const route = pick(routes); // get a random route
-    const [lat, lon] = route.start; // the starting point
+    const [lon, lat] = route.route[0]; // the starting point
 
     const battery = randomBattery();
     const rented = decideRented();
@@ -167,6 +167,7 @@ async function generateRandomScooter({ scootersCol, routes, idx }) {
                 lat,
                 lon,
             },
+            route,
             rented: false,
             status: doc.status,
         };
@@ -186,7 +187,7 @@ async function generateRandomScooter({ scootersCol, routes, idx }) {
             `Could not create and login user, idx: ${idx}`,
             customer,
             customerDoc,
-            token
+            token,
         );
     }
 
@@ -318,7 +319,7 @@ async function driveLoop({
         const [lon, lat] = linearInterpolation(
             path[segmentIdx],
             path[segmentIdx + 1],
-            t
+            t,
         );
         locationSensor.set(lat, lon);
 
@@ -381,7 +382,7 @@ function startRental(scooterId, token) {
     return postJson(
         `${BACKEND_BASE_URL}/api/v1/rentals`,
         { scooter: scooterId },
-        { token }
+        { token },
     );
 }
 
@@ -402,7 +403,7 @@ async function endRental(rentalId, token) {
                 authorization: `Bearer ${token}`,
                 'content-type': 'application/json',
             },
-        }
+        },
     );
 
     return res.ok;
@@ -459,13 +460,10 @@ async function main() {
             // await scooter.isReady();
             await once(scooter, 'READY');
 
-            // only scooters that are rented need to call the API to rent
-            // and start their drive loop
-            if (!result.rented) continue;
-
             // When the scooter starts, happens when the rental step is completed,
             // it starts its drive loop
-            // console.log({ result });
+            // NOTE: Attaching this listener on "AVAILABLE" scooters as well will allow us to start them
+            // from the webapp and have them follow a simulated route
             scooter.once('START', async () => {
                 speedSensor.set(result.scooter.speedKmh);
                 await driveLoop({
@@ -478,6 +476,10 @@ async function main() {
                 const rentalEnded = await endRental(rental._id);
             });
 
+            // only scooters that are rented need to call the API to rent
+            // and start their drive loop
+            if (!result.rented) continue;
+
             await setUserCredit(db, result.customerId);
             rental = await startRental(result.scooter.id, result.token);
             console.log({ rental });
@@ -489,18 +491,18 @@ async function main() {
                     created: results.length,
                     rented: results.filter((r) => r.rented).length,
                     available: results.filter(
-                        (r) => r.status === 'available' && !r.rented
+                        (r) => r.status === 'available' && !r.rented,
                     ).length,
                     charging: results.filter((r) => r.status === 'charging')
                         .length,
                     maintenance: results.filter(
-                        (r) => r.status === 'maintenance'
+                        (r) => r.status === 'maintenance',
                     ).length,
                     sample: results.slice(0, 5),
                 },
                 null,
-                2
-            )
+                2,
+            ),
         );
     } finally {
         await client.close();

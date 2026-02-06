@@ -71,7 +71,7 @@ const schema = new Schema(
             index: true,
         },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 /**
@@ -112,7 +112,7 @@ schema.pre(
             if (update.$set) update.$set.speedKmh = 0;
             else update.speedKmh = 0;
         }
-    }
+    },
 );
 
 const Scooter = model('Scooter', schema);
