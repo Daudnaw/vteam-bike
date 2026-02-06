@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
 import {
@@ -23,6 +23,7 @@ import {
     getSingelBike,
 } from '../../../../../src/app/actions/bikes';
 import { useRouter } from 'next/navigation';
+import SingleBikeMap from '../../../../map/SingleBikeMap';
 
 /**
  * Single bike
@@ -34,6 +35,7 @@ export default function SingleBike({ bikeId }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const router = useRouter();
+    const refWs = useRef(null);
 
     useEffect(() => {
         if (!bikeId) return;
@@ -43,6 +45,51 @@ export default function SingleBike({ bikeId }) {
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
     }, [bikeId]);
+
+    useEffect(() => {
+        if (!loading) {
+            const ws = new WebSocket('ws://localhost:3000/ws/scooters');
+
+            ws.onopen = () => {
+                refWs.current = ws;
+
+                ws.send(
+                    JSON.stringify({
+                        type: 'HELLO',
+                        scooterId: bike._id,
+                        role: 'admin',
+                    })
+                );
+
+                console.log('Websocket connected');
+            };
+
+            ws.onmessage = (e) => {
+                let msg;
+
+                try {
+                    msg = JSON.parse(e.data);
+                } catch {
+                    return;
+                }
+
+                console.log(msg);
+            };
+
+            ws.onerror = (e) => {
+                console.log('WS error:', e);
+            };
+
+            ws.onclose = (e) => {
+                console.log('WS close:', e.code);
+            };
+
+            return () => {
+                ws.close();
+                console.log('Websocket closed');
+            };
+        }
+    }, [bike]);
 
     if (loading) return <p>Loading bike...</p>;
     if (error) return <p className='text-red-500'>{error}</p>;
@@ -309,6 +356,9 @@ export default function SingleBike({ bikeId }) {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <div className='mt-10 mb-10 h-[400px]'>
+                <SingleBikeMap bike={bike} admin={true} />
             </div>
         </div>
     );
