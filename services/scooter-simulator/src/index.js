@@ -167,6 +167,7 @@ async function generateRandomScooter({ scootersCol, routes, idx }) {
         lat,
         lon,
       },
+      route,
       rented: false,
       status: doc.status,
     };
@@ -459,13 +460,10 @@ async function main() {
       // await scooter.isReady();
       await once(scooter, "READY");
 
-      // only scooters that are rented need to call the API to rent
-      // and start their drive loop
-      if (!result.rented) continue;
-
       // When the scooter starts, happens when the rental step is completed,
       // it starts its drive loop
-      // console.log({ result });
+      // NOTE: Attaching this listener on "AVAILABLE" scooters as well will allow us to start them
+      // from the webapp and have them follow a simulated route
       scooter.once("START", async () => {
         speedSensor.set(result.scooter.speedKmh);
         await driveLoop({
@@ -477,6 +475,10 @@ async function main() {
 
         const rentalEnded = await endRental(rental._id);
       });
+
+      // only scooters that are rented need to call the API to rent
+      // and start their drive loop
+      if (!result.rented) continue;
 
       await setUserCredit(db, result.customerId);
       rental = await startRental(result.scooter.id, result.token);
