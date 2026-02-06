@@ -14,17 +14,18 @@ export async function getBikes() {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter`, {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/v1/scooter`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
-        cache: 'no-store',
     });
 
-    if (res.ok) {
-        return res.json();
+    if (res.status == 200) {
+        const bikes = await res.json();
+
+        return bikes;
     }
 
     throw new Error(res.err || 'Fetching bikes failed!');
@@ -43,13 +44,16 @@ export async function deleteBike(bike) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/scooter/${bike._id}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
 
     if (res.ok) {
         refresh();
@@ -74,17 +78,20 @@ export async function stopBike(bike) {
 
     bike.status = 'offline';
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-            bike,
-        }),
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/scooter/${bike._id}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                bike,
+            }),
+            cache: 'no-store',
+        }
+    );
 
     if (res.ok) {
         refresh();
@@ -109,17 +116,20 @@ export async function lockBike(bike) {
 
     bike.status = 'locked';
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-            bike,
-        }),
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/scooter/${bike._id}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                bike,
+            }),
+            cache: 'no-store',
+        }
+    );
 
     if (res.ok) {
         refresh();
@@ -144,17 +154,20 @@ export async function maintainBike(bike) {
 
     bike.status = 'maintenance';
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-            bike,
-        }),
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/scooter/${bike._id}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                bike,
+            }),
+            cache: 'no-store',
+        }
+    );
 
     if (res.ok) {
         refresh();
@@ -179,17 +192,20 @@ export async function readyBike(bike) {
 
     bike.status = 'available';
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bike._id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-            bike,
-        }),
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/scooter/${bike._id}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                bike,
+            }),
+            cache: 'no-store',
+        }
+    );
 
     if (res.ok) {
         refresh();
@@ -216,7 +232,7 @@ export async function addBike(form) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter`, {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/v1/scooter`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -245,7 +261,6 @@ export async function addBike(form) {
  * @returns
  */
 export async function updateBike(id, form) {
-    console.log(`update ${form} `);
     return { success: true };
 }
 
@@ -262,14 +277,17 @@ export async function getSingelBike(bikeId) {
         throw new Error('Not authenticated');
     }
 
-    const res = await fetch(`http://backend:3000/api/v1/scooter/${bikeId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/v1/scooter/${bikeId}`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        }
+    );
 
     if (res.ok) {
         return res.json();

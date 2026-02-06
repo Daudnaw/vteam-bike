@@ -274,7 +274,7 @@ async function driveLoop({
     let segmentProgressMeters = 0;
 
     while (segmentIdx < segmentLengths.length) {
-        console.log(`Driving ${segmentIdx} at ${speedMps}mps`);
+        // console.log(`Driving ${segmentIdx} at ${speedMps}mps`);
 
         // If speed is 0, just idle but keep ticking.
         if (speedMps === 0) {

@@ -12,7 +12,7 @@ export async function signin(formData) {
 
     let password = formData.get('password');
 
-    const res = await fetch('http://backend:3000/api/auth/login', {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -45,7 +45,7 @@ export async function signinapp(formData) {
 
     let password = formData.get('password');
 
-    const res = await fetch('http://backend:3000/api/auth/login', {
+    const res = await fetch(`${process.env.API_URL_INTERNAL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -100,11 +100,14 @@ export async function register(formData) {
     let email = formData.get('email');
     let password = formData.get('password');
 
-    const res = await fetch('http://backend:3000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, email, password }),
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/auth/register`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ firstName, lastName, email, password }),
+        }
+    );
 
     const data = await res.json();
 
@@ -133,11 +136,14 @@ export async function registerapp(formData) {
     let email = formData.get('email');
     let password = formData.get('password');
 
-    const res = await fetch('http://backend:3000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, email, password }),
-    });
+    const res = await fetch(
+        `${process.env.API_URL_INTERNAL}/api/auth/register`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ firstName, lastName, email, password }),
+        }
+    );
 
     const data = await res.json();
 

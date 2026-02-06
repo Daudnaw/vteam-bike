@@ -62,7 +62,7 @@ const schema = new Schema(
         status: {
             type: String,
             enum: Object.values(STATUSES),
-            default: STATUSES.OFFLINE,
+            default: STATUSES.AVAILABLE,
             index: true,
         },
         lastSeenAt: {

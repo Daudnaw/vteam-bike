@@ -68,6 +68,13 @@ v1.post('/', requireAuth, async (req, res, next) => {
 
         const user = await User.findById(userId).lean();
 
+        // const credit = Number(user.credit ?? 0);
+        // if (credit <= 0) {
+        //     return res
+        //         .status(402)
+        //         .json({ error: 'Too little credits', credit });
+        // }
+
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         const scooterDoc = await Scooter.findById(scooter).lean();
@@ -84,6 +91,7 @@ v1.post('/', requireAuth, async (req, res, next) => {
         }
 
         const rental = new Rental({ user: userId, scooter });
+
         await rental.startRental();
 
         const existed = sendCommand(rental.scooter, { action: 'START' });

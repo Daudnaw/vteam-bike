@@ -1,5 +1,5 @@
 import { Marker, Popup, useMap } from 'react-leaflet';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import L from 'leaflet';
 import dynamic from 'next/dynamic';
 
@@ -80,7 +80,7 @@ export default function BikesLayer({ bikes, admin }) {
             {availableBikes.map((bike) => (
                 <Marker
                     key={bike._id}
-                    position={[bike.lat, bike.lon]}
+                    position={[bike.lon, bike.lat]}
                     icon={bikeIcon}
                 >
                     <Popup>
