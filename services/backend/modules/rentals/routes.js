@@ -4,7 +4,7 @@ import { sendCommand } from '../scooter/ws.js';
 import { requireAuth } from '../auth/middleware.js';
 import handelPrice from './handelPayment.js';
 import User from '../users/model.js';
-import Scooter from '../scooter/model.js';
+import Scooter, { STATUSES } from '../scooter/model.js';
 
 const Rental = model('Rental');
 
@@ -82,6 +82,12 @@ v1.post('/', requireAuth, async (req, res, next) => {
                 status: scooterDoc.status,
             });
         }
+        if (scooterDoc.status !== STATUSES.AVAILABLE) {
+            return res.status(409).json({
+                error: 'Scooter is not available',
+                status: scooterDoc.status,
+            });
+        }
 
         const rental = new Rental({ user: userId, scooter });
         await rental.startRental();
@@ -93,49 +99,6 @@ v1.post('/', requireAuth, async (req, res, next) => {
                 .status(409)
                 .json({ error: 'Scooter is offline', rental });
         }
-
-        return res.status(201).json(rental);
-    } catch (err) {
-        next(err);
-    }
-});
-
-/**
- * @route POST /v1/rentals
- * @summary Start a rental
- * @body {string} scooter.required Scooter ID
- * @returns {Rental.model} 201 - Created rental
- * @returns {Error} 400/401/403/409 - Errors
- */
-v1.post('/app', requireAuth, async (req, res, next) => {
-    try {
-        const userId = req.user.sub;
-
-        const { scooter } = req.body;
-
-        if (!scooter) {
-            return res.status(400).json({ error: 'Scooter is required' });
-        }
-
-        const user = await User.findById(userId).lean();
-
-        if (!user) return res.status(404).json({ error: 'User not found' });
-
-        const scooterDoc = await Scooter.findById(scooter).lean();
-
-        if (!scooterDoc) {
-            return res.status(404).json({ error: 'Scooter not found' });
-        }
-
-        if (scooterDoc.status !== 'idle') {
-            return res.status(409).json({
-                error: 'Scooter is not available',
-                status: scooterDoc.status,
-            });
-        }
-
-        const rental = new Rental({ user: userId, scooter });
-        await rental.startRental();
 
         return res.status(201).json(rental);
     } catch (err) {
@@ -168,6 +131,9 @@ v1.patch('/:id/end', requireAuth, async (req, res, next) => {
 
         const existed = sendCommand(rental.scooter, { action: 'STOP' });
 
+        if (!existed) {
+            return res.status(409).json({ error: 'Scoter is offline', rental });
+        }
         if (!existed) {
             return res.status(409).json({ error: 'Scoter is offline', rental });
         }
@@ -304,6 +270,11 @@ v1.get('/user/:userId', requireAuth, async (req, res, next) => {
                 .status(404)
                 .json({ message: 'No rentals found for this user' });
         }
+        if (rentals.length === 0) {
+            return res
+                .status(404)
+                .json({ message: 'No rentals found for this user' });
+        }
 
         res.status(200).json(rentals);
     } catch (err) {
@@ -327,6 +298,11 @@ v1.get('/user/:userId/latest', requireAuth, async (req, res, next) => {
             .populate('user', 'firstName email')
             .populate('scooter', 'name status');
 
+        if (!rental) {
+            return res
+                .status(404)
+                .json({ message: 'No rentals found for this user' });
+        }
         if (!rental) {
             return res
                 .status(404)

@@ -1,3 +1,4 @@
+import createDebug from "debug";
 import { WebSocketServer } from "ws";
 import Scooter from "./model.js";
 
@@ -5,6 +6,8 @@ const DEFAULT_TELEMETRY = {
   activeIntervalMs: 5000,
   idleIntervalMs: 60000,
 };
+
+const debug = createDebug("backend:websockets:scooters");
 
 /**
  * In-memory "room" cache.
@@ -25,6 +28,7 @@ const rooms = new Map();
  * @param {object} message - JSON-serializable payload.
  */
 export function send(ws, message) {
+  debug(`SEND: ${JSON.stringify(message)}`);
   ws.send(JSON.stringify(message));
 }
 
@@ -35,8 +39,10 @@ export function send(ws, message) {
  * @returns {Set<WebSocket>} The Set of WebSockets subscribed to this scooter.
  */
 export function getRoom(key) {
+  debug(`Getting room ${key}`);
   let set = rooms.get(key);
   if (!set) {
+    debug("Room doesn't exist. Creating.");
     set = new Set();
     rooms.set(key, set);
   }
