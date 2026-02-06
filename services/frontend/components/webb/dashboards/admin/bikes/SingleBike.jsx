@@ -36,6 +36,7 @@ export default function SingleBike({ bikeId }) {
     const [error, setError] = useState(null);
     const router = useRouter();
     const refWs = useRef(null);
+    const [bikeState, setBikeState] = useState(null);
 
     useEffect(() => {
         if (!bikeId) return;
@@ -69,6 +70,7 @@ export default function SingleBike({ bikeId }) {
 
                 try {
                     msg = JSON.parse(e.data);
+                    setBikeState(msg.state);
                 } catch {
                     return;
                 }
@@ -289,12 +291,12 @@ export default function SingleBike({ bikeId }) {
                                         className={`h-10 w-10 rounded-full border border-detail-yellow
                     flex items-center justify-center transition
                     ${
-                        canDo(bike.status, 'maintain')
+                        canDo(bike?.status, 'maintain')
                             ? 'hover:bg-detail-yellow hover:text-black'
                             : 'opacity-40 cursor-not-allowed'
                     }`}
                                         title={
-                                            canDo(bike.status, 'maintain')
+                                            canDo(bike?.status, 'maintain')
                                                 ? 'Service'
                                                 : 'Cykeln är redan i service'
                                         }
@@ -303,7 +305,9 @@ export default function SingleBike({ bikeId }) {
                                     </button>
 
                                     <button
-                                        disabled={!canDo(bike.status, 'delete')}
+                                        disabled={
+                                            !canDo(bike?.status, 'delete')
+                                        }
                                         onClick={() =>
                                             handleAction(
                                                 deleteBike,
@@ -314,12 +318,12 @@ export default function SingleBike({ bikeId }) {
                                         className={`h-10 w-10 rounded-full border border-red-500 text-red-400
                     flex items-center justify-center transition
                     ${
-                        canDo(bike.status, 'delete')
+                        canDo(bike?.status, 'delete')
                             ? 'hover:bg-red-500 hover:text-black'
                             : 'opacity-40 cursor-not-allowed'
                     }`}
                                         title={
-                                            canDo(bike.status, 'delete')
+                                            canDo(bike?.status, 'delete')
                                                 ? 'Ta bort'
                                                 : 'Kan inte ta bort cykeln nu'
                                         }
@@ -328,7 +332,7 @@ export default function SingleBike({ bikeId }) {
                                     </button>
 
                                     <button
-                                        disabled={!canDo(bike.status, 'ready')}
+                                        disabled={!canDo(bike?.status, 'ready')}
                                         onClick={() =>
                                             handleAction(
                                                 readyBike,
@@ -339,12 +343,12 @@ export default function SingleBike({ bikeId }) {
                                         className={`h-10 w-10 rounded-full border border-green-500 text-green-400
                     flex items-center justify-center transition
                     ${
-                        canDo(bike.status, 'ready')
+                        canDo(bike?.status, 'ready')
                             ? 'hover:bg-green-500 hover:text-black'
                             : 'opacity-40 cursor-not-allowed'
                     }`}
                                         title={
-                                            canDo(bike.status, 'ready')
+                                            canDo(bike?.status, 'ready')
                                                 ? 'Gör tillgänglig'
                                                 : 'Kan inte göras tillgänglig'
                                         }
@@ -357,9 +361,11 @@ export default function SingleBike({ bikeId }) {
                     </tbody>
                 </table>
             </div>
-            <div className='mt-10 mb-10 h-[400px]'>
-                <SingleBikeMap bike={bike} admin={true} />
-            </div>
+            {bikeState && (
+                <div className='mt-10 mb-10 h-[400px]'>
+                    <SingleBikeMap bike={bikeState} admin={true} />
+                </div>
+            )}
         </div>
     );
 }

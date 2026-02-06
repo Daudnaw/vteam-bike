@@ -27,7 +27,7 @@ export default function SingleBikeMap({ bike, admin }) {
     const bikeIcon = useMemo(() => createBikeIcon(20), [20]);
     return (
         <MapContainer
-            center={[bike.lat, bike.lon]}
+            center={[bike?.lat, bike?.lon]}
             zoom={16}
             style={{ height: '70vh', width: '100%' }}
         >
@@ -36,31 +36,33 @@ export default function SingleBikeMap({ bike, admin }) {
                 attribution='&copy; OpenStreetMap contributors'
             />
             <Marker
-                key={bike._id}
-                position={[bike.lat, bike.lon]}
+                key={bike?._id}
+                position={[bike?.lat, bike?.lon]}
                 icon={bikeIcon}
             >
                 <Popup>
                     <a
                         style={{
                             color:
-                                bike.status == 'offline' ? '#F08080' : '#000',
+                                bike?.status == 'offline' ? '#F08080' : '#000',
                             fontWeight: 700,
                         }}
                     >
-                        {bike.status == 'offline' && (
+                        {bike?.status == 'offline' && (
                             <span>Inte tillgänglig</span>
                         )}
-                        {bike.status == 'available' && <span>Tillgänglig</span>}
-                        {bike.status == 'charging' && <span>Laddar</span>}
-                        {bike.status == 'maintenance' && <span>Service</span>}
-                        {bike.status == 'rented' && <span>Aktiv</span>}
+                        {bike?.status == 'available' && (
+                            <span>Tillgänglig</span>
+                        )}
+                        {bike?.status == 'charging' && <span>Laddar</span>}
+                        {bike?.status == 'maintenance' && <span>Service</span>}
+                        {bike?.status == 'rented' && <span>Aktiv</span>}
                     </a>
                     <br />
                     <br />
                     {admin ? (
                         <a
-                            href={`/admin-dashboard/bikes/single?bikeId=${bike._id}`}
+                            href={`/admin-dashboard/bikes/single?bikeId=${bike?._id}`}
                             style={{
                                 color: '#1976d2',
                                 textDecoration: 'underline',
@@ -70,9 +72,9 @@ export default function SingleBikeMap({ bike, admin }) {
                             Se detaljer
                         </a>
                     ) : (
-                        bike.status == 'available' && (
+                        bike?.status == 'available' && (
                             <a
-                                href={`/app/user-app/rent-bike?bikeId=${bike._id}`}
+                                href={`/app/user-app/rent-bike?bikeId=${bike?._id}`}
                                 style={{
                                     backgroundColor: 'green',
                                     color: '#fff',
