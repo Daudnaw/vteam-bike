@@ -149,7 +149,7 @@ async function setUserCredit(db, userId, credit = 1000) {
  */
 async function generateRandomScooter({ scootersCol, routes, idx }) {
     const route = pick(routes); // get a random route
-    const [lon, lat] = route.start; // the starting point
+    const [lon, lat] = route.route[0]; // the starting point
 
     const battery = randomBattery();
     const rented = decideRented();
