@@ -24,17 +24,13 @@ export async function rentBike(bikeId) {
         cache: 'no-store',
     });
 
-    const response = await res.json();
+    if (res.status == 201) {
+        return await res.json();
+    }
 
-    console.log('RES,', response);
+    const resError = await res.json();
 
-    // if (res.status == 201) {
-    //     return await res.json();
-    // }
-
-    // const resError = await res.json();
-
-    throw new Error(response);
+    throw new Error(resError.error || 'Renting bike failed!');
 }
 
 /**
@@ -51,7 +47,7 @@ export async function endRental(rentalId) {
     }
 
     const res = await fetch(
-        `${process.env.API_URL_INTERNAL}/api/v1/rentals/${rentalId}/end/app`,
+        `${process.env.API_URL_INTERNAL}/api/v1/rentals/${rentalId}/end`,
         {
             method: 'PATCH',
             headers: {
